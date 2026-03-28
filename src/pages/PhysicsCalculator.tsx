@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -9,7 +9,6 @@ type Units = "metric" | "imperial";
 
 const G = 9.81;
 
-function kg2kN(kg: number): number { return (kg * G) / 1000; }
 function kN2kg(kn: number): number { return (kn * 1000) / G; }
 function deg(rad: number): number { return (rad * 180) / Math.PI; }
 function rad(d: number): number { return (d * Math.PI) / 180; }
@@ -138,7 +137,6 @@ function LineTensionCalc({ units }: { units: Units }) {
   const Ttotal = round2(Fexact + T0);
   const safetyFactor = round2(mbs / Ttotal);
 
-  const fDisp = (kn: number) => uUnit ? `${kN2lbf(kn)} lbf` : `${kn} kN`;
   const wDisp = (kn: number) => `≈ ${Math.round(kN2kg(kn))} kg`;
 
   // SVG diagram — live updating
@@ -375,8 +373,6 @@ function AnchorAngleCalc({ units }: { units: Units }) {
       // Back leg bisects. Each leg at 120° in equilateral config.
       // General: use α as spread between outermost pair, middle leg adds redundancy.
       // Force per leg (equal sharing assumption with equalization):
-      const cosHalf = Math.cos(alphaR / 2);
-      // Outer legs carry the same as 2-leg; middle leg at α=0 from vertical carries F/3
       // Average: F_leg ≈ F / (3 × cos(α/3))  — simplified practical formula
       const cosThird = Math.cos(alphaR / 3);
       Fleg = cosThird < 0.001 ? 999 : round2(F / (3 * cosThird));
@@ -425,9 +421,7 @@ function AnchorAngleCalc({ units }: { units: Units }) {
 
   const legPositions: { x: number; y: number; angle: number }[] = [];
   for (let i = 0; i < numLegs; i++) {
-    const legAngleDeg = numLegs === 1
-      ? 0
-      : -alpha / 2 + (alpha / (numLegs - 1)) * i;
+    const legAngleDeg = -alpha / 2 + (alpha / (numLegs - 1)) * i;
     const legAngleR = rad(legAngleDeg);
     legPositions.push({
       x: svgCX + legLen * Math.sin(legAngleR),
