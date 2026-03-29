@@ -34,27 +34,27 @@ const MATERIAL_LABELS: Record<string, string> = {
   hybrid: "Hybrid", unknown: "Unknown",
 };
 
-// ─── 30 distinct colors ───────────────────────────────────────────────────────
+// ─── Colors ───────────────────────────────────────────────────────────────────
 
 const PALETTE = [
-  "#c8531a", "#2d6a4f", "#1a6bc8", "#8e44ad", "#e67e22", "#16a085", "#c94f6d",
-  "#d4a843", "#5b8db8", "#3a7d44", "#e74c3c", "#2980b9", "#8b6914", "#27ae60",
-  "#6c5ce7", "#fd79a8", "#00b894", "#e17055", "#636e72", "#d35400", "#1abc9c",
-  "#f39c12", "#c0392b", "#2c3e50", "#a29bfe", "#55efc4", "#fdcb6e", "#e84393",
-  "#00cec9", "#b2bec3",
+  "#c8531a","#2d6a4f","#1a6bc8","#8e44ad","#e67e22","#16a085","#c94f6d",
+  "#d4a843","#5b8db8","#3a7d44","#e74c3c","#2980b9","#8b6914","#27ae60",
+  "#6c5ce7","#fd79a8","#00b894","#e17055","#636e72","#d35400","#1abc9c",
+  "#f39c12","#c0392b","#2c3e50","#a29bfe","#55efc4","#fdcb6e","#e84393",
+  "#00cec9","#b2bec3",
 ];
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
-const chip = (active: boolean, color?: string): React.CSSProperties => ({
+const chip = (active: boolean, _color?: string): React.CSSProperties => ({
   fontFamily: "'DM Mono', monospace",
   fontSize: 11,
   letterSpacing: "0.06em",
   padding: "5px 12px",
   borderRadius: 4,
   border: "1px solid",
-  borderColor: active ? (color || "#0d0f0e") : "rgba(13,15,14,0.2)",
-  background: active ? (color || "#0d0f0e") : "transparent",
+  borderColor: active ? "#0d0f0e" : "rgba(13,15,14,0.2)",
+  background: active ? "#0d0f0e" : "transparent",
   color: active ? "#f4f1eb" : "#0d0f0e",
   cursor: "pointer",
   transition: "all 0.15s",
@@ -79,8 +79,9 @@ function StretchChart({ webbings, hovered, onHover, colorMap, activeIds }: {
   colorMap: Record<string, string>;
   activeIds: Set<string>;
 }) {
-  const plottable = webbings.filter(w => w.stretchCurve && w.stretchCurve.length > 1);
-  const visible = plottable.filter(w => activeIds.has(w.id));
+  const visible = webbings.filter(w =>
+    activeIds.has(w.id) && w.stretchCurve && w.stretchCurve.length > 1
+  );
 
   const VW = 720, VH = 320;
   const PL = 48, PR = 16, PT = 16, PB = 38;
@@ -133,7 +134,7 @@ function StretchChart({ webbings, hovered, onHover, colorMap, activeIds }: {
       })}
 
       {hovered && (() => {
-        const w = visible.find(w => w.id === hovered);
+        const w = visible.find(v => v.id === hovered);
         if (!w?.stretchCurve) return null;
         const last = w.stretchCurve[w.stretchCurve.length - 1];
         return (
@@ -155,25 +156,30 @@ function StretchChart({ webbings, hovered, onHover, colorMap, activeIds }: {
 
 // ─── Stretch Table ────────────────────────────────────────────────────────────
 
+function hexToRgb(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `${r},${g},${b}`;
+}
+
 function StretchTable({ webbings, colorMap }: {
   webbings: Webbing[];
   colorMap: Record<string, string>;
 }) {
-  // Only webbings with multi-point BC stretch data (uniform kN points 1–12)
   const bcWebbings = webbings.filter(w =>
-    w.stretchCurve && w.stretchCurve.length > 1 &&
-    w.stretchSource === 'balance-community'
+    w.stretchSource === "balance-community" && w.stretchCurve && w.stretchCurve.length > 1
   );
 
   if (bcWebbings.length === 0) return (
     <div style={{ padding: "20px", fontFamily: "'DM Mono',monospace", fontSize: 11, color: "#7a7268" }}>
-      No Balance Community stretch data in current selection.
+      No Balance Community stretch data available.
     </div>
   );
 
   const kns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-  const getVal = (w: Webbing, kn: number) => {
+  const getVal = (w: Webbing, kn: number): string => {
     const pt = w.stretchCurve?.find(p => p.kn === kn);
     return pt != null ? `${pt.percent}%` : "—";
   };
@@ -223,13 +229,6 @@ function StretchTable({ webbings, colorMap }: {
   );
 }
 
-function hexToRgb(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `${r},${g},${b}`;
-}
-
 // ─── MBS Chart ────────────────────────────────────────────────────────────────
 
 function MBSChart({ webbings }: { webbings: Webbing[] }) {
@@ -237,10 +236,11 @@ function MBSChart({ webbings }: { webbings: Webbing[] }) {
   const max = Math.max(...data.map(w => w.mbsKn || 0));
   const BH = 19, G = 4, LW = 160, PR = 55, SVG_W = 720;
   const VH = data.length * (BH + G) + 36;
+
   const matColor = (w: Webbing) =>
     w.material.includes("DY") ? "#2d6a4f" :
-      w.material.includes("NY") ? "#2980b9" :
-        w.material.includes("hybrid") ? "#8e44ad" : "#c8531a";
+    w.material.includes("NY") ? "#2980b9" :
+    w.material.includes("hybrid") ? "#8e44ad" : "#c8531a";
 
   return (
     <svg viewBox={`0 0 ${SVG_W} ${VH}`} style={{ width: "100%", borderRadius: 8, background: "#fff", border: "1px solid rgba(13,15,14,0.08)" }}>
@@ -248,22 +248,27 @@ function MBSChart({ webbings }: { webbings: Webbing[] }) {
       {data.map((w, i) => {
         const y = 20 + i * (BH + G);
         const bw = ((w.mbsKn || 0) / max) * (SVG_W - LW - PR);
-        const col = matColor(w);
         return (
           <g key={w.id}>
-            <text x={LW - 6} y={y + BH / 2 + 4} fontSize={10} fill={w.discontinued ? "#7a7268" : "#0d0f0e"} textAnchor="end" fontFamily="'DM Sans',sans-serif"
-              fontStyle={w.discontinued ? "italic" : "normal"}>{w.name}</text>
-            <rect x={LW} y={y} width={bw} height={BH} rx={3} fill={col} fillOpacity={w.discontinued ? 0.35 : 0.65} />
+            <text x={LW - 6} y={y + BH / 2 + 4} fontSize={10}
+              fill={w.discontinued ? "#7a7268" : "#0d0f0e"}
+              fontStyle={w.discontinued ? "italic" : "normal"}
+              textAnchor="end" fontFamily="'DM Sans',sans-serif">{w.name}</text>
+            <rect x={LW} y={y} width={bw} height={BH} rx={3} fill={matColor(w)} fillOpacity={w.discontinued ? 0.35 : 0.65} />
             <text x={LW + bw + 5} y={y + BH / 2 + 4} fontSize={9} fill="#7a7268" fontFamily="'DM Mono',monospace">{w.mbsKn} kN</text>
           </g>
         );
       })}
-      {([["DY", "Dyneema", "#2d6a4f"], ["NY", "Nylon", "#2980b9"], ["PL", "Polyester", "#c8531a"], ["hybrid", "Hybrid", "#8e44ad"]] as const).map(([, lab, col], i) => (
-        <g key={lab} transform={`translate(${LW + i * 120},${VH - 10})`}>
-          <rect width={9} height={9} rx={2} fill={col} fillOpacity={0.65} />
-          <text x={13} y={8} fontSize={9} fill="#7a7268" fontFamily="'DM Mono',monospace">{lab}</text>
-        </g>
-      ))}
+      {(["DY","NY","PL","hybrid"] as const).map((mat, i) => {
+        const colors: Record<string, string> = { DY:"#2d6a4f", NY:"#2980b9", PL:"#c8531a", hybrid:"#8e44ad" };
+        const labs: Record<string, string> = { DY:"Dyneema", NY:"Nylon", PL:"Polyester", hybrid:"Hybrid" };
+        return (
+          <g key={mat} transform={`translate(${LW + i * 120},${VH - 10})`}>
+            <rect width={9} height={9} rx={2} fill={colors[mat]} fillOpacity={0.65} />
+            <text x={13} y={8} fontSize={9} fill="#7a7268" fontFamily="'DM Mono',monospace">{labs[mat]}</text>
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -284,8 +289,10 @@ function WeightChart({ webbings }: { webbings: Webbing[] }) {
         const bw = ((w.weightGm || 0) / max) * (SVG_W - LW - PR);
         return (
           <g key={w.id}>
-            <text x={LW - 6} y={y + BH / 2 + 4} fontSize={10} fill={w.discontinued ? "#7a7268" : "#0d0f0e"} textAnchor="end"
-              fontFamily="'DM Sans',sans-serif" fontStyle={w.discontinued ? "italic" : "normal"}>{w.name}</text>
+            <text x={LW - 6} y={y + BH / 2 + 4} fontSize={10}
+              fill={w.discontinued ? "#7a7268" : "#0d0f0e"}
+              fontStyle={w.discontinued ? "italic" : "normal"}
+              textAnchor="end" fontFamily="'DM Sans',sans-serif">{w.name}</text>
             <rect x={LW} y={y} width={bw} height={BH} rx={3} fill="#7a7268" fillOpacity={w.discontinued ? 0.25 : 0.45} />
             <text x={LW + bw + 5} y={y + BH / 2 + 4} fontSize={9} fill="#7a7268" fontFamily="'DM Mono',monospace">{w.weightGm} g/m</text>
           </g>
@@ -298,31 +305,35 @@ function WeightChart({ webbings }: { webbings: Webbing[] }) {
 // ─── Webbing Card ─────────────────────────────────────────────────────────────
 
 function WebbingCard({ w, inStretch, color, onToggleStretch }: {
-  w: Webbing; inStretch: boolean; color: string; onToggleStretch: (id: string) => void;
+  w: Webbing;
+  inStretch: boolean;
+  color: string;
+  onToggleStretch: (id: string) => void;
 }) {
   const hasStretch = w.stretchCurve && w.stretchCurve.length > 1;
   const matLabel = w.material.map(m => MATERIAL_LABELS[m] || m).join(" + ");
 
   return (
-    <div style={{
-      background: w.discontinued ? "#f9f7f3" : "#fff",
-      border: `1px solid ${w.discontinued ? "rgba(13,15,14,0.07)" : "rgba(13,15,14,0.1)"}`,
-      borderRadius: 8, padding: "14px 16px",
-      display: "flex", flexDirection: "column", gap: 9,
-      opacity: w.discontinued ? 0.85 : 1,
-    }}
+    <div
+      style={{
+        background: w.discontinued ? "#f9f7f3" : "#fff",
+        border: `1px solid ${w.discontinued ? "rgba(13,15,14,0.07)" : "rgba(13,15,14,0.1)"}`,
+        borderRadius: 8, padding: "14px 16px",
+        display: "flex", flexDirection: "column", gap: 9,
+        opacity: w.discontinued ? 0.85 : 1,
+      }}
       onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 2px 10px rgba(13,15,14,0.06)")}
       onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 600, color: "#0d0f0e", lineHeight: 1.2 }}>{w.name}</div>
+            <div style={{ fontFamily: "'Fraunces',serif", fontSize: 15, fontWeight: 600, color: "#0d0f0e", lineHeight: 1.2 }}>{w.name}</div>
             {w.discontinued && (
               <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 8, padding: "1px 5px", borderRadius: 2, background: "#edeae2", color: "#7a7268", letterSpacing: "0.06em" }}>DC</span>
             )}
           </div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "#7a7268", letterSpacing: "0.06em", marginTop: 2 }}>
+          <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: "#7a7268", letterSpacing: "0.06em", marginTop: 2 }}>
             {(w.brand || "Unknown").toUpperCase()}
           </div>
         </div>
@@ -339,12 +350,15 @@ function WebbingCard({ w, inStretch, color, onToggleStretch }: {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5 }}>
-        {[
+        {([
           ["MBS", w.mbsKn != null ? `${w.mbsKn}` : "—", "kN"],
           ["Width", w.widthMm != null ? `${w.widthMm}` : "—", "mm"],
           ["Weight", w.weightGm != null ? `${w.weightGm}` : "—", "g/m"],
-          ["Elong.", w.stretchCurve && w.stretchCurve.length === 1 ? `${w.stretchCurve[0].percent}` : w.stretchCurve && w.stretchCurve.length > 1 ? "curve" : "—", w.stretchCurve?.length === 1 ? "%" : ""],
-        ].map(([label, val, unit]) => (
+          ["Elong.", w.stretchCurve && w.stretchCurve.length === 1
+            ? `${w.stretchCurve[0].percent}`
+            : w.stretchCurve && w.stretchCurve.length > 1 ? "curve" : "—",
+            w.stretchCurve?.length === 1 ? "%" : ""],
+        ] as [string, string, string][]).map(([label, val, unit]) => (
           <div key={label} style={{ textAlign: "center", background: "#f4f1eb", borderRadius: 4, padding: "6px 3px" }}>
             <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: "#7a7268", letterSpacing: "0.05em", marginBottom: 2 }}>{label}</div>
             <div style={{ fontFamily: "'Fraunces',serif", fontSize: 13, fontWeight: 700, fontStyle: "italic", color: "#0d0f0e", lineHeight: 1 }}>
@@ -357,9 +371,11 @@ function WebbingCard({ w, inStretch, color, onToggleStretch }: {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 5 }}>
         <div style={{ display: "flex", gap: 7, fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#7a7268" }}>
           {w.wllKn != null && <span style={{ color: "#2d6a4f" }}>WLL {w.wllKn} kN</span>}
-          {w.stretchSource && <span style={{ background: "#f4f1eb", padding: "1px 4px", borderRadius: 2 }}>
-            {w.stretchSource === 'balance-community' ? 'BC' : w.stretchSource === 'isa' ? 'ISA' : 'DB'}
-          </span>}
+          {w.stretchSource && (
+            <span style={{ background: "#f4f1eb", padding: "1px 4px", borderRadius: 2 }}>
+              {w.stretchSource === "balance-community" ? "BC" : w.stretchSource === "isa" ? "ISA" : "DB"}
+            </span>
+          )}
         </div>
         <div style={{ display: "flex", gap: 5 }}>
           {hasStretch && (
@@ -398,19 +414,16 @@ export default function WebbingDatabase() {
     return map;
   }, [allData]);
 
-  // Chart state
   const [chartTab, setChartTab] = useState<ChartTab>("stretch");
   const [hovered, setHovered] = useState<string | null>(null);
   const [tableOpen, setTableOpen] = useState(false);
 
-  // All webbings with multi-point stretch curves shown by default
   const allStretchIds = useMemo(() =>
     new Set(allData.filter(w => w.stretchCurve && w.stretchCurve.length > 1).map(w => w.id)),
     [allData]
   );
   const [activeStretchIds, setActiveStretchIds] = useState<Set<string>>(allStretchIds);
 
-  // Filter state
   const [search, setSearch] = useState("");
   const [matFilter, setMatFilter] = useState<MatFilter>("ALL");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
@@ -444,9 +457,8 @@ export default function WebbingDatabase() {
       return next;
     });
 
-  // BC webbings for the stretch table (all of them, not just filtered)
   const bcStretchWebbings = useMemo(() =>
-    allData.filter(w => w.stretchSource === 'balance-community' && w.stretchCurve && w.stretchCurve.length > 1),
+    allData.filter(w => w.stretchSource === "balance-community" && w.stretchCurve && w.stretchCurve.length > 1),
     [allData]
   );
 
@@ -480,15 +492,15 @@ export default function WebbingDatabase() {
                 </p>
               </div>
               <div style={{ display: "flex", gap: 24 }}>
-                {[
+                {([
                   [stats.total, "total"],
                   [stats.active, "active"],
                   [stats.discontinued, "discontinued"],
                   [stats.withStretch, "stretch curves"],
-                ].map(([n, label]) => (
-                  <div key={String(label)} style={{ textAlign: "right" }}>
+                ] as [number, string][]).map(([n, label]) => (
+                  <div key={label} style={{ textAlign: "right" }}>
                     <div style={{ fontFamily: "'Fraunces',serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "#c8531a", lineHeight: 1 }}>{n}</div>
-                    <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: "#7a7268", letterSpacing: "0.06em" }}>{String(label).toUpperCase()}</div>
+                    <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: "#7a7268", letterSpacing: "0.06em" }}>{label.toUpperCase()}</div>
                   </div>
                 ))}
               </div>
@@ -510,13 +522,11 @@ export default function WebbingDatabase() {
             ))}
           </div>
 
-          {/* ── Stretch Chart ── */}
           {chartTab === "stretch" && (
             <div>
-              {/* Select all / none controls */}
               <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
                 <span style={{ ...monoLabel, marginBottom: 0 }}>Visible</span>
-                <button onClick={() => setActiveStretchIds(allStretchIds)} style={{ ...chip(false), fontSize: 10, padding: "3px 9px" }}>All on</button>
+                <button onClick={() => setActiveStretchIds(new Set(allStretchIds))} style={{ ...chip(false), fontSize: 10, padding: "3px 9px" }}>All on</button>
                 <button onClick={() => setActiveStretchIds(new Set())} style={{ ...chip(false), fontSize: 10, padding: "3px 9px" }}>All off</button>
                 <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: "#7a7268" }}>
                   {activeStretchIds.size} / {allStretchIds.size} shown · dashed = discontinued
@@ -528,11 +538,9 @@ export default function WebbingDatabase() {
                 hovered={hovered}
                 onHover={setHovered}
                 colorMap={colorMap}
-                onToggle={toggleStretch}
                 activeIds={activeStretchIds}
               />
 
-              {/* ── Stretch Table (collapsible) ── */}
               <div style={{ marginTop: 16, border: "1px solid rgba(13,15,14,0.1)", borderRadius: 8, overflow: "hidden" }}>
                 <button
                   onClick={() => setTableOpen(o => !o)}
@@ -542,7 +550,7 @@ export default function WebbingDatabase() {
                     fontFamily: "'DM Mono',monospace", fontSize: 11, letterSpacing: "0.06em", color: "#0d0f0e",
                   }}
                 >
-                  <span>{tableOpen ? "−" : "+"} Expand Stretch Table (Balance Community — % at each kN)</span>
+                  <span>{tableOpen ? "−" : "+"} Expand Stretch Table (Balance Community · % elongation at each kN)</span>
                   <span style={{ color: "#7a7268", fontSize: 10 }}>{bcStretchWebbings.length} webbings · 1–12 kN</span>
                 </button>
                 {tableOpen && (
@@ -553,7 +561,7 @@ export default function WebbingDatabase() {
               </div>
 
               <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 10, color: "#7a7268", marginTop: 8, letterSpacing: "0.04em" }}>
-                Sources: Balance Community (balancecommunity.com/collections/stretch) · ISA SlackData · Toggle webbings via "○ chart" on cards below
+                Sources: Balance Community · ISA SlackData · Toggle individual webbings via "○ chart" on each card below
               </p>
             </div>
           )}
