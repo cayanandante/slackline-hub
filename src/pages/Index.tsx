@@ -362,7 +362,7 @@ function Footer() {
       <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", letterSpacing: "0.04em", color: "#7a7268", lineHeight: 1.7 }}>
         <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 700, color: "#0d0f0e", fontSize: "0.9rem" }}>Slackline Hub</span><br />
         Built by{" "}
-        <a href="mailto:cayanmecanica@gmail.com" style={{ color: "#c8531a" }}>Cayan Dantas</a>
+        <a href="mailto:cayandantas@proton.me" style={{ color: "#c8531a" }}>Cayan Dantas</a>
         {" "}· Powered by ISA open data · Open source
       </div>
       <div style={{ display: "flex", gap: "1.5rem" }}>
