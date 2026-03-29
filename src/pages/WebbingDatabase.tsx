@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import rawWebbingData from "../data/webbing_database.json";
+import rawWebbingData from "../data/webbing_database.json" assert { type: "json" };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,11 +42,11 @@ const SOURCE_LABEL: Record<string, string> = {
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
 const PALETTE = [
-  "#c8531a","#2d6a4f","#1a6bc8","#8e44ad","#e67e22","#16a085",
-  "#c94f6d","#d4a843","#5b8db8","#3a7d44","#e74c3c","#2980b9",
-  "#8b6914","#27ae60","#6c5ce7","#fd79a8","#00b894","#e17055",
-  "#0d0f0e","#7a7268","#d35400","#1abc9c","#f39c12","#c0392b",
-  "#2c3e50","#16a085","#8e44ad","#d35400","#6c5ce7","#27ae60",
+  "#c8531a", "#2d6a4f", "#1a6bc8", "#8e44ad", "#e67e22", "#16a085",
+  "#c94f6d", "#d4a843", "#5b8db8", "#3a7d44", "#e74c3c", "#2980b9",
+  "#8b6914", "#27ae60", "#6c5ce7", "#fd79a8", "#00b894", "#e17055",
+  "#0d0f0e", "#7a7268", "#d35400", "#1abc9c", "#f39c12", "#c0392b",
+  "#2c3e50", "#16a085", "#8e44ad", "#d35400", "#6c5ce7", "#27ae60",
 ];
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
