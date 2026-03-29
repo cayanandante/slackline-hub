@@ -37,11 +37,11 @@ const MATERIAL_LABELS: Record<string, string> = {
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
 const PALETTE = [
-  "#e8541a","#2ec466","#4da6ff","#c084fc","#f59e0b","#06b6d4","#f43f5e",
-  "#84cc16","#fb923c","#818cf8","#34d399","#f472b6","#facc15","#38bdf8",
-  "#a78bfa","#4ade80","#fb7185","#fbbf24","#60a5fa","#c4b5fd","#86efac",
-  "#fca5a5","#fde68a","#93c5fd","#d8b4fe","#bbf7d0","#fecaca","#fef08a",
-  "#bfdbfe","#e9d5ff",
+  "#e8541a", "#2ec466", "#4da6ff", "#c084fc", "#f59e0b", "#06b6d4", "#f43f5e",
+  "#84cc16", "#fb923c", "#818cf8", "#34d399", "#f472b6", "#facc15", "#38bdf8",
+  "#a78bfa", "#4ade80", "#fb7185", "#fbbf24", "#60a5fa", "#c4b5fd", "#86efac",
+  "#fca5a5", "#fde68a", "#93c5fd", "#d8b4fe", "#bbf7d0", "#fecaca", "#fef08a",
+  "#bfdbfe", "#e9d5ff",
 ];
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
@@ -340,8 +340,8 @@ function SpecsTable({ webbings }: { webbings: Webbing[] }) {
                 {w.stretchCurve && w.stretchCurve.length > 1
                   ? <span style={{ color: "#2ec466", fontSize: 10 }}>✓ {w.stretchCurve.length} pts</span>
                   : w.stretchCurve?.length === 1
-                  ? <span style={{ color: "#f59e0b", fontSize: 10 }}>~ {w.stretchCurve[0].percent}%</span>
-                  : <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 10 }}>—</span>
+                    ? <span style={{ color: "#f59e0b", fontSize: 10 }}>~ {w.stretchCurve[0].percent}%</span>
+                    : <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 10 }}>—</span>
                 }
               </td>
               <td style={{ ...tableCell }}>
@@ -370,8 +370,8 @@ function MBSChart({ webbings }: { webbings: Webbing[] }) {
   const VH = data.length * (BH + G) + 36;
   const matColor = (w: Webbing) =>
     w.material.includes("DY") ? "#2ec466" :
-    w.material.includes("NY") ? "#4da6ff" :
-    w.material.includes("hybrid") ? "#c084fc" : "#e8541a";
+      w.material.includes("NY") ? "#4da6ff" :
+        w.material.includes("hybrid") ? "#c084fc" : "#e8541a";
 
   return (
     <svg viewBox={`0 0 ${SVG_W} ${VH}`} style={{ width: "100%", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -387,9 +387,9 @@ function MBSChart({ webbings }: { webbings: Webbing[] }) {
           </g>
         );
       })}
-      {(["DY","NY","PL","hybrid"] as const).map((mat, i) => {
-        const cols: Record<string, string> = { DY:"#2ec466", NY:"#4da6ff", PL:"#e8541a", hybrid:"#c084fc" };
-        const labs: Record<string, string> = { DY:"Dyneema", NY:"Nylon", PL:"Polyester", hybrid:"Hybrid" };
+      {(["DY", "NY", "PL", "hybrid"] as const).map((mat, i) => {
+        const cols: Record<string, string> = { DY: "#2ec466", NY: "#4da6ff", PL: "#e8541a", hybrid: "#c084fc" };
+        const labs: Record<string, string> = { DY: "Dyneema", NY: "Nylon", PL: "Polyester", hybrid: "Hybrid" };
         return (
           <g key={mat} transform={`translate(${LW + i * 120},${VH - 10})`}>
             <rect width={9} height={9} rx={2} fill={cols[mat]} fillOpacity={0.7} />
@@ -447,7 +447,6 @@ export default function WebbingDatabase() {
   const [viewMode, setViewMode] = useState<ViewMode>("charts");
   const [chartTab, setChartTab] = useState<ChartTab>("stretch");
   const [hovered, setHovered] = useState<string | null>(null);
-  const [stretchTableOpen, setStretchTableOpen] = useState(false);
 
   const allStretchIds = useMemo(() =>
     new Set(allData.filter(w => w.stretchCurve && w.stretchCurve.length > 1).map(w => w.id)),
