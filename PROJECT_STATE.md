@@ -1,25 +1,24 @@
 # Slackline Hub — Project State
-> Last updated: March 28, 2026
+> Last updated: March 29, 2026 — end of session 2
 > Update this file at the end of every work session.
 
 ---
 
-## 🔴 Current status: IN DEVELOPMENT (not public)
-
-Site is live at slackline-hub.vercel.app but URL is kept private. Not indexed by search engines yet.
+## 🔴 Current status: IN DEVELOPMENT (URL private — not shared publicly)
 
 ---
 
 ## Infrastructure
 
-| Service | URL / ID | Status |
-|---------|----------|--------|
-| GitHub | github.com/cayanandante/slackline-hub | ✅ Live |
-| Live site | slackline-hub.vercel.app | ✅ Live, private |
-| Supabase project ID | qgcemdwsruveqdiddhjz | ✅ Schema ready |
-| Supabase URL | https://qgcemdwsruveqdiddhjz.supabase.co | ✅ |
-| Supabase anon key | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnY2VtZHdzcnV2ZXFkaWRkaGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU5NDQsImV4cCI6MjA5MDMwMTk0NH0.oWvKBSFmKheu0_eUd5e9WuOa9LqVpMDXJA71WXC26Y4 | ✅ |
-| Lovable | ABANDONED | ❌ Not using |
+| Service | URL / ID | Notes |
+|---------|----------|-------|
+| GitHub | github.com/cayanandante/slackline-hub | Main repo |
+| Live site | slackline-hub.vercel.app | Vercel free tier, auto-deploys from main |
+| Supabase project ID | qgcemdwsruveqdiddhjz | Free tier |
+| Supabase URL | https://qgcemdwsruveqdiddhjz.supabase.co | |
+| Supabase anon key | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnY2VtZHdzcnV2ZXFkaWRkaGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU5NDQsImV4cCI6MjA5MDMwMTk0NH0.oWvKBSFmKheu0_eUd5e9WuOa9LqVpMDXJA71WXC26Y4 | Safe to store |
+| Cloudflare Worker | https://slackline-hub-worker.cayandantas.workers.dev | Claude API proxy — LIVE |
+| Claude API | via Cloudflare Worker | Key stored as Cloudflare secret |
 
 ---
 
@@ -28,11 +27,13 @@ Site is live at slackline-hub.vercel.app but URL is kept private. Not indexed by
 - **Frontend**: React + TypeScript + Vite (local: ~/slackline-hub/)
 - **Styling**: CSS-in-JS inline styles + src/index.css (NO Tailwind, NO shadcn)
 - **Routing**: react-router-dom
-- **Fonts**: Fraunces + DM Mono + DM Sans (loaded in index.html)
+- **Fonts**: Fraunces (serif) + DM Mono (labels) + DM Sans (body) — loaded in index.html
+- **Maps**: Leaflet.js (for team/spot/events maps)
 - **Database**: Supabase (Postgres + pgvector)
-- **AI**: Claude API claude-sonnet-4-20250514
-- **Deploy**: Vercel auto-deploy from GitHub main
-- **No Lovable** — all code written in Claude, pushed to GitHub
+- **AI**: Claude API claude-sonnet-4-20250514 — via Cloudflare Worker ✅ LIVE
+- **Deploy**: Vercel — auto-deploys from GitHub main in ~30 seconds
+
+---
 
 ## Workflow
 
@@ -40,7 +41,7 @@ Site is live at slackline-hub.vercel.app but URL is kept private. Not indexed by
 git add .
 git commit -m "describe what changed"
 git push
-# Vercel redeploys in ~30 seconds
+# Vercel redeploys automatically in ~30 seconds
 ```
 
 ---
@@ -50,15 +51,51 @@ git push
 ```
 slackline-hub/
 ├── src/
-│   ├── index.css                  ← global styles + brand tokens
-│   ├── main.tsx                   ← entry point
-│   ├── App.tsx                    ← routes
+│   ├── index.css                   ← global styles + brand tokens
+│   ├── main.tsx                    ← entry point
+│   ├── App.tsx                     ← all routes
 │   └── pages/
-│       ├── Index.tsx              ← homepage (/)
-│       └── PhysicsCalculator.tsx  ← /tools/physics
-├── index.html                     ← Google Fonts loaded here
-├── PROJECT_STATE.md               ← this file
+│       ├── Index.tsx               ← homepage (/)
+│       ├── PhysicsCalculator.tsx   ← /tools/physics
+│       ├── KnowledgeLibrary.tsx    ← /knowledge/resources
+│       └── DoubleCheck.tsx         ← /tools/double-check (built, hidden from nav)
+├── index.html                      ← Google Fonts loaded here
+├── PROJECT_STATE.md                ← this file
 └── package.json
+```
+
+---
+
+## Full site structure (planned)
+
+```
+Slackline Hub
+│
+├── /                    Home ✅
+│
+├── /tools
+│   ├── /physics         Forces Calculator ✅
+│   ├── /chat            AI Knowledge Chat (next priority)
+│   ├── /knots           Knot Guide — static visual, click to expand
+│   └── /double-check    AI Safety Check ✅ (built, hidden from nav for now)
+│
+├── /knowledge
+│   ├── /resources       Resource Library ✅ (463 links from Supabase)
+│   ├── /glossary        PT/EN Glossary (from Glossário PDF)
+│   └── /videos          Video Library (YouTube API)
+│
+├── /community
+│   ├── /teams           World Team Map (ISA slackline-data + Leaflet)
+│   ├── /events          Events Calendar + Map (ISA data API)
+│   └── /incidents       Incidents Database (ISA SAIR + manual curation)
+│
+├── /freestyle           Highline Freestyle (Google Sheet API — 262 tricks, 23 combos)
+│
+├── /gear                Gear Database (SlackDB / ISA SlackData)
+│
+├── /rigger              ISA Rigger Flashcards
+│
+└── /blog                Blog (static markdown)
 ```
 
 ---
@@ -66,79 +103,117 @@ slackline-hub/
 ## What's built ✅
 
 ### Homepage (/) ✅ LIVE
-- Sticky nav with logo and links
-- Hero: headline, subtitle, CTA buttons, stats (200+, 28, 12, 3)
-- Safety warning banner
-- Tools grid: 5 categories, 12 cards (1 live, 11 coming soon)
-- Knowledge base stats section
-- Footer with credits (Cayan Dantas, ISA)
+Nav, hero ("Tools for Slackliners, by Slackliners"), safety banner, tools grid (5 categories, 12 cards — 1 live, 11 coming soon), knowledge base stats (463 resources), footer.
 
 ### Physics Calculator (/tools/physics) ✅ LIVE
 5 calculators with real engineering formulas, metric/imperial toggle, live SVG diagrams:
-1. **Line Tension & Anchor Load** — DAV formula + exact trig. Safety factor vs MBS.
-2. **Anchor Angle & Elevation** — 2/3/4 symmetric legs (equally spaced fan), flat + elevated master point (A-frame). Two diagrams: top-view plan + side-view with beta arc. Formulas: flat: F/(2·cos(a/2)), F/(3·cos(a/3)), F/(4·cos(a/2)); elevated: F/(n·sin(b)).
-3. **Backup Fall Simulator** — Athanasiadis model, H>2(L+S) clearance check, webbing selector.
-4. **Midline Safety Height Checker** — H>2(L+S) formula, go/no-go display, visual gauge.
-5. **Mechanical Advantage Calculator** — 5 pulley systems (2:1-6:1), friction loss model, reference table.
+1. Line Tension & Anchor Load — DAV formula + exact trig. Safety factor vs MBS.
+2. Anchor Angle & Elevation — 2/3/4 symmetric legs (equally spaced), flat + elevated master point. Top-view + side-view diagrams.
+3. Backup Fall Simulator — Athanasiadis model, H>2(L+S) clearance check, webbing selector.
+4. Midline Safety Height Checker — H>2(L+S) formula, go/no-go display, visual gauge.
+5. Mechanical Advantage Calculator — 5 pulley systems (2:1–6:1), friction loss model.
 
-### Supabase Schema ✅ (not yet seeded)
-10 tables: resources, teams, events, incidents, gear, glossary, knowledge_chunks (pgvector), physics_logs, ai_chat_logs, spots.
-RLS enabled, public read via anon key.
+### Resource Library (/knowledge/resources) ✅ LIVE
+- 463 resources loaded from Supabase
+- Grouped by guide section (23 sections)
+- Search + filter by type + filter by language (PT/EN)
+- Collapsible sections
 
-### Knowledge Base ✅ (knowledge_base_full.json v2.2)
-- 463 unique resources extracted from the Guia do Praticante de Highline
-- 497 total hrefs in LaTeX, 34 duplicates removed
-- 87 Portuguese resources (red links in guide)
-- 376 English resources (blue links in guide)
-- Fields: url, title_pt, author, year, type, source, section, subsection, language
-- Types: video (178), document (86), article (67), instagram (48), community (30), shop (27), book (9), tool (4), podcast (3), database (1), app (1)
+### AI Double-Check Assistant (/tools/double-check) ✅ BUILT (hidden from nav)
+- Form: line geometry, anchors, webbing, backup, conditions
+- Calls Claude API via Cloudflare Worker
+- Returns structured safety checklist with ✅/⚠/❌ per item
+- Recommendations + ISA citations
 
----
+### Cloudflare Worker ✅ LIVE
+- URL: https://slackline-hub-worker.cayandantas.workers.dev
+- Claude API proxy — hides API key from frontend
+- CORS enabled for slackline-hub.vercel.app
+- API key stored as Cloudflare secret
 
-## What's NOT built yet ❌ (in priority order)
+### Supabase Schema ✅ (tables created and seeded)
+- resources — 463 rows ✅ SEEDED
+- teams, events, incidents, gear, glossary — empty, not yet seeded
+- knowledge_chunks (pgvector) — empty, not yet seeded
+- physics_logs, ai_chat_logs — empty
 
-1. **Seed database** — insert all 463 resources + teams + events into Supabase
-2. **Resource Library page** — /knowledge — searchable filterable grid
-3. **AI Double-Check Assistant** — /tools/double-check — Claude API safety checklist
-4. **Cloudflare Worker** — Claude API proxy
-5. **Knowledge Chat** — /tools/chat — RAG chatbot
-6. **Brazilian Team Finder** — /community/teams — Leaflet map
-7. **Event Calendar** — /community/events
-8. **n8n pipeline** — RAG embedding pipeline
-9. **i18n** — PT/EN/ES via i18next
-10. **Equipment Selector, Knot Guide, Global Spot Map, Rigger Study App, Setup Planner**
-11. **Custom domain** (not yet purchased)
-12. **vercel.json with noindex**
-
----
-
-## Key files in Claude project knowledge
-
-| File | Description |
-|------|-------------|
-| main.tex | LaTeX source of the Guia do Praticante de Highline |
-| Guia_do_Praticante_de_Highline_1.pdf | PDF of the guide |
-| Glossario_termos_em_ingles_highline.pdf | PT/EN terminology glossary |
-| knowledge_base_full.json | 463 resources (v2.2) |
-| PROJECT_STATE.md | This file |
-| PhysicsCalculator.tsx | Physics calculator component |
-| Index.tsx | Homepage component |
-| App.tsx | Routes |
-| index.css | Global styles |
-| main.tsx | Entry point |
+### Knowledge Base JSON ✅
+- knowledge_base_full.json v2.2 — in project files and GitHub
+- 463 unique resources, 87 PT, 376 EN, 397 named, 66 image links
 
 ---
 
-## Brand tokens
+## What's NOT built yet ❌ (priority order)
 
---ink: #0d0f0e / --paper: #f4f1eb / --paper2: #edeae2
---accent: #c8531a / --green: #2d6a4f / --muted: #7a7268
---serif: Fraunces / --mono: DM Mono / --sans: DM Sans
+1. **Knot Guide** — /tools/knots — static visual, click to expand, custom SVG illustrations
+2. **World Team Map** — /community/teams — ISA slackline-data API + Leaflet
+3. **Events Calendar + Map** — /community/events — ISA data API + Leaflet
+4. **AI Knowledge Chat** — /tools/chat — RAG chatbot over guide content
+5. **Highline Freestyle** — /freestyle — Google Sheet API (262 tricks, 23 combos)
+6. **Gear Database** — /gear — SlackDB + ISA SlackData
+7. **Glossary** — /knowledge/glossary — parse Glossário PDF
+8. **Video Library** — /knowledge/videos — YouTube API
+9. **Rigger Flashcards** — /rigger — ISA certification study
+10. **Incidents Database** — /community/incidents — ISA SAIR
+11. **Blog** — /blog — static markdown
+12. **i18n** — PT/EN/ES via i18next
+13. **Custom domain** — not yet purchased
+14. **vercel.json** — noindex headers (site URL not shared publicly)
+15. **RAG pipeline** — embed guide content into Supabase pgvector for Knowledge Chat
+
+---
+
+## External data sources
+
+| Source | What | How to access |
+|--------|------|---------------|
+| ISA slackline-data | Countries, national teams | github.com/International-Slackline-Association/slackline-data |
+| ISA SlackMap API | 7000+ lines, 1700+ spots worldwide | slackmap.slacklineinternational.org/api |
+| ISA Events API | Events, competitions, certifications | data.slacklineinternational.org/events |
+| SlackDB | Gear database (MBS, WLL, weight) | slackdb.com — public endpoints |
+| Highline Freestyle | 262 tricks, 23 combos | Google Sheet (public CSV export) |
+| YouTube API | Videos, documentaries, tutorials | YouTube Data API v3 (free) |
+| AnimatedKnots | NOT usable — copyrighted, no API | Build our own SVG knots instead |
+
+---
+
+## Files in Claude project knowledge
+
+- PROJECT_STATE.md — this file
+- main.tex — full LaTeX source of the guide
+- Guia_do_Praticante_de_Highline_1.pdf — guide PDF
+- Glossário_termos_em_ingles_highline.pdf — PT/EN glossary
+- knowledge_base_full.json — 463 resources (v2.2)
+- highline-freestyle.com3-29-2026.json — Freestyle DB export (schema only, data in Google Sheet)
+- PhysicsCalculator.tsx — physics calculator
+- Index.tsx — homepage
+- App.tsx — routes
+- index.css — global styles
+- main.tsx — entry point
+
+---
+
+## Design tokens
+
+```css
+--ink:    #0d0f0e    --paper:  #f4f1eb    --paper2: #edeae2
+--accent: #c8531a    --green:  #2d6a4f    --muted:  #7a7268
+--serif: 'Fraunces', serif
+--mono:  'DM Mono', monospace
+--sans:  'DM Sans', sans-serif
+```
+
+---
+
+## Safety principles (non-negotiable)
+
+- All AI advice: "⚠️ Always verify with a certified ISA Rigger"
+- Never hallucinate gear specs, MBS values, or safety thresholds
+- Physics calculators: always show assumptions and limitations
 
 ---
 
 ## Contact
 
-- Project owner: Cayan Dantas
-- Email: cayandantas@proton.me
-- Role: ISA-certified Rigger, mechanical engineering MSc student, Brazil
+- **Owner**: Cayan Dantas — cayandantas@proton.me
+- **Role**: ISA-certified Rigger, mechanical engineering MSc, Brazil
