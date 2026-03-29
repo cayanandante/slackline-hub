@@ -1,34 +1,51 @@
 import { Link } from "react-router-dom";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
+// White background, navy blue accent, bold condensed type
+// Font: Barlow Condensed (loaded via index.html or index.css)
+
+const C = {
+  white:   "#ffffff",
+  bg:      "#f5f6f8",
+  navy:    "#0a1628",
+  blue:    "#1a56db",
+  mid:     "#3b5a8a",
+  muted:   "#6b7a99",
+  border:  "#dde2ed",
+  text:    "#0a1628",
+};
+
+// ─── Tool data ────────────────────────────────────────────────────────────────
 
 const liveTools = [
-  { name: "Forces Calculator", sub: "Tension · Anchor · Backup · MA", path: "/tools/physics", tag: "PHYSICS" },
-  { name: "Webbing Database", sub: "241 webbings · Stretch curves · MBS", path: "/gear/webbing", tag: "GEAR" },
-  { name: "Resource Library", sub: "463 curated links from the Guia", path: "/knowledge/resources", tag: "KNOWLEDGE" },
+  {
+    tag: "PHYSICS",
+    name: "Forces Calculator",
+    desc: "Line tension, anchor loads, backup fall, mechanical advantage.",
+    path: "/tools/physics",
+  },
+  {
+    tag: "GEAR",
+    name: "Webbing Database",
+    desc: "241 webbings. Stretch curves, MBS, weight, material.",
+    path: "/gear/webbing",
+  },
+  {
+    tag: "KNOWLEDGE",
+    name: "Resource Library",
+    desc: "463 curated resources from the Guia do Praticante.",
+    path: "/knowledge/resources",
+  },
 ];
 
-const soonTools = [
-  { name: "AI Safety Check", tag: "AI" },
-  { name: "Knot Guide", tag: "RIGGING" },
-  { name: "AI Knowledge Chat", tag: "AI" },
-  { name: "Highline Freestyle", tag: "TRICKS" },
-  { name: "Spot Map", tag: "COMMUNITY" },
-  { name: "Event Calendar", tag: "COMMUNITY" },
+const comingTools = [
+  { tag: "AI", name: "Safety Check" },
+  { tag: "RIGGING", name: "Knot Guide" },
+  { tag: "AI", name: "Knowledge Chat" },
+  { tag: "FREESTYLE", name: "Trick Database" },
+  { tag: "COMMUNITY", name: "Spot Map" },
+  { tag: "COMMUNITY", name: "Events Calendar" },
 ];
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  PHYSICS:    { bg: "rgba(59,130,246,0.15)", text: "#60a5fa" },
-  GEAR:       { bg: "rgba(234,179,8,0.15)",  text: "#facc15" },
-  KNOWLEDGE:  { bg: "rgba(34,197,94,0.15)",  text: "#4ade80" },
-  AI:         { bg: "rgba(168,85,247,0.15)", text: "#c084fc" },
-  RIGGING:    { bg: "rgba(249,115,22,0.15)", text: "#fb923c" },
-  TRICKS:     { bg: "rgba(236,72,153,0.15)", text: "#f472b6" },
-  COMMUNITY:  { bg: "rgba(20,184,166,0.15)", text: "#2dd4bf" },
-  SAFETY:     { bg: "rgba(239,68,68,0.15)",  text: "#f87171" },
-};
 
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
@@ -36,51 +53,47 @@ function Nav() {
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 100,
-      background: "rgba(5,5,8,0.88)", backdropFilter: "blur(20px)",
-      borderBottom: "1px solid rgba(255,255,255,0.05)",
+      background: C.white,
+      borderBottom: `1px solid ${C.border}`,
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "0 clamp(1.25rem,4vw,3.5rem)", height: 58,
+      padding: "0 clamp(1.5rem,5vw,5rem)", height: 64,
+      boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
     }}>
-      <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 12 }}>
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect width="28" height="28" rx="6" fill="#FF4D00"/>
-          <path d="M7 20L14 8L21 20" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M10 16H18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-        </svg>
+      <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{
+          width: 36, height: 36, background: C.blue, borderRadius: 4,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 15L10 5L17 15" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M6 11H14" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+        </div>
         <span style={{
-          fontFamily: "'Fraunces', serif", fontSize: 17, fontWeight: 900,
-          fontStyle: "italic", color: "#fff", letterSpacing: "-0.02em",
+          fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+          fontSize: 20, fontWeight: 700, color: C.navy, letterSpacing: "0.02em",
+          textTransform: "uppercase",
         }}>Slackline Hub</span>
       </Link>
 
-      <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
         {[
           { label: "Tools", href: "#tools" },
           { label: "Gear", href: "/gear/webbing" },
           { label: "Resources", href: "/knowledge/resources" },
-          { label: "GitHub ↗", href: "https://github.com/cayanandante/slackline-hub", external: true },
+          { label: "Calculator", href: "/tools/physics" },
+          { label: "GitHub", href: "https://github.com/cayanandante/slackline-hub", ext: true },
         ].map(l => (
-          <a key={l.label} href={l.href} target={l.external ? "_blank" : undefined}
-            style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.1em",
-              color: "rgba(255,255,255,0.45)", padding: "0 14px", height: 58,
-              display: "flex", alignItems: "center", textDecoration: "none",
-              textTransform: "uppercase", transition: "color 0.15s",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#FF4D00")}
-            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
+          <a key={l.label} href={l.href} target={l.ext ? "_blank" : undefined} style={{
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
+            color: C.muted, padding: "0 16px", height: 64, display: "flex", alignItems: "center",
+            textDecoration: "none", transition: "color 0.15s", borderBottom: "2px solid transparent",
+          }}
+            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.blue; (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = C.blue; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.muted; (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = "transparent"; }}
           >{l.label}</a>
         ))}
-        <Link to="/tools/physics" style={{
-          fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.1em",
-          textTransform: "uppercase", color: "#fff", background: "#FF4D00",
-          padding: "0 18px", height: 36, display: "flex", alignItems: "center",
-          borderRadius: 4, textDecoration: "none", marginLeft: 8,
-          transition: "background 0.15s",
-        }}
-          onMouseEnter={e => (e.currentTarget.style.background = "#ff6a30")}
-          onMouseLeave={e => (e.currentTarget.style.background = "#FF4D00")}
-        >Calculator →</Link>
       </div>
     </nav>
   );
@@ -89,280 +102,299 @@ function Nav() {
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 function Hero() {
+  // Background: deep navy photo-style section with big full-width headline
   return (
     <section style={{
-      background: "#050508",
-      minHeight: "92vh",
-      display: "flex", flexDirection: "column", justifyContent: "flex-end",
-      padding: "0 clamp(1.25rem,4vw,3.5rem) clamp(3rem,6vh,5rem)",
+      background: C.navy,
+      padding: "clamp(4rem,10vh,9rem) clamp(1.5rem,5vw,5rem)",
       position: "relative", overflow: "hidden",
     }}>
-      {/* Background: giant slanted text */}
+      {/* Blue geometric accent */}
       <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        pointerEvents: "none", overflow: "hidden",
-      }}>
-        <span style={{
-          fontFamily: "'Fraunces', serif",
-          fontSize: "clamp(12rem,30vw,28rem)",
-          fontWeight: 900, fontStyle: "italic",
-          color: "rgba(255,255,255,0.025)",
-          letterSpacing: "-0.06em", lineHeight: 0.85,
-          transform: "rotate(-8deg) translateY(5%)",
-          whiteSpace: "nowrap", userSelect: "none",
-        }}>HIGH<br/>LINE</span>
-      </div>
-
-      {/* Vertical stripe accent */}
+        position: "absolute", top: 0, right: 0,
+        width: "42%", height: "100%",
+        background: C.blue, opacity: 0.08,
+        clipPath: "polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%)",
+      }} />
       <div style={{
-        position: "absolute", top: 0, right: "clamp(6rem,14vw,18rem)",
-        width: 1, height: "100%",
-        background: "linear-gradient(to bottom, transparent 0%, rgba(255,77,0,0.4) 40%, rgba(255,77,0,0.4) 70%, transparent 100%)",
+        position: "absolute", bottom: 0, left: 0,
+        width: "100%", height: 4,
+        background: C.blue,
       }} />
 
-      {/* Stats — top right */}
-      <div style={{
-        position: "absolute", top: "clamp(3rem,6vh,5rem)", right: "clamp(1.25rem,4vw,3.5rem)",
-        display: "flex", flexDirection: "column", gap: 20, alignItems: "flex-end",
-      }}>
-        {[
-          { n: "241", label: "webbings" },
-          { n: "463", label: "resources" },
-          { n: "96", label: "stretch curves" },
-        ].map(s => (
-          <div key={s.label} style={{ textAlign: "right" }}>
-            <div style={{
-              fontFamily: "'Fraunces', serif", fontSize: "clamp(2rem,4vw,3.5rem)",
-              fontWeight: 900, fontStyle: "italic", color: "#FF4D00", lineHeight: 1,
-            }}>{s.n}</div>
-            <div style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: "0.12em",
-              textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginTop: 2,
-            }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Main content */}
-      <div style={{ position: "relative", maxWidth: 900 }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative" }}>
         <div style={{
-          fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.2em",
-          textTransform: "uppercase", color: "#FF4D00", marginBottom: 24,
-          display: "flex", alignItems: "center", gap: 12,
+          fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+          fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
+          color: C.blue, marginBottom: 20, display: "flex", alignItems: "center", gap: 12,
         }}>
-          <span style={{ width: 40, height: 1, background: "#FF4D00", display: "inline-block" }} />
+          <span style={{ width: 32, height: 2, background: C.blue, display: "inline-block" }} />
           Open Source · ISA Standards · Community Built
         </div>
 
         <h1 style={{
-          fontFamily: "'Fraunces', serif",
-          fontSize: "clamp(3.5rem,9vw,9rem)",
-          fontWeight: 900, fontStyle: "italic",
-          lineHeight: 0.88, letterSpacing: "-0.04em",
-          color: "#fff", margin: "0 0 clamp(1.5rem,3vh,2.5rem)",
+          fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+          fontSize: "clamp(4rem,10vw,10rem)",
+          fontWeight: 800,
+          lineHeight: 0.92,
+          letterSpacing: "-0.01em",
+          color: C.white,
+          textTransform: "uppercase",
+          margin: "0 0 clamp(1.5rem,3vh,2.5rem)",
         }}>
           Tools for<br />
-          <span style={{ color: "#FF4D00" }}>Slackliners,</span><br />
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>by Slackliners.</span>
+          <span style={{ color: C.blue }}>Slackliners.</span>
         </h1>
 
         <p style={{
-          fontSize: "clamp(1rem,1.5vw,1.15rem)", fontWeight: 300, lineHeight: 1.75,
-          color: "rgba(255,255,255,0.5)", maxWidth: 480,
-          marginBottom: "clamp(2rem,4vh,3.5rem)",
+          fontSize: "clamp(1rem,1.5vw,1.1rem)",
+          color: "rgba(255,255,255,0.6)",
+          fontWeight: 400, lineHeight: 1.75,
+          maxWidth: 460, marginBottom: "clamp(2rem,4vh,3rem)",
         }}>
-          Physics calculators, AI safety assistant, the most complete webbing database,
-          rigging guides — built on ISA standards by practitioners.
+          Physics calculators, AI safety tools, the most complete webbing database — built on ISA standards by practitioners.
         </p>
 
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Link to="/tools/physics" style={{
-            fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.1em",
-            textTransform: "uppercase", background: "#FF4D00", color: "#fff",
-            padding: "15px 32px", borderRadius: 4, textDecoration: "none",
-            transition: "background 0.2s, transform 0.15s", display: "inline-block",
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+            background: C.blue, color: C.white,
+            padding: "14px 32px", borderRadius: 3, textDecoration: "none",
+            transition: "background 0.15s, transform 0.15s", display: "inline-block",
           }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "#ff6a30"; (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-2px)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "#FF4D00"; (e.currentTarget as HTMLAnchorElement).style.transform = "none"; }}
+            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "#1648c2"; (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = C.blue; (e.currentTarget as HTMLAnchorElement).style.transform = "none"; }}
           >Forces Calculator →</Link>
+
           <Link to="/gear/webbing" style={{
-            fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: "rgba(255,255,255,0.6)",
-            padding: "15px 32px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.15)",
-            textDecoration: "none", transition: "all 0.2s", display: "inline-block",
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+            background: "transparent", color: C.white,
+            padding: "14px 32px", borderRadius: 3, border: "2px solid rgba(255,255,255,0.3)",
+            textDecoration: "none", transition: "border-color 0.15s, color 0.15s", display: "inline-block",
           }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.4)"; (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.15)"; (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.6)"; }}
+            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = C.white; (e.currentTarget as HTMLAnchorElement).style.color = C.white; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.3)"; }}
           >Webbing Database →</Link>
         </div>
       </div>
-
-      {/* Safety strip at bottom */}
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0,
-        background: "rgba(255,77,0,0.08)", borderTop: "1px solid rgba(255,77,0,0.2)",
-        padding: "10px clamp(1.25rem,4vw,3.5rem)",
-        display: "flex", alignItems: "center", gap: 10,
-      }}>
-        <span style={{ fontSize: 14 }}>⚠️</span>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.08em", color: "#FF4D00", textTransform: "uppercase" }}>
-          Always verify with a certified ISA Rigger before use
-        </span>
-      </div>
     </section>
   );
 }
 
-// ─── Live Tools ───────────────────────────────────────────────────────────────
+// ─── Stats bar ────────────────────────────────────────────────────────────────
+
+function StatsBar() {
+  return (
+    <div style={{
+      background: C.blue,
+      padding: "0 clamp(1.5rem,5vw,5rem)",
+    }}>
+      <div style={{
+        maxWidth: 1100, margin: "0 auto",
+        display: "flex", gap: 0,
+      }}>
+        {[
+          { n: "241", label: "Webbings indexed" },
+          { n: "463", label: "Curated resources" },
+          { n: "96", label: "Stretch curves" },
+          { n: "3", label: "Languages" },
+        ].map((s, i) => (
+          <div key={s.label} style={{
+            padding: "clamp(1rem,2vh,1.5rem) clamp(1.5rem,3vw,3rem)",
+            borderRight: i < 3 ? "1px solid rgba(255,255,255,0.15)" : "none",
+            flex: 1,
+          }}>
+            <div style={{
+              fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+              fontSize: "clamp(2rem,3.5vw,3rem)",
+              fontWeight: 800, color: C.white, lineHeight: 1,
+              textTransform: "uppercase",
+            }}>{s.n}</div>
+            <div style={{
+              fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+              fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 2,
+            }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Safety bar ───────────────────────────────────────────────────────────────
+
+function SafetyBar() {
+  return (
+    <div style={{
+      background: "#fef3c7", borderBottom: `1px solid #fcd34d`,
+      padding: "12px clamp(1.5rem,5vw,5rem)",
+      display: "flex", alignItems: "center", gap: 10,
+    }}>
+      <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+      <p style={{
+        fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+        fontSize: 13, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase",
+        color: "#92400e", margin: 0,
+      }}>
+        Always verify with a certified ISA Rigger before use
+      </p>
+    </div>
+  );
+}
+
+// ─── Live tools ───────────────────────────────────────────────────────────────
 
 function LiveTools() {
   return (
-    <section style={{ background: "#0a0a0f", padding: "clamp(4rem,8vh,7rem) clamp(1.25rem,4vw,3.5rem)" }}>
+    <section id="tools" style={{ background: C.white, padding: "clamp(4rem,8vh,7rem) clamp(1.5rem,5vw,5rem)" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 40, flexWrap: "wrap", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 40, flexWrap: "wrap", gap: 12 }}>
           <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: "clamp(2rem,4vw,3.5rem)",
-            fontWeight: 900, fontStyle: "italic",
-            letterSpacing: "-0.04em", color: "#fff", margin: 0,
-          }}>Live now.</h2>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" }}>3 tools live · more coming</span>
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: "clamp(2.5rem,5vw,4.5rem)",
+            fontWeight: 800, textTransform: "uppercase", letterSpacing: "-0.01em",
+            color: C.navy, margin: 0, lineHeight: 0.9,
+          }}>Live Now</h2>
+          <span style={{
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase",
+            color: C.muted,
+          }}>3 tools available</span>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 2 }}>
-          {liveTools.map((t, i) => {
-            const tc = TAG_COLORS[t.tag] || { bg: "rgba(255,255,255,0.08)", text: "#fff" };
-            return (
-              <Link key={t.name} to={t.path} style={{ textDecoration: "none" }}>
-                <div style={{
-                  background: i === 0 ? "#FF4D00" : "rgba(255,255,255,0.03)",
-                  border: i === 0 ? "none" : "1px solid rgba(255,255,255,0.06)",
-                  padding: "clamp(2rem,4vh,3rem) clamp(1.5rem,3vw,2.5rem)",
-                  display: "flex", flexDirection: "column", gap: 20,
-                  minHeight: 220,
-                  cursor: "pointer", transition: "transform 0.2s, background 0.2s",
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; if (i !== 0) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.06)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "none"; if (i !== 0) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.03)"; }}
-                >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
+          {liveTools.map((t, i) => (
+            <Link key={t.name} to={t.path} style={{ textDecoration: "none" }}>
+              <div style={{
+                background: i === 0 ? C.navy : C.bg,
+                padding: "clamp(2rem,4vh,3rem) clamp(1.5rem,3vw,2rem)",
+                height: "100%", minHeight: 200,
+                display: "flex", flexDirection: "column", gap: 16,
+                cursor: "pointer", transition: "transform 0.15s",
+                borderBottom: `3px solid ${i === 0 ? C.blue : "transparent"}`,
+              }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)"; if (i !== 0) (e.currentTarget as HTMLDivElement).style.borderBottomColor = C.blue; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "none"; if (i !== 0) (e.currentTarget as HTMLDivElement).style.borderBottomColor = "transparent"; }}
+              >
+                <div>
                   <span style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    background: i === 0 ? "rgba(0,0,0,0.2)" : tc.bg,
-                    color: i === 0 ? "#fff" : tc.text,
-                    padding: "4px 10px", borderRadius: 3, display: "inline-block", alignSelf: "flex-start",
+                    fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                    fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
+                    color: i === 0 ? C.blue : C.blue,
+                    background: i === 0 ? "rgba(26,86,219,0.15)" : "rgba(26,86,219,0.1)",
+                    padding: "3px 9px", borderRadius: 2,
                   }}>{t.tag}</span>
-                  <div>
-                    <div style={{
-                      fontFamily: "'Fraunces', serif",
-                      fontSize: "clamp(1.5rem,2.5vw,2.2rem)",
-                      fontWeight: 900, fontStyle: "italic",
-                      color: i === 0 ? "#fff" : "#fff",
-                      letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 8,
-                    }}>{t.name}</div>
-                    <div style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 11,
-                      color: i === 0 ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.35)",
-                      letterSpacing: "0.04em",
-                    }}>{t.sub}</div>
-                  </div>
-                  <div style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.1em",
-                    textTransform: "uppercase", marginTop: "auto",
-                    color: i === 0 ? "#fff" : "rgba(255,255,255,0.4)",
-                    display: "flex", alignItems: "center", gap: 8,
-                  }}>
-                    Open →
-                  </div>
                 </div>
-              </Link>
-            );
-          })}
+                <div>
+                  <div style={{
+                    fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                    fontSize: "clamp(1.6rem,2.5vw,2.2rem)", fontWeight: 800,
+                    textTransform: "uppercase", letterSpacing: "-0.01em",
+                    color: i === 0 ? C.white : C.navy, marginBottom: 8, lineHeight: 1,
+                  }}>{t.name}</div>
+                  <div style={{
+                    fontSize: 14, color: i === 0 ? "rgba(255,255,255,0.55)" : C.muted,
+                    lineHeight: 1.6, fontWeight: 400,
+                  }}>{t.desc}</div>
+                </div>
+                <div style={{
+                  fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                  fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                  color: C.blue, marginTop: "auto",
+                }}>Open →</div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-// ─── Coming Soon ──────────────────────────────────────────────────────────────
+// ─── Coming soon ──────────────────────────────────────────────────────────────
 
 function ComingSoon() {
   return (
-    <section style={{ background: "#050508", padding: "clamp(4rem,8vh,7rem) clamp(1.25rem,4vw,3.5rem)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+    <section style={{
+      background: C.bg,
+      borderTop: `1px solid ${C.border}`,
+      padding: "clamp(3rem,6vh,5rem) clamp(1.5rem,5vw,5rem)",
+    }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ marginBottom: 40 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
           <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: "clamp(2rem,4vw,3.5rem)",
-            fontWeight: 900, fontStyle: "italic",
-            letterSpacing: "-0.04em", color: "#fff", margin: "0 0 8px",
-          }}>Building next.</h2>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>
-            These tools are in development
-          </p>
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: "clamp(2rem,4vw,3.5rem)", fontWeight: 800,
+            textTransform: "uppercase", color: C.navy, margin: 0,
+          }}>Coming Soon</h2>
         </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 2 }}>
-          {soonTools.map(t => {
-            const tc = TAG_COLORS[t.tag] || { bg: "rgba(255,255,255,0.05)", text: "rgba(255,255,255,0.3)" };
-            return (
-              <div key={t.name} style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.04)",
-                padding: "clamp(1.25rem,2vh,1.75rem) clamp(1rem,2vw,1.5rem)",
-                display: "flex", flexDirection: "column", gap: 12,
-              }}>
-                <span style={{
-                  fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: "0.14em",
-                  textTransform: "uppercase", background: tc.bg, color: tc.text,
-                  padding: "3px 8px", borderRadius: 3, display: "inline-block", alignSelf: "flex-start",
-                }}>{t.tag}</span>
-                <div style={{
-                  fontFamily: "'Fraunces', serif", fontSize: "clamp(1rem,1.5vw,1.3rem)",
-                  fontWeight: 700, fontStyle: "italic",
-                  color: "rgba(255,255,255,0.3)", letterSpacing: "-0.02em",
-                }}>{t.name}</div>
-              </div>
-            );
-          })}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 2 }}>
+          {comingTools.map(t => (
+            <div key={t.name} style={{
+              background: C.white, border: `1px solid ${C.border}`,
+              padding: "20px 18px", display: "flex", flexDirection: "column", gap: 10,
+            }}>
+              <span style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
+                color: C.blue, background: "rgba(26,86,219,0.08)",
+                padding: "3px 8px", borderRadius: 2, display: "inline-block", alignSelf: "flex-start",
+              }}>{t.tag}</span>
+              <div style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                fontSize: "clamp(1rem,1.5vw,1.3rem)", fontWeight: 700,
+                textTransform: "uppercase", color: `rgba(10,22,40,0.4)`, letterSpacing: "0.01em",
+              }}>{t.name}</div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-// ─── About strip ──────────────────────────────────────────────────────────────
+// ─── About ────────────────────────────────────────────────────────────────────
 
 function About() {
   return (
     <section style={{
-      background: "#FF4D00",
-      padding: "clamp(4rem,8vh,7rem) clamp(1.25rem,4vw,3.5rem)",
+      background: C.navy,
+      padding: "clamp(4rem,8vh,7rem) clamp(1.5rem,5vw,5rem)",
     }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,8rem)", alignItems: "center" }}>
         <div>
-          <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: "clamp(2.5rem,5vw,5rem)",
-            fontWeight: 900, fontStyle: "italic",
-            letterSpacing: "-0.04em", color: "#fff",
-            lineHeight: 0.9, margin: "0 0 24px",
+          <div style={{
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
+            color: C.blue, marginBottom: 16, display: "flex", alignItems: "center", gap: 10,
           }}>
-            Built by<br />riggers,<br />for riggers.
+            <span style={{ width: 24, height: 2, background: C.blue, display: "inline-block" }} />
+            About
+          </div>
+          <h2 style={{
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: "clamp(2.5rem,5vw,5rem)", fontWeight: 800,
+            textTransform: "uppercase", color: C.white,
+            letterSpacing: "-0.01em", lineHeight: 0.92, margin: "0 0 24px",
+          }}>
+            Built by<br />riggers,<br />
+            <span style={{ color: C.blue }}>for riggers.</span>
           </h2>
           <p style={{
-            fontSize: "clamp(0.9rem,1.2vw,1.05rem)", fontWeight: 300,
-            color: "rgba(255,255,255,0.75)", lineHeight: 1.8, marginBottom: 24,
+            fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, marginBottom: 24,
           }}>
-            Created by <strong style={{ color: "#fff" }}>Cayan Dantas</strong> — ISA-certified Rigger and mechanical engineering MSc student from Brazil. Grounded in the <em style={{ fontFamily: "'Fraunces', serif" }}>Guia do Praticante de Highline</em>.
+            Created by <strong style={{ color: C.white }}>Cayan Dantas</strong> — ISA-certified Rigger and mechanical engineering MSc from Brazil. Every tool is grounded in verified ISA standards.
           </p>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {["ISA Open Data", "SlackDB", "Balance Community", "ISA SlackMap", "RopeLab", "HowNOT2"].map(s => (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {["ISA Open Data","SlackDB","Balance Community","RopeLab","HowNOT2"].map(s => (
               <span key={s} style={{
-                fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.04em",
-                color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.25)",
-                padding: "4px 10px", borderRadius: 3,
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
+                color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.12)",
+                padding: "4px 10px", borderRadius: 2,
               }}>{s}</span>
             ))}
           </div>
@@ -373,11 +405,19 @@ function About() {
             { n: "463", label: "Curated resources" },
             { n: "241", label: "Webbings indexed" },
             { n: "96", label: "Stretch curves" },
-            { n: "3", label: "Languages planned" },
+            { n: "23", label: "Guide sections" },
           ].map(s => (
-            <div key={s.label} style={{ background: "rgba(0,0,0,0.2)", padding: "clamp(1.5rem,3vh,2.5rem)" }}>
-              <div style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(2.5rem,4vw,4rem)", fontWeight: 900, fontStyle: "italic", color: "#fff", lineHeight: 1, marginBottom: 6 }}>{s.n}</div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)" }}>{s.label}</div>
+            <div key={s.label} style={{ background: "rgba(255,255,255,0.04)", padding: "clamp(1.5rem,3vh,2.5rem)" }}>
+              <div style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                fontSize: "clamp(2.5rem,4vw,4rem)", fontWeight: 800,
+                color: C.blue, lineHeight: 1, marginBottom: 6,
+              }}>{s.n}</div>
+              <div style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase",
+                color: "rgba(255,255,255,0.4)",
+              }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -391,14 +431,21 @@ function About() {
 function Footer() {
   return (
     <footer style={{
-      background: "#050508", borderTop: "1px solid rgba(255,255,255,0.04)",
-      padding: "clamp(2rem,4vh,3rem) clamp(1.25rem,4vw,3.5rem)",
+      background: C.white,
+      borderTop: `1px solid ${C.border}`,
+      padding: "clamp(2rem,4vh,3rem) clamp(1.5rem,5vw,5rem)",
       display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20,
     }}>
       <div>
-        <div style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 900, color: "#fff", fontSize: 18, marginBottom: 6 }}>Slackline Hub</div>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em", lineHeight: 1.8 }}>
-          Built by <a href="mailto:cayandantas@proton.me" style={{ color: "#FF4D00", textDecoration: "none" }}>Cayan Dantas</a> · ISA-certified Rigger · Open source
+        <div style={{
+          fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+          fontSize: 18, fontWeight: 800, textTransform: "uppercase",
+          color: C.navy, marginBottom: 4, letterSpacing: "0.02em",
+        }}>Slackline Hub</div>
+        <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.7 }}>
+          Built by{" "}
+          <a href="mailto:cayandantas@proton.me" style={{ color: C.blue, textDecoration: "none" }}>Cayan Dantas</a>
+          {" "}· ISA-certified Rigger · Open source
         </div>
       </div>
       <div style={{ display: "flex", gap: 24 }}>
@@ -408,11 +455,12 @@ function Footer() {
           { label: "Become a Rigger", href: "https://www.slacklineinternational.org/riggers/" },
         ].map(l => (
           <a key={l.label} href={l.href} target="_blank" style={{
-            fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.08em",
-            textTransform: "uppercase", color: "rgba(255,255,255,0.25)", textDecoration: "none", transition: "color 0.15s",
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+            fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase",
+            color: C.muted, textDecoration: "none", transition: "color 0.15s",
           }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#FF4D00")}
-            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}
+            onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
+            onMouseLeave={e => (e.currentTarget.style.color = C.muted)}
           >{l.label}</a>
         ))}
       </div>
@@ -424,9 +472,11 @@ function Footer() {
 
 export default function Index() {
   return (
-    <div style={{ background: "#050508", minHeight: "100vh", color: "#fff" }}>
+    <div style={{ background: C.white, minHeight: "100vh", color: C.navy }}>
       <Nav />
       <Hero />
+      <StatsBar />
+      <SafetyBar />
       <LiveTools />
       <ComingSoon />
       <About />
