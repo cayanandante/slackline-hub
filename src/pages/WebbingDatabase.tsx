@@ -73,6 +73,8 @@ const monoLabel: React.CSSProperties = {
 // ─── Stretch Chart ────────────────────────────────────────────────────────────
 
 function StretchChart({ webbings, hovered, onHover, colorMap, activeIds }: {
+  webbings: Webbing[];
+  hovered: string | null;
   onHover: (id: string | null) => void;
   colorMap: Record<string, string>;
   activeIds: Set<string>;
