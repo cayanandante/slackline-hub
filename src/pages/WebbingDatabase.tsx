@@ -82,8 +82,8 @@ function drawSymbol(sym: SymbolType, cx: number, cy: number, r: number, color: s
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
 const chip = (active: boolean): React.CSSProperties => ({
-  fontFamily: FONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em",
-  textTransform: "uppercase", padding: "6px 16px", borderRadius: 2, border: "1px solid",
+  fontFamily: FONT, fontSize: 14, fontWeight: 700, letterSpacing: "0.08em",
+  textTransform: "uppercase", padding: "7px 18px", borderRadius: 2, border: "1px solid",
   borderColor: active ? C.blue : C.border,
   background: active ? C.blue : C.white,
   color: active ? C.white : C.muted,
@@ -91,16 +91,11 @@ const chip = (active: boolean): React.CSSProperties => ({
 });
 
 const monoLabel: React.CSSProperties = {
-  fontFamily: FONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.15em",
+  fontFamily: FONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.15em",
   textTransform: "uppercase", color: C.muted, marginBottom: 8,
 };
 
 // ─── Stretch Chart with crosshair, symbols, sidebar legend ───────────────────
-
-interface CrosshairData {
-  kn: number;
-  items: { w: Webbing; val: number; color: string; sym: SymbolType }[];
-}
 
 function StretchChart({ webbings, colorMap, symMap, activeIds, onToggle }: {
   webbings: Webbing[];
@@ -110,7 +105,9 @@ function StretchChart({ webbings, colorMap, symMap, activeIds, onToggle }: {
   onToggle: (id: string) => void;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [crosshair, setCrosshair] = useState<CrosshairData | null>(null);
+  const [mouseKn, setMouseKn] = useState<number | null>(null);
+  const [mousePct, setMousePct] = useState<number | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const visible = webbings.filter(w => activeIds.has(w.id) && w.stretchCurve && w.stretchCurve.length > 1);
 
@@ -136,25 +133,39 @@ function StretchChart({ webbings, colorMap, symMap, activeIds, onToggle }: {
     return null;
   };
 
-  // Mouse move handler — snap to nearest kN
+  // Mouse move: snap kN, find closest line by y-distance
   const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const scaleX = VW / rect.width;
+    const scaleY = VH / rect.height;
     const px = (e.clientX - rect.left) * scaleX;
+    const py = (e.clientY - rect.top) * scaleY;
     const kn = Math.max(0, Math.min(MAX_X, Math.round(((px - PL) / CW) * MAX_X)));
-    const items = visible
-      .map(w => {
-        const val = interp(w, kn);
-        if (val === null) return null;
-        return { w, val, color: colorMap[w.id], sym: symMap[w.id] };
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null)
-      .sort((a, b) => b.val - a.val);
-    setCrosshair({ kn, items });
-  }, [visible, colorMap, symMap]);
+    setMouseKn(kn);
+    // Find closest line by vertical distance at this kN
+    let closestId: string | null = null;
+    let closestDist = Infinity;
+    visible.forEach(w => {
+      const val = interp(w, kn);
+      if (val === null) return;
+      const lineY = yS(val);
+      const dist = Math.abs(py - lineY);
+      if (dist < closestDist) { closestDist = dist; closestId = w.id; }
+    });
+    if (closestDist < 40) {
+      setHoveredId(closestId);
+      if (closestId) {
+        const hov = visible.find(v => v.id === closestId);
+        if (hov) setMousePct(interp(hov, kn));
+      }
+    } else {
+      setHoveredId(null);
+      setMousePct(null);
+    }
+  }, [visible]);
 
-  const handleMouseLeave = () => setCrosshair(null);
+  const handleMouseLeave = () => { setMouseKn(null); setHoveredId(null); setMousePct(null); };
 
   // Symbol positions along each line (every 2 kN)
   const symbolKns = [2, 4, 6, 8, 10, 12];
@@ -193,10 +204,10 @@ function StretchChart({ webbings, colorMap, symMap, activeIds, onToggle }: {
             const col = colorMap[w.id];
             const sym = symMap[w.id];
             const d = pts.map((p,i) => `${i===0?"M":"L"} ${xS(p.kn).toFixed(1)} ${yS(p.percent).toFixed(1)}`).join(" ");
-            const isCrosshaired = crosshair !== null;
-            const isHighlighted = crosshair?.items.some(it => it.w.id === w.id);
-            const opacity = isCrosshaired ? (isHighlighted ? 1 : 0.07) : 0.75;
-            const strokeW = isHighlighted ? 3 : 1.5;
+            const isHighlighted = hoveredId === w.id;
+            const isDimmed = hoveredId !== null && !isHighlighted;
+            const opacity = isDimmed ? 0.06 : isHighlighted ? 1 : 0.75;
+            const strokeW = isHighlighted ? 3.5 : 1.5;
 
             return (
               <g key={w.id}>
@@ -210,7 +221,7 @@ function StretchChart({ webbings, colorMap, symMap, activeIds, onToggle }: {
                   const val = interp(w, kn);
                   if (val === null) return null;
                   return (
-                    <g key={kn} opacity={opacity} style={{ transition: "opacity 0.08s" }}>
+                    <g key={kn} opacity={isHighlighted ? 1 : isDimmed ? 0.06 : 0.6} style={{ transition: "opacity 0.08s" }}>
                       {drawSymbol(sym, xS(kn), yS(val), isHighlighted ? 5 : 3.5, col)}
                     </g>
                   );
@@ -220,72 +231,74 @@ function StretchChart({ webbings, colorMap, symMap, activeIds, onToggle }: {
           })}
 
           {/* Crosshair vertical line */}
-          {crosshair && (
+          {mouseKn !== null && (
             <line
-              x1={xS(crosshair.kn)} x2={xS(crosshair.kn)}
+              x1={xS(mouseKn)} x2={xS(mouseKn)}
               y1={PT} y2={VH-PB}
-              stroke={C.navy} strokeWidth={1} strokeDasharray="4 3" opacity={0.4}
+              stroke={C.navy} strokeWidth={1} strokeDasharray="4 3" opacity={0.3}
             />
           )}
 
-          {/* Tooltip: top-3 labels near line ends */}
-          {crosshair && crosshair.items.slice(0, 5).map((it, i) => {
-            const val = it.val;
-            const py = yS(val);
+          {/* Tooltip: single hovered webbing */}
+          {hoveredId && mouseKn !== null && (() => {
+            const w = visible.find(v => v.id === hoveredId);
+            if (!w || mousePct === null) return null;
+            const py = yS(mousePct);
+            const col = colorMap[w.id];
+            const sym = symMap[w.id];
+            const tooltipX = xS(mouseKn) + 14;
+            const brand = w.brand || "";
+            const label = `${w.name}  —  ${mousePct}% @ ${mouseKn} kN`;
+            const brandLabel = brand ? `  ·  ${brand}` : "";
+            const boxW = Math.min(320, (label.length + brandLabel.length) * 7.2 + 24);
+            const boxH = brand ? 44 : 26;
+            const boxY = Math.max(PT, Math.min(py - boxH / 2, VH - PB - boxH));
             return (
-              <g key={it.w.id}>
-                {/* Dot at crosshair intersection */}
-                {drawSymbol(it.sym, xS(crosshair.kn), py, 6, it.color)}
-                {/* Floating label */}
-                {i < 3 && (
-                  <g>
-                    <rect
-                      x={xS(crosshair.kn) + 10}
-                      y={py - 11 + i * 22}
-                      width={Math.min(180, it.w.name.length * 7.5 + 60)}
-                      height={20}
-                      rx={3} fill={C.white} stroke={it.color} strokeWidth={1.5}
-                    />
-                    <text
-                      x={xS(crosshair.kn) + 16}
-                      y={py + 3 + i * 22}
-                      fontSize={11} fill={it.color} fontFamily={FONT} fontWeight={700}
-                    >
-                      {it.w.name} — {val}%
-                    </text>
-                  </g>
+              <g key={hoveredId}>
+                {drawSymbol(sym, xS(mouseKn), py, 7, col)}
+                <rect x={tooltipX} y={boxY} width={boxW} height={boxH} rx={4}
+                  fill={C.white} stroke={col} strokeWidth={2}
+                  style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.12))" }}
+                />
+                <text x={tooltipX + 12} y={boxY + 17} fontSize={13} fill={col}
+                  fontFamily={FONT} fontWeight={800}>{w.name}  —  {mousePct}% @ {mouseKn} kN</text>
+                {brand && (
+                  <text x={tooltipX + 12} y={boxY + 33} fontSize={11} fill={C.muted}
+                    fontFamily={FONT} fontWeight={600}>{brand}</text>
                 )}
               </g>
             );
-          })}
+          })()}
         </svg>
 
-        {/* Crosshair readout bar */}
-        {crosshair && (
-          <div style={{
-            background: C.bg, borderTop: `1px solid ${C.border}`,
-            padding: "8px 16px",
-            display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center",
-          }}>
-            <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: C.navy, letterSpacing: "0.08em", marginRight: 8 }}>
-              @ {crosshair.kn} kN:
-            </span>
-            {crosshair.items.slice(0, 8).map(it => (
-              <span key={it.w.id} style={{
-                fontFamily: FONT, fontSize: 12, fontWeight: 600, color: it.color,
-                background: C.white, border: `1px solid ${it.color}`,
-                borderRadius: 2, padding: "1px 8px",
-              }}>
-                {it.w.name} {it.val}%
+        {/* Hover readout bar */}
+        {hoveredId && mouseKn !== null && (() => {
+          const w = visible.find(v => v.id === hoveredId);
+          if (!w || mousePct === null) return null;
+          return (
+            <div style={{
+              background: C.bg, borderTop: `1px solid ${C.border}`,
+              padding: "10px 18px", display: "flex", alignItems: "center", gap: 12,
+            }}>
+              <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 800, color: colorMap[w.id] }}>
+                {w.name}
               </span>
-            ))}
-            {crosshair.items.length > 8 && (
-              <span style={{ fontFamily: FONT, fontSize: 11, color: C.muted }}>
-                +{crosshair.items.length - 8} more
+              <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: C.navy }}>
+                {mousePct}% at {mouseKn} kN
               </span>
-            )}
-          </div>
-        )}
+              {w.brand && (
+                <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: C.muted }}>
+                  · {w.brand}
+                </span>
+              )}
+              {w.discontinued && (
+                <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: C.muted, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 2, padding: "1px 6px" }}>
+                  Discontinued
+                </span>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Sidebar legend — scrollable, toggleable */}
@@ -299,7 +312,7 @@ function StretchChart({ webbings, colorMap, symMap, activeIds, onToggle }: {
             Legend
           </span>
         </div>
-        {webbings.filter(w => w.stretchCurve && w.stretchCurve.length > 1).map(w => {
+        {webbings.filter(w => w.stretchCurve && w.stretchCurve.length > 1 && activeIds.has(w.id)).map(w => {
           const on = activeIds.has(w.id);
           const col = colorMap[w.id];
           const sym = symMap[w.id];
@@ -354,12 +367,12 @@ function StretchTable({ webbings, colorMap }: { webbings: Webbing[]; colorMap: R
   };
 
   const th: React.CSSProperties = {
-    padding: "11px 12px", fontFamily: FONT, fontSize: 12, fontWeight: 700,
+    padding: "12px 14px", fontFamily: FONT, fontSize: 13, fontWeight: 700,
     letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted,
     borderBottom: `2px solid ${C.border}`, whiteSpace: "nowrap", textAlign: "left", background: C.white,
   };
   const td: React.CSSProperties = {
-    padding: "9px 12px", fontFamily: FONT, fontSize: 13, fontWeight: 500,
+    padding: "10px 14px", fontFamily: FONT, fontSize: 14, fontWeight: 500,
     borderBottom: `1px solid ${C.border}`, whiteSpace: "nowrap", color: C.text,
   };
 
@@ -431,13 +444,13 @@ function SpecsTable({ webbings }: { webbings: Webbing[] }) {
   }), [webbings, sortCol, sortDir]);
 
   const th: React.CSSProperties = {
-    padding: "11px 12px", fontFamily: FONT, fontSize: 12, fontWeight: 700,
+    padding: "12px 14px", fontFamily: FONT, fontSize: 13, fontWeight: 700,
     letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted,
     borderBottom: `2px solid ${C.border}`, whiteSpace: "nowrap", textAlign: "left",
     background: C.white, cursor: "pointer",
   };
   const td: React.CSSProperties = {
-    padding: "9px 12px", fontFamily: FONT, fontSize: 13, fontWeight: 500,
+    padding: "10px 14px", fontFamily: FONT, fontSize: 14, fontWeight: 500,
     borderBottom: `1px solid ${C.border}`, whiteSpace: "nowrap", color: C.text,
   };
 
@@ -571,8 +584,8 @@ export default function WebbingDatabase() {
 
   const TAB = (mode: ViewMode, label: string) => (
     <button onClick={()=>setViewMode(mode)} style={{
-      fontFamily: FONT, fontSize: 14, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-      padding: "16px 24px", border: "none", background: "transparent", cursor: "pointer",
+      fontFamily: FONT, fontSize: 16, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+      padding: "18px 26px", border: "none", background: "transparent", cursor: "pointer",
       color: viewMode===mode ? C.blue : C.muted,
       borderBottom: `3px solid ${viewMode===mode ? C.blue : "transparent"}`,
       transition: "all 0.15s",
@@ -679,7 +692,7 @@ export default function WebbingDatabase() {
             </div>
           </div>
 
-          <div style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: C.muted, marginLeft: "auto", alignSelf: "center", letterSpacing: "0.08em" }}>
+          <div style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: C.muted, marginLeft: "auto", alignSelf: "center", letterSpacing: "0.08em" }}>
             {filtered.length} / {allData.length}
           </div>
         </div>
@@ -700,13 +713,13 @@ export default function WebbingDatabase() {
               </span>
             </div>
             <StretchChart
-              webbings={allData}
+              webbings={filtered}
               colorMap={colorMap}
               symMap={symMap}
               activeIds={activeStretchIds}
               onToggle={toggleStretch}
             />
-            <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 600, color: C.muted, marginTop: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: C.muted, marginTop: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
               Sources: Balance Community · ISA SlackData · Click legend to toggle · Hover chart for values
             </p>
           </div>
@@ -733,7 +746,7 @@ export default function WebbingDatabase() {
         )}
 
         <div style={{ marginTop: 48, padding: "14px 18px", background: C.white, border: `1px solid ${C.border}`, borderRadius: 4 }}>
-          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 600, color: C.muted, margin: 0, lineHeight: 1.9, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: C.muted, margin: 0, lineHeight: 1.9, letterSpacing: "0.06em", textTransform: "uppercase" }}>
             Data: SlackDB · ISA SlackData · Balance Community · Community-maintained. Always verify MBS and safety specs with the manufacturer before rigging.
           </p>
         </div>

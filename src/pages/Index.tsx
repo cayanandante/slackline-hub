@@ -86,7 +86,7 @@ function Nav() {
         ].map(l => (
           <a key={l.label} href={l.href} target={l.ext ? "_blank" : undefined} style={{
             fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-            fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
+            fontSize: 15, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
             color: C.muted, padding: "0 16px", height: 64, display: "flex", alignItems: "center",
             textDecoration: "none", transition: "color 0.15s", borderBottom: "2px solid transparent",
           }}
@@ -94,6 +94,23 @@ function Nav() {
             onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.muted; (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = "transparent"; }}
           >{l.label}</a>
         ))}
+        {/* Language selector */}
+        <div style={{ display: "flex", gap: 2, marginLeft: 12, borderLeft: `1px solid ${C.border}`, paddingLeft: 12 }}>
+          {["EN","PT","ES"].map((lang, i) => (
+            <button key={lang} style={{
+              fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+              fontSize: 12, fontWeight: 700, letterSpacing: "0.1em",
+              padding: "0 10px", height: 64, border: "none",
+              background: i === 0 ? "rgba(26,86,219,0.08)" : "transparent",
+              color: i === 0 ? C.blue : C.muted,
+              cursor: i === 0 ? "default" : "not-allowed",
+              transition: "color 0.15s",
+              borderBottom: i === 0 ? `2px solid ${C.blue}` : "2px solid transparent",
+            }}
+              title={i === 0 ? "English (current)" : "Coming soon"}
+            >{lang}</button>
+          ))}
+        </div>
       </div>
     </nav>
   );
@@ -125,7 +142,7 @@ function Hero() {
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative" }}>
         <div style={{
           fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-          fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
+          fontSize: 14, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
           color: C.blue, marginBottom: 20, display: "flex", alignItems: "center", gap: 12,
         }}>
           <span style={{ width: 32, height: 2, background: C.blue, display: "inline-block" }} />
@@ -147,7 +164,7 @@ function Hero() {
         </h1>
 
         <p style={{
-          fontSize: "clamp(1rem,1.5vw,1.1rem)",
+          fontSize: "clamp(1.1rem,1.6vw,1.2rem)",
           color: "rgba(255,255,255,0.6)",
           fontWeight: 400, lineHeight: 1.75,
           maxWidth: 460, marginBottom: "clamp(2rem,4vh,3rem)",
@@ -158,7 +175,7 @@ function Hero() {
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Link to="/tools/physics" style={{
             fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-            fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+            fontSize: 16, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
             background: C.blue, color: C.white,
             padding: "14px 32px", borderRadius: 3, textDecoration: "none",
             transition: "background 0.15s, transform 0.15s", display: "inline-block",
@@ -169,7 +186,7 @@ function Hero() {
 
           <Link to="/gear/webbing" style={{
             fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-            fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+            fontSize: 16, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
             background: "transparent", color: C.white,
             padding: "14px 32px", borderRadius: 3, border: "2px solid rgba(255,255,255,0.3)",
             textDecoration: "none", transition: "border-color 0.15s, color 0.15s", display: "inline-block",
@@ -291,7 +308,7 @@ function LiveTools() {
                 <div>
                   <div style={{
                     fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-                    fontSize: "clamp(1.6rem,2.5vw,2.2rem)", fontWeight: 800,
+                    fontSize: "clamp(1.8rem,2.8vw,2.5rem)", fontWeight: 800,
                     textTransform: "uppercase", letterSpacing: "-0.01em",
                     color: i === 0 ? C.white : C.navy, marginBottom: 8, lineHeight: 1,
                   }}>{t.name}</div>
@@ -339,13 +356,13 @@ function ComingSoon() {
             }}>
               <span style={{
                 fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-                fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
+                fontSize: 12, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
                 color: C.blue, background: "rgba(26,86,219,0.08)",
                 padding: "3px 8px", borderRadius: 2, display: "inline-block", alignSelf: "flex-start",
               }}>{t.tag}</span>
               <div style={{
                 fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-                fontSize: "clamp(1rem,1.5vw,1.3rem)", fontWeight: 700,
+                fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700,
                 textTransform: "uppercase", color: `rgba(10,22,40,0.4)`, letterSpacing: "0.01em",
               }}>{t.name}</div>
             </div>
@@ -380,19 +397,19 @@ function About() {
             textTransform: "uppercase", color: C.white,
             letterSpacing: "-0.01em", lineHeight: 0.92, margin: "0 0 24px",
           }}>
-            Built by<br />riggers,<br />
-            <span style={{ color: C.blue }}>for riggers.</span>
+            Built by a slackliner,<br />
+            <span style={{ color: C.blue }}>for slackliners.</span>
           </h2>
           <p style={{
-            fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, marginBottom: 24,
+            fontSize: 17, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, marginBottom: 24,
           }}>
-            Created by <strong style={{ color: C.white }}>Cayan Dantas</strong> — ISA-certified Rigger and mechanical engineering MSc from Brazil. Every tool is grounded in verified ISA standards.
+            Created by <strong style={{ color: C.white }}>Cayan Dantas</strong>, ISA Certified Rigger and Mechanical Engineer from Brazil.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {["ISA Open Data","SlackDB","Balance Community","RopeLab","HowNOT2"].map(s => (
               <span key={s} style={{
                 fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-                fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
+                fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.12)",
                 padding: "4px 10px", borderRadius: 2,
               }}>{s}</span>
@@ -434,36 +451,19 @@ function Footer() {
       background: C.white,
       borderTop: `1px solid ${C.border}`,
       padding: "clamp(2rem,4vh,3rem) clamp(1.5rem,5vw,5rem)",
-      display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20,
+      display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6,
     }}>
-      <div>
-        <div style={{
-          fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-          fontSize: 18, fontWeight: 800, textTransform: "uppercase",
-          color: C.navy, marginBottom: 4, letterSpacing: "0.02em",
-        }}>Slackline Hub</div>
-        <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.7 }}>
-          Built by{" "}
-          <a href="mailto:cayandantas@proton.me" style={{ color: C.blue, textDecoration: "none" }}>Cayan Dantas</a>
-          {" "}· ISA-certified Rigger · Open source
-        </div>
+      <div style={{
+        fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+        fontSize: 20, fontWeight: 800, textTransform: "uppercase",
+        color: C.navy, letterSpacing: "0.02em",
+      }}>Slackline Hub</div>
+      <div style={{ fontSize: 15, color: C.muted, lineHeight: 1.7 }}>
+        Built by <strong style={{ color: C.navy }}>Cayan Dantas</strong>
       </div>
-      <div style={{ display: "flex", gap: 24 }}>
-        {[
-          { label: "ISA GitHub", href: "https://github.com/International-Slackline-Association" },
-          { label: "ISA Open Data", href: "https://data.slacklineinternational.org/" },
-          { label: "Become a Rigger", href: "https://www.slacklineinternational.org/riggers/" },
-        ].map(l => (
-          <a key={l.label} href={l.href} target="_blank" style={{
-            fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-            fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase",
-            color: C.muted, textDecoration: "none", transition: "color 0.15s",
-          }}
-            onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
-            onMouseLeave={e => (e.currentTarget.style.color = C.muted)}
-          >{l.label}</a>
-        ))}
-      </div>
+      <a href="mailto:cayandantas@proton.me" style={{ fontSize: 15, color: C.blue, textDecoration: "none" }}>
+        cayandantas@proton.me
+      </a>
     </footer>
   );
 }
@@ -476,7 +476,6 @@ export default function Index() {
       <Nav />
       <Hero />
       <StatsBar />
-      <SafetyBar />
       <LiveTools />
       <ComingSoon />
       <About />
