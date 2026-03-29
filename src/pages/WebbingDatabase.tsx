@@ -37,11 +37,11 @@ const MATERIAL_LABELS: Record<string, string> = {
 // ─── 30 distinct colors ───────────────────────────────────────────────────────
 
 const PALETTE = [
-  "#c8531a","#2d6a4f","#1a6bc8","#8e44ad","#e67e22","#16a085","#c94f6d",
-  "#d4a843","#5b8db8","#3a7d44","#e74c3c","#2980b9","#8b6914","#27ae60",
-  "#6c5ce7","#fd79a8","#00b894","#e17055","#636e72","#d35400","#1abc9c",
-  "#f39c12","#c0392b","#2c3e50","#a29bfe","#55efc4","#fdcb6e","#e84393",
-  "#00cec9","#b2bec3",
+  "#c8531a", "#2d6a4f", "#1a6bc8", "#8e44ad", "#e67e22", "#16a085", "#c94f6d",
+  "#d4a843", "#5b8db8", "#3a7d44", "#e74c3c", "#2980b9", "#8b6914", "#27ae60",
+  "#6c5ce7", "#fd79a8", "#00b894", "#e17055", "#636e72", "#d35400", "#1abc9c",
+  "#f39c12", "#c0392b", "#2c3e50", "#a29bfe", "#55efc4", "#fdcb6e", "#e84393",
+  "#00cec9", "#b2bec3",
 ];
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
@@ -72,12 +72,9 @@ const monoLabel: React.CSSProperties = {
 
 // ─── Stretch Chart ────────────────────────────────────────────────────────────
 
-function StretchChart({ webbings, hovered, onHover, colorMap, onToggle, activeIds }: {
-  webbings: Webbing[];
-  hovered: string | null;
+function StretchChart({ webbings, hovered, onHover, colorMap, activeIds }: {
   onHover: (id: string | null) => void;
   colorMap: Record<string, string>;
-  onToggle: (id: string) => void;
   activeIds: Set<string>;
 }) {
   const plottable = webbings.filter(w => w.stretchCurve && w.stretchCurve.length > 1);
@@ -172,7 +169,7 @@ function StretchTable({ webbings, colorMap }: {
     </div>
   );
 
-  const kns = [1,2,3,4,5,6,7,8,9,10,11,12];
+  const kns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   const getVal = (w: Webbing, kn: number) => {
     const pt = w.stretchCurve?.find(p => p.kn === kn);
@@ -240,8 +237,8 @@ function MBSChart({ webbings }: { webbings: Webbing[] }) {
   const VH = data.length * (BH + G) + 36;
   const matColor = (w: Webbing) =>
     w.material.includes("DY") ? "#2d6a4f" :
-    w.material.includes("NY") ? "#2980b9" :
-    w.material.includes("hybrid") ? "#8e44ad" : "#c8531a";
+      w.material.includes("NY") ? "#2980b9" :
+        w.material.includes("hybrid") ? "#8e44ad" : "#c8531a";
 
   return (
     <svg viewBox={`0 0 ${SVG_W} ${VH}`} style={{ width: "100%", borderRadius: 8, background: "#fff", border: "1px solid rgba(13,15,14,0.08)" }}>
@@ -259,9 +256,9 @@ function MBSChart({ webbings }: { webbings: Webbing[] }) {
           </g>
         );
       })}
-      {([["DY","Dyneema","#2d6a4f"],["NY","Nylon","#2980b9"],["PL","Polyester","#c8531a"],["hybrid","Hybrid","#8e44ad"]] as const).map(([,lab,col],i) => (
+      {([["DY", "Dyneema", "#2d6a4f"], ["NY", "Nylon", "#2980b9"], ["PL", "Polyester", "#c8531a"], ["hybrid", "Hybrid", "#8e44ad"]] as const).map(([, lab, col], i) => (
         <g key={lab} transform={`translate(${LW + i * 120},${VH - 10})`}>
-          <rect width={9} height={9} rx={2} fill={col} fillOpacity={0.65}/>
+          <rect width={9} height={9} rx={2} fill={col} fillOpacity={0.65} />
           <text x={13} y={8} fontSize={9} fill="#7a7268" fontFamily="'DM Mono',monospace">{lab}</text>
         </g>
       ))}
@@ -504,7 +501,7 @@ export default function WebbingDatabase() {
         <div style={{ paddingTop: 32 }}>
           <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
             <span style={monoLabel}>Chart</span>
-            {(["stretch","mbs","weight"] as ChartTab[]).map(c => (
+            {(["stretch", "mbs", "weight"] as ChartTab[]).map(c => (
               <button key={c} onClick={() => setChartTab(c)} style={chip(chartTab === c)}>
                 {c === "stretch" ? "Stretch curves" : c === "mbs" ? "MBS comparison" : "Weight/m"}
               </button>
@@ -590,7 +587,7 @@ export default function WebbingDatabase() {
           <div>
             <div style={monoLabel}>Status</div>
             <div style={{ display: "flex", gap: 4 }}>
-              {(["active","all","discontinued"] as StatusFilter[]).map(s => (
+              {(["active", "all", "discontinued"] as StatusFilter[]).map(s => (
                 <button key={s} onClick={() => setStatusFilter(s)} style={chip(statusFilter === s)}>
                   {s === "active" ? "Active" : s === "discontinued" ? "Discontinued" : "All"}
                 </button>
@@ -601,7 +598,7 @@ export default function WebbingDatabase() {
           <div>
             <div style={monoLabel}>Material</div>
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-              {(["ALL","PL","NY","DY","hybrid"] as MatFilter[]).map(m => (
+              {(["ALL", "PL", "NY", "DY", "hybrid"] as MatFilter[]).map(m => (
                 <button key={m} onClick={() => setMatFilter(m)} style={chip(matFilter === m)}>
                   {m === "ALL" ? "All" : MATERIAL_LABELS[m] || m}
                 </button>
@@ -612,7 +609,7 @@ export default function WebbingDatabase() {
           <div>
             <div style={monoLabel}>Sort</div>
             <div style={{ display: "flex", gap: 4 }}>
-              {(["mbs","weight","name"] as SortKey[]).map(s => (
+              {(["mbs", "weight", "name"] as SortKey[]).map(s => (
                 <button key={s} onClick={() => setSortBy(s)} style={chip(sortBy === s)}>
                   {s === "mbs" ? "MBS ↓" : s === "weight" ? "Weight ↑" : "A–Z"}
                 </button>
