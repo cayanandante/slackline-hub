@@ -8,7 +8,7 @@ const tools = [
     accent: "#c8531a",
     bg: "#fef0ec",
     items: [
-      { name: "AI Double-Check Assistant", desc: "Step-by-step safety checklist powered by ISA standards. Catches rigging errors before you clip in.", path: null, status: "soon" },
+      { name: "AI Double-Check Assistant", desc: "Step-by-step safety checklist powered by ISA standards. Catches rigging errors before you clip in.", path: "/tools/double-check", status: "live" },
       { name: "Line Condition Analyzer", desc: "Upload a photo of your webbing — get an AI wear and UV damage assessment.", path: null, status: "soon" },
       { name: "Incident Database", desc: "Every published highline incident, searchable. Learn from every near-miss.", path: null, status: "soon" },
     ],
