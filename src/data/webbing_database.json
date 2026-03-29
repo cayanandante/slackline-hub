@@ -13,7 +13,6 @@
     "wllKn": null,
     "depthMm": 2.2,
     "url": "https://www.acrobatslackline.com/slackline1inch-1",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -39,288 +38,10 @@
     "wllKn": 4,
     "depthMm": 2,
     "url": "https://aki-slacklines.de/en/webbing/polyester/99/aki-tidal-webbing?c=6",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 9
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-61",
-    "name": "Core 1",
-    "brand": "Aki Slacklines",
-    "webbingType": "CS",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 76,
-    "mbsKn": 40,
-    "wllKn": null,
-    "depthMm": 3.9,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 0,
-        "percent": 0
-      },
-      {
-        "kn": 2,
-        "percent": 0.5
-      },
-      {
-        "kn": 4,
-        "percent": 1
-      },
-      {
-        "kn": 6,
-        "percent": 1.6
-      },
-      {
-        "kn": 8,
-        "percent": 2.15
-      },
-      {
-        "kn": 10,
-        "percent": 2.8
-      },
-      {
-        "kn": 12,
-        "percent": 3.4
-      },
-      {
-        "kn": 14,
-        "percent": 4
-      },
-      {
-        "kn": 16,
-        "percent": 4.65
-      },
-      {
-        "kn": 18,
-        "percent": 5.3
-      },
-      {
-        "kn": 20,
-        "percent": 5.9
-      },
-      {
-        "kn": 22,
-        "percent": 6.45
-      },
-      {
-        "kn": 24,
-        "percent": 7
-      }
-    ],
-    "stretchSource": "isa",
-    "sources": [
-      "slackdb",
-      "isa"
-    ]
-  },
-  {
-    "id": "slackdb-62",
-    "name": "Core 2 HS",
-    "brand": "Aki Slacklines",
-    "webbingType": "CS",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 71.5,
-    "mbsKn": 44,
-    "wllKn": null,
-    "depthMm": 3.5,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 0,
-        "percent": 0
-      },
-      {
-        "kn": 4,
-        "percent": 1.1
-      },
-      {
-        "kn": 6,
-        "percent": 1.6
-      },
-      {
-        "kn": 7,
-        "percent": 2.2
-      },
-      {
-        "kn": 8,
-        "percent": 3
-      },
-      {
-        "kn": 9,
-        "percent": 4.2
-      },
-      {
-        "kn": 10,
-        "percent": 5.7
-      },
-      {
-        "kn": 11,
-        "percent": 6.1
-      },
-      {
-        "kn": 12,
-        "percent": 6.5
-      },
-      {
-        "kn": 13,
-        "percent": 6.9
-      },
-      {
-        "kn": 14,
-        "percent": 7.3
-      },
-      {
-        "kn": 15,
-        "percent": 7.7
-      },
-      {
-        "kn": 16,
-        "percent": 8.1
-      }
-    ],
-    "stretchSource": "isa",
-    "sources": [
-      "slackdb",
-      "isa"
-    ]
-  },
-  {
-    "id": "slackdb-63",
-    "name": "Core 2 LS",
-    "brand": "Aki Slacklines",
-    "webbingType": "CS",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 69.9,
-    "mbsKn": 44,
-    "wllKn": null,
-    "depthMm": 3.2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 0,
-        "percent": 0
-      },
-      {
-        "kn": 4,
-        "percent": 0.8
-      },
-      {
-        "kn": 6,
-        "percent": 1.1
-      },
-      {
-        "kn": 7,
-        "percent": 1.3
-      },
-      {
-        "kn": 8,
-        "percent": 1.6
-      },
-      {
-        "kn": 9,
-        "percent": 1.8
-      },
-      {
-        "kn": 10,
-        "percent": 2
-      },
-      {
-        "kn": 11,
-        "percent": 2.2
-      },
-      {
-        "kn": 12,
-        "percent": 2.5
-      },
-      {
-        "kn": 13,
-        "percent": 2.8
-      },
-      {
-        "kn": 14,
-        "percent": 3
-      },
-      {
-        "kn": 15,
-        "percent": 3.3
-      },
-      {
-        "kn": 16,
-        "percent": 3.7
-      }
-    ],
-    "stretchSource": "isa",
-    "sources": [
-      "slackdb",
-      "isa"
-    ]
-  },
-  {
-    "id": "slackdb-64",
-    "name": "Matrix",
-    "brand": "Aki Slacklines",
-    "webbingType": "TB",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 32,
-    "weightGm": 102,
-    "mbsKn": 43,
-    "wllKn": null,
-    "depthMm": 4,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 12,
-        "percent": 14.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-65",
-    "name": "Matrix Outer",
-    "brand": "Aki Slacklines",
-    "webbingType": "TR",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 32,
-    "weightGm": 58,
-    "mbsKn": 27,
-    "wllKn": 8,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 9,
-        "percent": 14
       }
     ],
     "stretchSource": "slackdb-single",
@@ -342,37 +63,10 @@
     "wllKn": 4,
     "depthMm": 1.5,
     "url": "https://aki-slacklines.de/en/webbing/polyester/187/aki-nomad-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 4
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-3090",
-    "name": "Polar",
-    "brand": "Aki Slacklines",
-    "webbingType": "CS",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 56,
-    "mbsKn": 28,
-    "wllKn": null,
-    "depthMm": 2.4,
-    "url": "https://aki-slacklines.de/en/detail/index/sArticle/162",
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 8.5
       }
     ],
     "stretchSource": "slackdb-single",
@@ -394,7 +88,6 @@
     "wllKn": 6,
     "depthMm": 3.4,
     "url": "https://aki-slacklines.de/en/detail/index/sArticle/188/sCategory/6",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -420,7 +113,6 @@
     "wllKn": 7,
     "depthMm": null,
     "url": "https://aki-slacklines.de/en/webbing/polyamide/137/aki-sonic-2-slackline-webbing?c=12&fbclid=IwAR1eTq7La_8P4pp3HW0hq4rE2LNuzA2ZAbm-Vyx4gXORVdZU1EmhrtBbLAo",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -446,7 +138,6 @@
     "wllKn": 5.4,
     "depthMm": 2.8,
     "url": "https://aki-slacklines.de/en/webbing/polyamide/176/aki-sonic-light-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -456,160 +147,6 @@
     "stretchSource": "slackdb-single",
     "sources": [
       "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-67",
-    "name": "T-Wave",
-    "brand": "Aki Slacklines",
-    "webbingType": "TR",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 80,
-    "mbsKn": 38,
-    "wllKn": 10,
-    "depthMm": 4.5,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 0,
-        "percent": 0
-      },
-      {
-        "kn": 2,
-        "percent": 3.1
-      },
-      {
-        "kn": 4,
-        "percent": 7.2
-      },
-      {
-        "kn": 6,
-        "percent": 10
-      },
-      {
-        "kn": 7,
-        "percent": 11.5
-      },
-      {
-        "kn": 8,
-        "percent": 12.6
-      },
-      {
-        "kn": 9,
-        "percent": 13.6
-      },
-      {
-        "kn": 10,
-        "percent": 14.3
-      },
-      {
-        "kn": 11,
-        "percent": 15.2
-      },
-      {
-        "kn": 12,
-        "percent": 15.8
-      },
-      {
-        "kn": 13,
-        "percent": 16.6
-      },
-      {
-        "kn": 14,
-        "percent": 17.2
-      },
-      {
-        "kn": 15,
-        "percent": 17.8
-      },
-      {
-        "kn": 16,
-        "percent": 18.4
-      }
-    ],
-    "stretchSource": "isa",
-    "sources": [
-      "slackdb",
-      "isa"
-    ]
-  },
-  {
-    "id": "slackdb-139",
-    "name": "Unicorn",
-    "brand": "Aki Slacklines",
-    "webbingType": "CS",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 61.5,
-    "mbsKn": 32,
-    "wllKn": null,
-    "depthMm": 2.7,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 0,
-        "percent": 0
-      },
-      {
-        "kn": 2,
-        "percent": 1.1
-      },
-      {
-        "kn": 3,
-        "percent": 1.7
-      },
-      {
-        "kn": 4,
-        "percent": 2.3
-      },
-      {
-        "kn": 5,
-        "percent": 3.2
-      },
-      {
-        "kn": 6,
-        "percent": 4.5
-      },
-      {
-        "kn": 7,
-        "percent": 6
-      },
-      {
-        "kn": 8,
-        "percent": 7.3
-      },
-      {
-        "kn": 9,
-        "percent": 8.2
-      },
-      {
-        "kn": 10,
-        "percent": 9
-      },
-      {
-        "kn": 11,
-        "percent": 9.6
-      },
-      {
-        "kn": 12,
-        "percent": 10
-      },
-      {
-        "kn": 20,
-        "percent": 13
-      }
-    ],
-    "stretchSource": "isa",
-    "sources": [
-      "slackdb",
-      "isa"
     ]
   },
   {
@@ -626,37 +163,10 @@
     "wllKn": 6,
     "depthMm": 2.5,
     "url": "https://aki-slacklines.de/en/webbing/polyester/11/landcruising-verve-25-mm-slackline-30m?c=6",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 11
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-60",
-    "name": "Verve 35mm",
-    "brand": "Aki Slacklines",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 35,
-    "weightGm": 69,
-    "mbsKn": 35,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 7
       }
     ],
     "stretchSource": "slackdb-single",
@@ -678,7 +188,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 2,
@@ -723,110 +232,6 @@
     ]
   },
   {
-    "id": "slackdb-69",
-    "name": "Wave Tape 19",
-    "brand": "Aki Slacklines",
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 19,
-    "weightGm": 38,
-    "mbsKn": 18,
-    "wllKn": 6,
-    "depthMm": 2.4,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 6,
-        "percent": 14
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-68",
-    "name": "Wave Tube",
-    "brand": "Aki Slacklines",
-    "webbingType": "TB",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 42,
-    "mbsKn": 20,
-    "wllKn": 5,
-    "depthMm": 2.3,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 17
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-125",
-    "name": "Wave Tube  32",
-    "brand": "Aki Slacklines",
-    "webbingType": "TB",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 58,
-    "mbsKn": 27,
-    "wllKn": 6,
-    "depthMm": 2.3,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 16
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-70",
-    "name": "Wave Tube 19",
-    "brand": "Aki Slacklines",
-    "webbingType": "TB",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 19,
-    "weightGm": 36,
-    "mbsKn": 16,
-    "wllKn": null,
-    "depthMm": 2.4,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 6,
-        "percent": 14
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-71",
     "name": "White Magic",
     "brand": "Aki Slacklines",
@@ -840,7 +245,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://aki-slacklines.de/en/webbing/polyester/4/aki-white-magic-webbing?c=6",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -906,99 +310,20 @@
     ]
   },
   {
-    "id": "slackdb-3049",
-    "name": "Wizard",
-    "brand": "Aki Slacklines",
-    "webbingType": "CS",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 55,
-    "mbsKn": 33,
-    "wllKn": 6.6,
-    "depthMm": 2.5,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 0,
-        "percent": 0
-      },
-      {
-        "kn": 2,
-        "percent": 0.6
-      },
-      {
-        "kn": 3,
-        "percent": 0.9
-      },
-      {
-        "kn": 4,
-        "percent": 1.2
-      },
-      {
-        "kn": 5,
-        "percent": 1.5
-      },
-      {
-        "kn": 6,
-        "percent": 1.9
-      },
-      {
-        "kn": 7,
-        "percent": 2.3
-      },
-      {
-        "kn": 8,
-        "percent": 3.1
-      },
-      {
-        "kn": 9,
-        "percent": 3.7
-      },
-      {
-        "kn": 10,
-        "percent": 4.4
-      },
-      {
-        "kn": 11,
-        "percent": 5.1
-      },
-      {
-        "kn": 12,
-        "percent": 5.7
-      },
-      {
-        "kn": 20,
-        "percent": 8.2
-      },
-      {
-        "kn": 33,
-        "percent": 15
-      }
-    ],
-    "stretchSource": "isa",
-    "sources": [
-      "slackdb",
-      "isa"
-    ]
-  },
-  {
-    "id": "slackdb-89",
+    "id": "isa-aero",
     "name": "Aero",
     "brand": "Balance Community",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
-      "PL"
+      "PL",
+      "NY"
     ],
-    "widthMm": 25,
-    "weightGm": 59,
+    "widthMm": null,
+    "weightGm": 62,
     "mbsKn": 33.4,
-    "wllKn": 6.7,
-    "depthMm": 2.5,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -1087,7 +412,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -1105,9 +429,57 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
-    "stretchCurve": null,
-    "stretchSource": null,
+    "stretchCurve": [
+      {
+        "kn": 1,
+        "percent": 0
+      },
+      {
+        "kn": 2,
+        "percent": 0
+      },
+      {
+        "kn": 3,
+        "percent": 0
+      },
+      {
+        "kn": 4,
+        "percent": 0
+      },
+      {
+        "kn": 5,
+        "percent": 0
+      },
+      {
+        "kn": 6,
+        "percent": 0
+      },
+      {
+        "kn": 7,
+        "percent": 0
+      },
+      {
+        "kn": 8,
+        "percent": 0
+      },
+      {
+        "kn": 9,
+        "percent": 0
+      },
+      {
+        "kn": 10,
+        "percent": 0
+      },
+      {
+        "kn": 11,
+        "percent": 0
+      },
+      {
+        "kn": 12,
+        "percent": 0
+      }
+    ],
+    "stretchSource": "balance-community",
     "sources": [
       "balance-community"
     ]
@@ -1124,7 +496,6 @@
     "wllKn": 6.7,
     "depthMm": 3.2,
     "url": "http://www.balancecommunity.com/aero-2",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1194,7 +565,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1264,7 +634,6 @@
     "wllKn": 5.6,
     "depthMm": 2.46,
     "url": "https://www.balancecommunity.com/products/blue",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1321,46 +690,19 @@
     ]
   },
   {
-    "id": "slackdb-3138",
-    "name": "Blue 20",
-    "brand": "Balance Community",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 20,
-    "weightGm": 53,
-    "mbsKn": 25,
-    "wllKn": 5,
-    "depthMm": 3,
-    "url": "https://www.balancecommunity.com/collections/20mm-webbing/products/blue-20",
-    "discontinued": false,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 7.51
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-90",
+    "id": "isa-feather",
     "name": "Feather",
     "brand": "Balance Community",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
-    "weightGm": 34,
-    "mbsKn": 20,
-    "wllKn": 4,
-    "depthMm": 1.5,
+    "widthMm": null,
+    "weightGm": 47,
+    "mbsKn": 27,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -1409,13 +751,12 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
   {
     "id": "slackdb-118",
-    "name": "Feather PRO",
+    "name": "Feather Pro",
     "brand": "Balance Community",
     "webbingType": "FL",
     "material": [
@@ -1427,7 +768,6 @@
     "wllKn": 5.4,
     "depthMm": 2.46,
     "url": "http://www.balancecommunity.com/feather-pro",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1497,7 +837,6 @@
     "wllKn": 5.4,
     "depthMm": 2.46,
     "url": "https://www.balancecommunity.com/products/green",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1554,7 +893,7 @@
     ]
   },
   {
-    "id": "slackdb-3139",
+    "id": "bc-green20",
     "name": "Green 20",
     "brand": "Balance Community",
     "webbingType": "FL",
@@ -1562,12 +901,11 @@
       "NY"
     ],
     "widthMm": 20,
-    "weightGm": 53,
-    "mbsKn": 25,
-    "wllKn": 5,
-    "depthMm": 3.38,
-    "url": "https://www.balancecommunity.com/collections/20mm-webbing/products/green-20?variant",
-    "discontinued": false,
+    "weightGm": null,
+    "mbsKn": null,
+    "wllKn": null,
+    "depthMm": null,
+    "url": "https://www.balancecommunity.com/products/green-20",
     "stretchCurve": [
       {
         "kn": 1,
@@ -1620,7 +958,7 @@
     ],
     "stretchSource": "balance-community",
     "sources": [
-      "slackdb"
+      "balance-community"
     ]
   },
   {
@@ -1637,7 +975,6 @@
     "wllKn": 9,
     "depthMm": 5,
     "url": "https://www.balancecommunity.com/products/heavy",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1707,7 +1044,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1764,32 +1100,6 @@
     ]
   },
   {
-    "id": "slackdb-3137",
-    "name": "Jelly",
-    "brand": "Balance Community",
-    "webbingType": "TB",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 45,
-    "mbsKn": 20,
-    "wllKn": 4,
-    "depthMm": 2.3,
-    "url": "https://www.balancecommunity.com/products/jelly-webbing",
-    "discontinued": false,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 7.01
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "bc-jellypro",
     "name": "Jelly PRO",
     "brand": "Balance Community",
@@ -1803,7 +1113,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1873,7 +1182,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -1943,7 +1251,6 @@
     "wllKn": 5.2,
     "depthMm": 2.5,
     "url": "https://www.balancecommunity.com/products/jybn",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -1956,20 +1263,19 @@
     ]
   },
   {
-    "id": "slackdb-3042",
+    "id": "isa-lift",
     "name": "Lift",
     "brand": "Balance Community",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "NY"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": 58,
     "mbsKn": 28,
-    "wllKn": 5.6,
-    "depthMm": 3.18,
-    "url": "http://www.balancecommunity.com/lift",
-    "discontinued": true,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
     "stretchCurve": [
       {
         "kn": 0,
@@ -2058,7 +1364,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -2076,7 +1381,6 @@
     "wllKn": 4.3,
     "depthMm": 3.2,
     "url": "https://www.balancecommunity.com/products/lift-2be",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -2133,20 +1437,19 @@
     ]
   },
   {
-    "id": "bc-mantramk1",
+    "id": "isa-mantramk1",
     "name": "Mantra MK1",
     "brand": "Balance Community",
     "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": null,
     "mbsKn": null,
     "wllKn": null,
     "depthMm": null,
-    "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
+    "url": null,
     "stretchCurve": [
       {
         "kn": 0,
@@ -2235,25 +1538,23 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "balance-community",
       "isa"
     ]
   },
   {
-    "id": "bc-mantramk2",
+    "id": "isa-mantramk2",
     "name": "Mantra MK2",
     "brand": "Balance Community",
     "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": null,
     "mbsKn": null,
     "wllKn": null,
     "depthMm": null,
-    "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
+    "url": null,
     "stretchCurve": [
       {
         "kn": 0,
@@ -2342,25 +1643,23 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "balance-community",
       "isa"
     ]
   },
   {
-    "id": "bc-mantramk3",
+    "id": "isa-mantramk3",
     "name": "Mantra MK3",
     "brand": "Balance Community",
     "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": null,
     "mbsKn": null,
     "wllKn": null,
     "depthMm": null,
-    "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
+    "url": null,
     "stretchCurve": [
       {
         "kn": 0,
@@ -2433,13 +1732,12 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "balance-community",
       "isa"
     ]
   },
   {
     "id": "slackdb-91",
-    "name": "Mantra MK4",
+    "name": "Mantra MK4: Flight",
     "brand": "Balance Community",
     "webbingType": "FL",
     "material": [
@@ -2451,7 +1749,6 @@
     "wllKn": 8.4,
     "depthMm": 3.5,
     "url": "http://www.balancecommunity.com/mantra-mk4-flight",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -2508,32 +1805,6 @@
     ]
   },
   {
-    "id": "slackdb-92",
-    "name": "Mantra MKIII",
-    "brand": "Balance Community",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 83,
-    "mbsKn": 42,
-    "wllKn": 8.4,
-    "depthMm": 4.1,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 8.8
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "bc-paradigm",
     "name": "Paradigm",
     "brand": "Balance Community",
@@ -2547,7 +1818,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -2617,7 +1887,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -2687,7 +1956,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -2744,33 +2012,6 @@
     ]
   },
   {
-    "id": "slackdb-99",
-    "name": "RAGEline",
-    "brand": "Balance Community",
-    "webbingType": "TR",
-    "material": [
-      "PL",
-      "NY"
-    ],
-    "widthMm": 31,
-    "weightGm": 104,
-    "mbsKn": 42,
-    "wllKn": 12,
-    "depthMm": null,
-    "url": "http://www.balancecommunity.com/rageline",
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 12,
-        "percent": 8.3
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "bc-secondaire",
     "name": "Secondaire",
     "brand": "Balance Community",
@@ -2784,7 +2025,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -2841,27 +2081,6 @@
     ]
   },
   {
-    "id": "bc-secondairemk2",
-    "name": "Secondaire MK2",
-    "brand": "Balance Community",
-    "webbingType": null,
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": null,
-    "mbsKn": null,
-    "wllKn": null,
-    "depthMm": null,
-    "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
-    "stretchCurve": null,
-    "stretchSource": null,
-    "sources": [
-      "balance-community"
-    ]
-  },
-  {
     "id": "bc-silk99",
     "name": "Silk 99",
     "brand": "Balance Community",
@@ -2875,7 +2094,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -2945,36 +2163,9 @@
     "wllKn": 2.7,
     "depthMm": null,
     "url": "http://www.balancecommunity.com/11-16-slack-spec-tubular",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-95",
-    "name": "Slack-Spec Threaded Tubular",
-    "brand": "Balance Community",
-    "webbingType": "TR",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 70,
-    "mbsKn": 33.4,
-    "wllKn": 6.7,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 6.7,
-        "percent": 11.1
       }
     ],
     "stretchSource": "slackdb-single",
@@ -2996,7 +2187,6 @@
     "wllKn": 4,
     "depthMm": null,
     "url": "http://www.balancecommunity.com/1-slack-spec-tubular",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10
@@ -3008,34 +2198,77 @@
     ]
   },
   {
-    "id": "slackdb-96",
-    "name": "Spider Silk 7/8\"",
+    "id": "slackdb-3124",
+    "name": "Spider Silk MK3",
     "brand": "Balance Community",
     "webbingType": "FL",
     "material": [
-      "VC"
+      "DY"
     ],
-    "widthMm": 22.2,
-    "weightGm": 44,
-    "mbsKn": 51.2,
-    "wllKn": 10.2,
-    "depthMm": 2.8,
-    "url": null,
-    "discontinued": true,
+    "widthMm": 20,
+    "weightGm": 31,
+    "mbsKn": 38,
+    "wllKn": 7.6,
+    "depthMm": 3,
+    "url": "https://www.balancecommunity.com/products/spider-silk-mk3",
     "stretchCurve": [
       {
+        "kn": 1,
+        "percent": 0.37
+      },
+      {
+        "kn": 2,
+        "percent": 0.78
+      },
+      {
+        "kn": 3,
+        "percent": 0.93
+      },
+      {
+        "kn": 4,
+        "percent": 1.09
+      },
+      {
+        "kn": 5,
+        "percent": 1.21
+      },
+      {
+        "kn": 6,
+        "percent": 1.8
+      },
+      {
+        "kn": 7,
+        "percent": 1.87
+      },
+      {
+        "kn": 8,
+        "percent": 1.93
+      },
+      {
+        "kn": 9,
+        "percent": 2.21
+      },
+      {
         "kn": 10,
-        "percent": 1.6
+        "percent": 2.36
+      },
+      {
+        "kn": 11,
+        "percent": 2.36
+      },
+      {
+        "kn": 12,
+        "percent": 2.67
       }
     ],
-    "stretchSource": "slackdb-single",
+    "stretchSource": "balance-community",
     "sources": [
       "slackdb"
     ]
   },
   {
-    "id": "bc-spidersilkmk1",
-    "name": "Spider Silk MK1",
+    "id": "bc-spidersilkmk4",
+    "name": "Spider Silk MK4",
     "brand": "Balance Community",
     "webbingType": null,
     "material": [
@@ -3047,20 +2280,68 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
-    "stretchCurve": null,
-    "stretchSource": null,
+    "stretchCurve": [
+      {
+        "kn": 1,
+        "percent": 0.64
+      },
+      {
+        "kn": 2,
+        "percent": 2
+      },
+      {
+        "kn": 3,
+        "percent": 2.7
+      },
+      {
+        "kn": 4,
+        "percent": 3.12
+      },
+      {
+        "kn": 5,
+        "percent": 3.47
+      },
+      {
+        "kn": 6,
+        "percent": 3.71
+      },
+      {
+        "kn": 7,
+        "percent": 3.93
+      },
+      {
+        "kn": 8,
+        "percent": 4.11
+      },
+      {
+        "kn": 9,
+        "percent": 4.25
+      },
+      {
+        "kn": 10,
+        "percent": 4.4
+      },
+      {
+        "kn": 11,
+        "percent": 4.49
+      },
+      {
+        "kn": 12,
+        "percent": 4.67
+      }
+    ],
+    "stretchSource": "balance-community",
     "sources": [
       "balance-community"
     ]
   },
   {
-    "id": "bc-spidersilkmk2",
-    "name": "Spider Silk MK2",
+    "id": "bc-spidersilkmk5",
+    "name": "Spider Silk MK5",
     "brand": "Balance Community",
     "webbingType": null,
     "material": [
-      "VC"
+      "DY"
     ],
     "widthMm": 25,
     "weightGm": null,
@@ -3068,7 +2349,75 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
+    "stretchCurve": [
+      {
+        "kn": 1,
+        "percent": 0.37
+      },
+      {
+        "kn": 2,
+        "percent": 1.33
+      },
+      {
+        "kn": 3,
+        "percent": 1.83
+      },
+      {
+        "kn": 4,
+        "percent": 2.25
+      },
+      {
+        "kn": 5,
+        "percent": 2.64
+      },
+      {
+        "kn": 6,
+        "percent": 2.95
+      },
+      {
+        "kn": 7,
+        "percent": 3.24
+      },
+      {
+        "kn": 8,
+        "percent": 3.44
+      },
+      {
+        "kn": 9,
+        "percent": 3.63
+      },
+      {
+        "kn": 10,
+        "percent": 3.79
+      },
+      {
+        "kn": 11,
+        "percent": 4.06
+      },
+      {
+        "kn": 12,
+        "percent": 4.18
+      }
+    ],
+    "stretchSource": "balance-community",
+    "sources": [
+      "balance-community"
+    ]
+  },
+  {
+    "id": "isa-spidersilkmk2",
+    "name": "SpiderSilk MK2",
+    "brand": "Balance Community",
+    "webbingType": null,
+    "material": [
+      "VC"
+    ],
+    "widthMm": null,
+    "weightGm": 48,
+    "mbsKn": 67,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
     "stretchCurve": [
       {
         "kn": 0,
@@ -3157,244 +2506,7 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "balance-community",
       "isa"
-    ]
-  },
-  {
-    "id": "slackdb-3124",
-    "name": "Spider Silk MK3",
-    "brand": "Balance Community",
-    "webbingType": "FL",
-    "material": [
-      "DY"
-    ],
-    "widthMm": 20,
-    "weightGm": 31,
-    "mbsKn": 38,
-    "wllKn": 7.6,
-    "depthMm": 3,
-    "url": "https://www.balancecommunity.com/products/spider-silk-mk3",
-    "discontinued": false,
-    "stretchCurve": [
-      {
-        "kn": 1,
-        "percent": 0.37
-      },
-      {
-        "kn": 2,
-        "percent": 0.78
-      },
-      {
-        "kn": 3,
-        "percent": 0.93
-      },
-      {
-        "kn": 4,
-        "percent": 1.09
-      },
-      {
-        "kn": 5,
-        "percent": 1.21
-      },
-      {
-        "kn": 6,
-        "percent": 1.8
-      },
-      {
-        "kn": 7,
-        "percent": 1.87
-      },
-      {
-        "kn": 8,
-        "percent": 1.93
-      },
-      {
-        "kn": 9,
-        "percent": 2.21
-      },
-      {
-        "kn": 10,
-        "percent": 2.36
-      },
-      {
-        "kn": 11,
-        "percent": 2.36
-      },
-      {
-        "kn": 12,
-        "percent": 2.67
-      }
-    ],
-    "stretchSource": "balance-community",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "bc-spidersilkmk4",
-    "name": "Spider Silk MK4",
-    "brand": "Balance Community",
-    "webbingType": null,
-    "material": [
-      "DY"
-    ],
-    "widthMm": 25,
-    "weightGm": null,
-    "mbsKn": null,
-    "wllKn": null,
-    "depthMm": null,
-    "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
-    "stretchCurve": [
-      {
-        "kn": 1,
-        "percent": 0.64
-      },
-      {
-        "kn": 2,
-        "percent": 2
-      },
-      {
-        "kn": 3,
-        "percent": 2.7
-      },
-      {
-        "kn": 4,
-        "percent": 3.12
-      },
-      {
-        "kn": 5,
-        "percent": 3.47
-      },
-      {
-        "kn": 6,
-        "percent": 3.71
-      },
-      {
-        "kn": 7,
-        "percent": 3.93
-      },
-      {
-        "kn": 8,
-        "percent": 4.11
-      },
-      {
-        "kn": 9,
-        "percent": 4.25
-      },
-      {
-        "kn": 10,
-        "percent": 4.4
-      },
-      {
-        "kn": 11,
-        "percent": 4.49
-      },
-      {
-        "kn": 12,
-        "percent": 4.67
-      }
-    ],
-    "stretchSource": "balance-community",
-    "sources": [
-      "balance-community"
-    ]
-  },
-  {
-    "id": "bc-spidersilkmk5",
-    "name": "Spider Silk MK5",
-    "brand": "Balance Community",
-    "webbingType": null,
-    "material": [
-      "DY"
-    ],
-    "widthMm": 25,
-    "weightGm": null,
-    "mbsKn": null,
-    "wllKn": null,
-    "depthMm": null,
-    "url": "https://www.balancecommunity.com/collections/stretch",
-    "discontinued": false,
-    "stretchCurve": [
-      {
-        "kn": 1,
-        "percent": 0.37
-      },
-      {
-        "kn": 2,
-        "percent": 1.33
-      },
-      {
-        "kn": 3,
-        "percent": 1.83
-      },
-      {
-        "kn": 4,
-        "percent": 2.25
-      },
-      {
-        "kn": 5,
-        "percent": 2.64
-      },
-      {
-        "kn": 6,
-        "percent": 2.95
-      },
-      {
-        "kn": 7,
-        "percent": 3.24
-      },
-      {
-        "kn": 8,
-        "percent": 3.44
-      },
-      {
-        "kn": 9,
-        "percent": 3.63
-      },
-      {
-        "kn": 10,
-        "percent": 3.79
-      },
-      {
-        "kn": 11,
-        "percent": 4.06
-      },
-      {
-        "kn": 12,
-        "percent": 4.18
-      }
-    ],
-    "stretchSource": "balance-community",
-    "sources": [
-      "balance-community"
-    ]
-  },
-  {
-    "id": "slackdb-97",
-    "name": "Spider Silk MKII",
-    "brand": "Balance Community",
-    "webbingType": "FL",
-    "material": [
-      "VC"
-    ],
-    "widthMm": 25,
-    "weightGm": 48,
-    "mbsKn": 67,
-    "wllKn": 13.4,
-    "depthMm": 2.5,
-    "url": "http://www.balancecommunity.com/spider-silk-mkii",
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 1.22
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
     ]
   },
   {
@@ -3411,7 +2523,6 @@
     "wllKn": 7.1,
     "depthMm": 3,
     "url": "http://www.balancecommunity.com/type-18-mkii",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 1,
@@ -3481,7 +2592,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -3559,7 +2669,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -3637,7 +2746,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slack-shop.de/baender-schlingen/bander/strong/slacklineband-strong-ii.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 6,
@@ -3663,7 +2771,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.edelrid.de/en/sports/flat-webbings1/flachband-supertape-19mm.html",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -3684,7 +2791,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.edelrid.de/en/sports/tubular-webbings/x-tube-25mm.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 8,
@@ -3710,7 +2816,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.edelrid.de/en/sports/tubular-webbings/x-tube-16mm.html",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -3718,20 +2823,19 @@
     ]
   },
   {
-    "id": "slackdb-53",
-    "name": "BlueWing",
+    "id": "isa-bluewing",
+    "name": "Bluewing",
     "brand": "Elephant Slacklines",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": 63,
     "mbsKn": 30,
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -3820,7 +2924,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -3838,7 +2941,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://elephant-slacklines.com",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 7,
@@ -3864,7 +2966,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://elephant-slacklines.com",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 7.5,
@@ -3890,7 +2991,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -3943,58 +3043,6 @@
     ]
   },
   {
-    "id": "slackdb-51",
-    "name": "Passion red",
-    "brand": "Elephant Slacklines",
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 69,
-    "mbsKn": 33,
-    "wllKn": null,
-    "depthMm": 3.6,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 12.3
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-55",
-    "name": "Wing 3.5",
-    "brand": "Elephant Slacklines",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 35,
-    "weightGm": 54,
-    "mbsKn": 30,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 7.5,
-        "percent": 5.9
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-108",
     "name": "Rasta Tubelar",
     "brand": "Ellington",
@@ -4008,7 +3056,6 @@
     "wllKn": 4,
     "depthMm": 2.2,
     "url": "http://www.balancingearthslacklines.com/webbing_tubular_rasta_slackline_balancing_earth_p/rtw.htm",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -4029,7 +3076,6 @@
     "wllKn": 6,
     "depthMm": 3,
     "url": "http://www.balancingearthslacklines.com/slackline_webbing_flat_nylon_type_18_cg4_slackline_p/cg4.htm",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 6,
@@ -4055,7 +3101,6 @@
     "wllKn": 5,
     "depthMm": 2,
     "url": "https://www.slackshop.cz/en/for-advanced/142-eqb-bounce.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4098,7 +3143,6 @@
     "wllKn": null,
     "depthMm": 2.6,
     "url": "https://www.slackshop.cz/en/polyester/195-eqb-candy.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -4124,7 +3168,6 @@
     "wllKn": null,
     "depthMm": 2.5,
     "url": "https://www.slackshop.cz/en/webbing/31-eqb-dragon.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4171,7 +3214,6 @@
     "wllKn": 7,
     "depthMm": 2.4,
     "url": "http://www.eqb.cz/element-en.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4201,20 +3243,19 @@
     ]
   },
   {
-    "id": "slackdb-7",
+    "id": "isa-flash",
     "name": "Flash",
     "brand": "EQB / SlackShop",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "NY"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": 61,
     "mbsKn": 31,
     "wllKn": null,
-    "depthMm": 2.5,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4243,7 +3284,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -4261,7 +3301,6 @@
     "wllKn": 10,
     "depthMm": 4,
     "url": "https://www.slackshop.cz/en/webbing/76-157-eqb-fresh.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4308,7 +3347,6 @@
     "wllKn": 7,
     "depthMm": 2.2,
     "url": "https://www.slackshop.cz/en/webbing/30-eqb-neon.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4379,33 +3417,6 @@
     "wllKn": 15,
     "depthMm": null,
     "url": "https://www.eqb.cz/ninja-en.html",
-    "discontinued": false,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 11
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-10",
-    "name": "Nitro",
-    "brand": "EQB / SlackShop",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 50,
-    "weightGm": 99,
-    "mbsKn": 40,
-    "wllKn": 10,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 10,
@@ -4431,7 +3442,6 @@
     "wllKn": 6,
     "depthMm": 2.8,
     "url": "https://www.slackshop.cz/en/webbing/176-eqb-ocean.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -4457,7 +3467,6 @@
     "wllKn": 12,
     "depthMm": 2.6,
     "url": "https://www.slackshop.cz/en/webbing/78-eqb-skye.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4532,7 +3541,6 @@
     "wllKn": 10,
     "depthMm": 2.4,
     "url": "https://www.slackshop.cz/en/webbing/175-eqb-skye2.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -4558,7 +3566,6 @@
     "wllKn": null,
     "depthMm": 1.6,
     "url": "https://www.slackshop.cz/en/webbing/29-eqb-slim.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 3,
@@ -4571,20 +3578,19 @@
     ]
   },
   {
-    "id": "slackdb-11",
+    "id": "isa-sumo",
     "name": "Sumo",
     "brand": "EQB / SlackShop",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": 82,
     "mbsKn": 40,
     "wllKn": null,
-    "depthMm": 3.8,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4613,7 +3619,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -4631,7 +3636,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://www.gibbon-slacklines.com/en/products/longline-modules/flowline/index.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -4639,25 +3643,6 @@
       }
     ],
     "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-59",
-    "name": "Tube Line",
-    "brand": "Gibbon",
-    "webbingType": "TB",
-    "material": [],
-    "widthMm": 25,
-    "weightGm": 64,
-    "mbsKn": 30,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": null,
-    "stretchSource": null,
     "sources": [
       "slackdb"
     ]
@@ -4676,7 +3661,6 @@
     "wllKn": 7,
     "depthMm": 1.8,
     "url": "https://www.slacklineshop.co.nz/product/25mm-flat-slackline-webbing/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -4702,11 +3686,229 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://www.slacklineshop.co.nz/product/25-mm-tubular-nylon-slackline-webbing-assorted-colors-order-by-the-metre/",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
       "slackdb"
+    ]
+  },
+  {
+    "id": "isa-core1",
+    "name": "Core1",
+    "brand": "Landcruising",
+    "webbingType": null,
+    "material": [
+      "PL"
+    ],
+    "widthMm": null,
+    "weightGm": 76,
+    "mbsKn": 43,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
+    "stretchCurve": [
+      {
+        "kn": 0,
+        "percent": 0
+      },
+      {
+        "kn": 2,
+        "percent": 0.5
+      },
+      {
+        "kn": 4,
+        "percent": 1
+      },
+      {
+        "kn": 6,
+        "percent": 1.6
+      },
+      {
+        "kn": 8,
+        "percent": 2.15
+      },
+      {
+        "kn": 10,
+        "percent": 2.8
+      },
+      {
+        "kn": 12,
+        "percent": 3.4
+      },
+      {
+        "kn": 14,
+        "percent": 4
+      },
+      {
+        "kn": 16,
+        "percent": 4.65
+      },
+      {
+        "kn": 18,
+        "percent": 5.3
+      },
+      {
+        "kn": 20,
+        "percent": 5.9
+      },
+      {
+        "kn": 22,
+        "percent": 6.45
+      },
+      {
+        "kn": 24,
+        "percent": 7
+      }
+    ],
+    "stretchSource": "isa",
+    "sources": [
+      "isa"
+    ]
+  },
+  {
+    "id": "isa-core2hs",
+    "name": "Core2 HS",
+    "brand": "Landcruising",
+    "webbingType": null,
+    "material": [
+      "PL"
+    ],
+    "widthMm": null,
+    "weightGm": 71.5,
+    "mbsKn": 44,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
+    "stretchCurve": [
+      {
+        "kn": 0,
+        "percent": 0
+      },
+      {
+        "kn": 4,
+        "percent": 1.1
+      },
+      {
+        "kn": 6,
+        "percent": 1.6
+      },
+      {
+        "kn": 7,
+        "percent": 2.2
+      },
+      {
+        "kn": 8,
+        "percent": 3
+      },
+      {
+        "kn": 9,
+        "percent": 4.2
+      },
+      {
+        "kn": 10,
+        "percent": 5.7
+      },
+      {
+        "kn": 11,
+        "percent": 6.1
+      },
+      {
+        "kn": 12,
+        "percent": 6.5
+      },
+      {
+        "kn": 13,
+        "percent": 6.9
+      },
+      {
+        "kn": 14,
+        "percent": 7.3
+      },
+      {
+        "kn": 15,
+        "percent": 7.7
+      },
+      {
+        "kn": 16,
+        "percent": 8.1
+      }
+    ],
+    "stretchSource": "isa",
+    "sources": [
+      "isa"
+    ]
+  },
+  {
+    "id": "isa-core2ls",
+    "name": "Core2 LS",
+    "brand": "Landcruising",
+    "webbingType": null,
+    "material": [
+      "PL"
+    ],
+    "widthMm": null,
+    "weightGm": 69.9,
+    "mbsKn": 44,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
+    "stretchCurve": [
+      {
+        "kn": 0,
+        "percent": 0
+      },
+      {
+        "kn": 4,
+        "percent": 0.8
+      },
+      {
+        "kn": 6,
+        "percent": 1.1
+      },
+      {
+        "kn": 7,
+        "percent": 1.3
+      },
+      {
+        "kn": 8,
+        "percent": 1.6
+      },
+      {
+        "kn": 9,
+        "percent": 1.8
+      },
+      {
+        "kn": 10,
+        "percent": 2
+      },
+      {
+        "kn": 11,
+        "percent": 2.2
+      },
+      {
+        "kn": 12,
+        "percent": 2.5
+      },
+      {
+        "kn": 13,
+        "percent": 2.8
+      },
+      {
+        "kn": 14,
+        "percent": 3
+      },
+      {
+        "kn": 15,
+        "percent": 3.3
+      },
+      {
+        "kn": 16,
+        "percent": 3.7
+      }
+    ],
+    "stretchSource": "isa",
+    "sources": [
+      "isa"
     ]
   },
   {
@@ -4723,7 +3925,6 @@
     "wllKn": 10,
     "depthMm": 2.6,
     "url": "http://www.slackgear.co.za/product/great-white/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -4749,7 +3950,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4906,6 +4106,156 @@
     ]
   },
   {
+    "id": "isa-twave",
+    "name": "T-Wave",
+    "brand": "Landcruising",
+    "webbingType": null,
+    "material": [
+      "NY"
+    ],
+    "widthMm": null,
+    "weightGm": 80,
+    "mbsKn": 38,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
+    "stretchCurve": [
+      {
+        "kn": 0,
+        "percent": 0
+      },
+      {
+        "kn": 2,
+        "percent": 3.1
+      },
+      {
+        "kn": 4,
+        "percent": 7.2
+      },
+      {
+        "kn": 6,
+        "percent": 10
+      },
+      {
+        "kn": 7,
+        "percent": 11.5
+      },
+      {
+        "kn": 8,
+        "percent": 12.6
+      },
+      {
+        "kn": 9,
+        "percent": 13.6
+      },
+      {
+        "kn": 10,
+        "percent": 14.3
+      },
+      {
+        "kn": 11,
+        "percent": 15.2
+      },
+      {
+        "kn": 12,
+        "percent": 15.8
+      },
+      {
+        "kn": 13,
+        "percent": 16.6
+      },
+      {
+        "kn": 14,
+        "percent": 17.2
+      },
+      {
+        "kn": 15,
+        "percent": 17.8
+      },
+      {
+        "kn": 16,
+        "percent": 18.4
+      }
+    ],
+    "stretchSource": "isa",
+    "sources": [
+      "isa"
+    ]
+  },
+  {
+    "id": "isa-unicorn",
+    "name": "Unicorn",
+    "brand": "Landcruising",
+    "webbingType": null,
+    "material": [
+      "PL"
+    ],
+    "widthMm": null,
+    "weightGm": 61.5,
+    "mbsKn": 32,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
+    "stretchCurve": [
+      {
+        "kn": 0,
+        "percent": 0
+      },
+      {
+        "kn": 2,
+        "percent": 1.1
+      },
+      {
+        "kn": 3,
+        "percent": 1.7
+      },
+      {
+        "kn": 4,
+        "percent": 2.3
+      },
+      {
+        "kn": 5,
+        "percent": 3.2
+      },
+      {
+        "kn": 6,
+        "percent": 4.5
+      },
+      {
+        "kn": 7,
+        "percent": 6
+      },
+      {
+        "kn": 8,
+        "percent": 7.3
+      },
+      {
+        "kn": 9,
+        "percent": 8.2
+      },
+      {
+        "kn": 10,
+        "percent": 9
+      },
+      {
+        "kn": 11,
+        "percent": 9.6
+      },
+      {
+        "kn": 12,
+        "percent": 10
+      },
+      {
+        "kn": 20,
+        "percent": 13
+      }
+    ],
+    "stretchSource": "isa",
+    "sources": [
+      "isa"
+    ]
+  },
+  {
     "id": "isa-ververed",
     "name": "Verve red",
     "brand": "Landcruising",
@@ -4919,7 +4269,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -4976,6 +4325,83 @@
     ]
   },
   {
+    "id": "isa-wizard",
+    "name": "Wizard",
+    "brand": "Landcruising",
+    "webbingType": null,
+    "material": [
+      "PL"
+    ],
+    "widthMm": null,
+    "weightGm": 55,
+    "mbsKn": 33,
+    "wllKn": null,
+    "depthMm": null,
+    "url": null,
+    "stretchCurve": [
+      {
+        "kn": 0,
+        "percent": 0
+      },
+      {
+        "kn": 2,
+        "percent": 0.6
+      },
+      {
+        "kn": 3,
+        "percent": 0.9
+      },
+      {
+        "kn": 4,
+        "percent": 1.2
+      },
+      {
+        "kn": 5,
+        "percent": 1.5
+      },
+      {
+        "kn": 6,
+        "percent": 1.9
+      },
+      {
+        "kn": 7,
+        "percent": 2.3
+      },
+      {
+        "kn": 8,
+        "percent": 3.1
+      },
+      {
+        "kn": 9,
+        "percent": 3.7
+      },
+      {
+        "kn": 10,
+        "percent": 4.4
+      },
+      {
+        "kn": 11,
+        "percent": 5.1
+      },
+      {
+        "kn": 12,
+        "percent": 5.7
+      },
+      {
+        "kn": 20,
+        "percent": 8.2
+      },
+      {
+        "kn": 33,
+        "percent": 15
+      }
+    ],
+    "stretchSource": "isa",
+    "sources": [
+      "isa"
+    ]
+  },
+  {
     "id": "slackdb-109",
     "name": "Chi",
     "brand": "Lopo",
@@ -4989,7 +4415,6 @@
     "wllKn": null,
     "depthMm": 2.6,
     "url": "https://www.middlewayslacklines.com",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -5015,37 +4440,10 @@
     "wllKn": null,
     "depthMm": 2.9,
     "url": "http://www.middlewayslacklines.com/?gclid=CNuN-J2FrssCFS8z0wodUssKNQ#!product-page/q2heq/175dcc60-c3b2-604d-301a-41aa51e3fc68",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 4
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-3129",
-    "name": "Zen 2",
-    "brand": "Lopo",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 64,
-    "mbsKn": 32,
-    "wllKn": null,
-    "depthMm": null,
-    "url": "https://middlewayslacklines.com/product/zen25mm/",
-    "discontinued": false,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 9
       }
     ],
     "stretchSource": "slackdb-single",
@@ -5067,7 +4465,6 @@
     "wllKn": 6.4,
     "depthMm": 3.1,
     "url": "http://www.slacklining.ca/shop/alfa/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -5093,37 +4490,10 @@
     "wllKn": 6,
     "depthMm": 2.7,
     "url": "https://petramslacklines.site123.me/shop-1/coelum-webbing-1",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 10
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-127",
-    "name": "#FFF",
-    "brand": "RAED Slacklines",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 61,
-    "mbsKn": 34,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 11,
-        "percent": 6
       }
     ],
     "stretchSource": "slackdb-single",
@@ -5145,7 +4515,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/aurora-polyester-highline-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 5,
@@ -5171,7 +4540,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/cumulus-nylon-highline-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -5259,7 +4627,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/dyneemite-ultralight-highline-project-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 5,
@@ -5285,7 +4652,6 @@
     "wllKn": null,
     "depthMm": 1.5,
     "url": "https://raed-slacklines.com/eclipse-lightweight-polyester-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 5,
@@ -5312,7 +4678,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/helium-lightweight-polyester-slackline-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -5419,7 +4784,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/motm-tubular-nylon-slackline-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -5526,7 +4890,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/motm-light",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -5547,7 +4910,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/parsec-longline-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -5654,7 +5016,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://raed-slacklines.com/rainbow-polyester-highline-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -5732,32 +5093,6 @@
     ]
   },
   {
-    "id": "slackdb-3010",
-    "name": "SuperMOTM",
-    "brand": "RAED Slacklines",
-    "webbingType": "TR",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 77,
-    "mbsKn": 36,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 12,
-        "percent": 14
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-3",
     "name": "Tape",
     "brand": "Singing Rock",
@@ -5771,37 +5106,10 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://www.singingrock.com/slackline-webbing-yellowblack",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 8
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-121",
-    "name": "Abysses",
-    "brand": "Slack Inov",
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 63,
-    "mbsKn": 32,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 11
       }
     ],
     "stretchSource": "slackdb-single",
@@ -5823,7 +5131,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://slack-inov.com/gb/longline/106-abysses-bounce-sold-by-meter",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -5849,7 +5156,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://slack-inov.com/gb/webbing/69-cosmic",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -5936,7 +5242,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://slack-inov.com/gb/longline/144-donkey",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -5979,7 +5284,6 @@
     "wllKn": 2.3,
     "depthMm": null,
     "url": "http://slack-inov.com/gb/webbing/9-emeraude",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -6000,7 +5304,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6073,58 +5376,6 @@
     ]
   },
   {
-    "id": "slackdb-26",
-    "name": "Flamme II",
-    "brand": "Slack Inov",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 76,
-    "mbsKn": 43,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 3.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-120",
-    "name": "Flamme III",
-    "brand": "Slack Inov",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 76,
-    "mbsKn": 40,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 5.4
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-3053",
     "name": "Joker",
     "brand": "Slack Inov",
@@ -6139,7 +5390,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://slack-inov.com/gb/webbing/110-joker-sold-by-meter",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6165,7 +5415,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://slack-inov.com/gb/longline/145-nova",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6208,7 +5457,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://slack-inov.com/gb/webbing/92-flamme3-webbing",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6221,20 +5469,19 @@
     ]
   },
   {
-    "id": "slackdb-32",
+    "id": "isa-articfox",
     "name": "Artic Fox",
     "brand": "Slack Mountain",
-    "webbingType": "TB",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
-    "weightGm": 52,
-    "mbsKn": 21,
-    "wllKn": 10.5,
-    "depthMm": 2,
+    "widthMm": null,
+    "weightGm": null,
+    "mbsKn": null,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6255,7 +5502,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -6273,7 +5519,6 @@
     "wllKn": 15,
     "depthMm": 2.8,
     "url": "http://slack-mountain.com/en/webbing-slackline/1-cobalt.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6316,7 +5561,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6358,7 +5602,6 @@
     "wllKn": 15,
     "depthMm": 3.6,
     "url": "http://slack-mountain.com/en/webbing-slackline/132-diablo2.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6385,7 +5628,6 @@
     "wllKn": 10,
     "depthMm": 2,
     "url": "https://slack-mountain.com/fr/sangle-hybride/185-firefly.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6411,7 +5653,6 @@
     "wllKn": 8,
     "depthMm": 2,
     "url": "https://slack-mountain.com/fr/sangles-slackline/214-firefox.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6437,7 +5678,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6458,32 +5698,6 @@
     ]
   },
   {
-    "id": "slackdb-31",
-    "name": "Flax NY",
-    "brand": "Slack Mountain",
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 38,
-    "mbsKn": 20,
-    "wllKn": 6,
-    "depthMm": 1.7,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 13
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-3044",
     "name": "French Line",
     "brand": "Slack Mountain",
@@ -6497,38 +5711,10 @@
     "wllKn": 10,
     "depthMm": 2,
     "url": "https://slack-mountain.com/fr/sangles-slackline/189-french-line.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 8
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-33",
-    "name": "Goku",
-    "brand": "Slack Mountain",
-    "webbingType": "FL",
-    "material": [
-      "PL",
-      "DY"
-    ],
-    "widthMm": 25,
-    "weightGm": 32,
-    "mbsKn": 35,
-    "wllKn": 11,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 3.8
       }
     ],
     "stretchSource": "slackdb-single",
@@ -6551,7 +5737,6 @@
     "wllKn": 11,
     "depthMm": 2,
     "url": "http://slack-mountain.com/en/webbing-slackline/136-goku2.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6581,20 +5766,19 @@
     ]
   },
   {
-    "id": "slackdb-126",
-    "name": "Morpheus",
+    "id": "isa-morpheus",
+    "name": "morpheus",
     "brand": "Slack Mountain",
-    "webbingType": "CS",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
-    "weightGm": 57,
-    "mbsKn": 25,
-    "wllKn": 8.33,
-    "depthMm": 2.1,
+    "widthMm": null,
+    "weightGm": null,
+    "mbsKn": null,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6619,7 +5803,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -6637,7 +5820,6 @@
     "wllKn": 5,
     "depthMm": null,
     "url": "https://slack-mountain.com/en/webbing-slackline/233-photon.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6663,7 +5845,6 @@
     "wllKn": 4,
     "depthMm": 1,
     "url": "http://slack-mountain.com/en/webbing-slackline/7-plum.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6698,7 +5879,6 @@
     "wllKn": 15,
     "depthMm": 1.8,
     "url": "https://slack-mountain.com/fr/jumplines/191-pop-art.html",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -6719,7 +5899,6 @@
     "wllKn": 7,
     "depthMm": 1.8,
     "url": "https://slack-mountain.com/fr/sangles-slackline/194-project-44.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6732,20 +5911,19 @@
     ]
   },
   {
-    "id": "slackdb-3020",
-    "name": "Rubalise",
+    "id": "isa-rubalise",
+    "name": "rubalise",
     "brand": "Slack Mountain",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 50,
-    "weightGm": 80,
-    "mbsKn": 30,
-    "wllKn": 10,
-    "depthMm": 1.7,
+    "widthMm": null,
+    "weightGm": null,
+    "mbsKn": null,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6762,7 +5940,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -6781,7 +5958,6 @@
     "wllKn": null,
     "depthMm": 2.14,
     "url": "https://slack-mountain.com/en/hybrid-webbing/221-cloud.html#/242-swen_loop-with/65-longueur-55_m",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6807,7 +5983,6 @@
     "wllKn": 7,
     "depthMm": 2.3,
     "url": "https://slack-mountain.com/en/webbing-slackline/213-skyway.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6833,7 +6008,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6871,7 +6045,6 @@
     "wllKn": 10.5,
     "depthMm": 2.1,
     "url": "http://slack-mountain.com/en/webbing-slackline/5-snake-tub.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -6897,7 +6070,6 @@
     "wllKn": 10,
     "depthMm": 3,
     "url": "http://slack-mountain.com/en/webbing-slackline/168-spectre.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6927,46 +6099,19 @@
     ]
   },
   {
-    "id": "slackdb-3075",
-    "name": "Spice",
-    "brand": "Slack Mountain",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 62,
-    "mbsKn": 30,
-    "wllKn": 10,
-    "depthMm": 2.5,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 3.9
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-3013",
+    "id": "isa-storm",
     "name": "Storm",
     "brand": "Slack Mountain",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 50,
-    "weightGm": 80,
-    "mbsKn": 30,
-    "wllKn": 7.5,
-    "depthMm": 1.7,
+    "widthMm": null,
+    "weightGm": null,
+    "mbsKn": null,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -6983,7 +6128,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -7001,7 +6145,6 @@
     "wllKn": 30,
     "depthMm": 3.1,
     "url": "http://slack-mountain.com/en/jumplines/6-wallaby.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -7023,20 +6166,19 @@
     ]
   },
   {
-    "id": "slackdb-38",
+    "id": "isa-windu",
     "name": "Windu",
     "brand": "Slack Mountain",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
-    "weightGm": 65,
-    "mbsKn": 25,
-    "wllKn": 12.5,
-    "depthMm": 2.5,
+    "widthMm": null,
+    "weightGm": null,
+    "mbsKn": null,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -7061,136 +6203,7 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
-    ]
-  },
-  {
-    "id": "slackdb-39",
-    "name": "Club S",
-    "brand": "Slack.fr",
-    "webbingType": "TR",
-    "material": [],
-    "widthMm": 25,
-    "weightGm": 75,
-    "mbsKn": 30,
-    "wllKn": 10,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 7
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-40",
-    "name": "Dark Blue",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 62,
-    "mbsKn": 28,
-    "wllKn": 15,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4.7
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-48",
-    "name": "Jumpline",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 30,
-    "weightGm": 60,
-    "mbsKn": 30,
-    "wllKn": 10,
-    "depthMm": 2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-50",
-    "name": "Jumpline AntiPop",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 40,
-    "weightGm": 101,
-    "mbsKn": 45,
-    "wllKn": 15,
-    "depthMm": 3,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 8
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-49",
-    "name": "Jumpline Pro Series",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 40,
-    "weightGm": 74,
-    "mbsKn": 40,
-    "wllKn": 13.3,
-    "depthMm": 2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
     ]
   },
   {
@@ -7207,7 +6220,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -7228,20 +6240,19 @@
     ]
   },
   {
-    "id": "slackdb-129",
+    "id": "isa-mcfly",
     "name": "McFly",
     "brand": "Slack.fr",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "NY"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": 65,
     "mbsKn": 31,
-    "wllKn": 10.3,
-    "depthMm": 3,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -7262,34 +6273,7 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
-    ]
-  },
-  {
-    "id": "slackdb-41",
-    "name": "MILF",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 73,
-    "mbsKn": 37,
-    "wllKn": 10.3,
-    "depthMm": 3,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 7
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
     ]
   },
   {
@@ -7307,7 +6291,6 @@
     "wllKn": 9,
     "depthMm": 2,
     "url": "https://laboutique.slack.fr/en/slackline-webbings/41-moonwalk-flat-hybride.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -7337,32 +6320,6 @@
     ]
   },
   {
-    "id": "slackdb-43",
-    "name": "Neon Light",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 62,
-    "mbsKn": 35,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-132",
     "name": "Reggae",
     "brand": "Slack.fr",
@@ -7376,7 +6333,6 @@
     "wllKn": 7,
     "depthMm": 2,
     "url": "https://laboutique.slack.fr/en/tubular-webbing/143-reggae-tubular.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7402,7 +6358,6 @@
     "wllKn": 7,
     "depthMm": 2,
     "url": "https://laboutique.slack.fr/en/tubular-webbing/146-rvd-tubular.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7428,7 +6383,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -7453,84 +6407,6 @@
     ]
   },
   {
-    "id": "slackdb-44",
-    "name": "SuperFL Kill Bill",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 146,
-    "mbsKn": 54,
-    "wllKn": null,
-    "depthMm": 5,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 2.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-45",
-    "name": "SuperFL Maverick V2",
-    "brand": "Slack.fr",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 62,
-    "mbsKn": 31,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-46",
-    "name": "Supertube Norway",
-    "brand": "Slack.fr",
-    "webbingType": "TB",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 54,
-    "mbsKn": 21,
-    "wllKn": 7,
-    "depthMm": 2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 10
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-84",
     "name": "Blue Mile",
     "brand": "SlackHouse",
@@ -7544,7 +6420,6 @@
     "wllKn": 11,
     "depthMm": 2.6,
     "url": "http://slackline.pl/bluemile",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7570,7 +6445,6 @@
     "wllKn": 5,
     "depthMm": 2,
     "url": "https://slackhouseshop.pl/en/produkt/levitation/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7596,7 +6470,6 @@
     "wllKn": 7,
     "depthMm": 2.85,
     "url": "https://slackhouseshop.pl/en/produkt/octopussy-en",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7622,7 +6495,6 @@
     "wllKn": 7,
     "depthMm": 3.35,
     "url": "https://slackhouseshop.pl/produkt/rubber-band-blu",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7648,7 +6520,6 @@
     "wllKn": 7,
     "depthMm": 3.35,
     "url": "https://slackhouseshop.pl/en/produkt/slackhouse-rubber-band-25mm-sol/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7674,37 +6545,10 @@
     "wllKn": 7,
     "depthMm": 3.35,
     "url": "https://slackhouseshop.pl/produkt/rubber-band-pur/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 14
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-106",
-    "name": "HighTech",
-    "brand": "SlackLife BC",
-    "webbingType": "FL",
-    "material": [
-      "DY"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 48,
-    "mbsKn": 39.2,
-    "wllKn": 10,
-    "depthMm": 3,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4.6
       }
     ],
     "stretchSource": "slackdb-single",
@@ -7726,7 +6570,6 @@
     "wllKn": 7.12,
     "depthMm": null,
     "url": "https://www.slacklifebc.com/product/lions-line-hightech-webbing/",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -7747,63 +6590,10 @@
     "wllKn": 6.4,
     "depthMm": null,
     "url": "https://www.slacklifebc.com/product/skypilot-nylon",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 12
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-105",
-    "name": "Sky Pilot (Green/Orange)",
-    "brand": "SlackLife BC",
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 65,
-    "mbsKn": 36.4,
-    "wllKn": 7.5,
-    "depthMm": 3,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 9
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-104",
-    "name": "Tantalus",
-    "brand": "SlackLife BC",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25.4,
-    "weightGm": 53,
-    "mbsKn": 34.7,
-    "wllKn": 6.7,
-    "depthMm": 3.2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 8
       }
     ],
     "stretchSource": "slackdb-single",
@@ -7825,7 +6615,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slacklifebc.com/product/totally-tubular/",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -7846,7 +6635,6 @@
     "wllKn": 5.34,
     "depthMm": 2.7,
     "url": "https://slacklineindustries.com/collections/1-inch/products/coretek",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 5.34,
@@ -7873,7 +6661,6 @@
     "wllKn": 6.4,
     "depthMm": 2.1,
     "url": "https://slacklineindustries.com/collections/1-inch/products/panda",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 6.4,
@@ -7899,7 +6686,6 @@
     "wllKn": 6.67,
     "depthMm": 2.5,
     "url": "https://slacklineindustries.com/collections/all-products/products/sugoi",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 6.67,
@@ -7925,7 +6711,6 @@
     "wllKn": 10,
     "depthMm": null,
     "url": "http://ambaradam.net/product/sin-mas/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -7951,7 +6736,6 @@
     "wllKn": null,
     "depthMm": 2.6,
     "url": "https://www.slackliner.de/en/Sigma-ReBL.html",
-    "discontinued": false,
     "stretchCurve": null,
     "stretchSource": null,
     "sources": [
@@ -7972,7 +6756,6 @@
     "wllKn": null,
     "depthMm": 2.7,
     "url": "http://www.slackliner.de/Webbing/Flat-Webbing/Sigma-Impact.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8039,7 +6822,6 @@
     "wllKn": null,
     "depthMm": 2.7,
     "url": "http://www.slackliner.de/Slackline-Band/Flachband/Sigma-Impact-lowstretch.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -8052,20 +6834,19 @@
     ]
   },
   {
-    "id": "slackdb-74",
+    "id": "isa-sigmalg",
     "name": "Sigma LG",
     "brand": "Slackliner.de",
-    "webbingType": "FL",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
+    "widthMm": null,
     "weightGm": 66,
     "mbsKn": 38,
-    "wllKn": 12,
-    "depthMm": 2.8,
+    "wllKn": null,
+    "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8102,7 +6883,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -8120,7 +6900,6 @@
     "wllKn": 10,
     "depthMm": null,
     "url": "http://www.slackliner.de/Webbing/Nylon/Sigma-N-jormungand-270.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8191,7 +6970,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8245,7 +7023,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8315,7 +7092,6 @@
     "wllKn": 8,
     "depthMm": null,
     "url": "http://www.slackliner.de/Slackline-Band/Schlauchband/Sigma-X.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 8,
@@ -8341,7 +7117,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slackliner.de/Webbing/Flat-Webbing/yaw.html?language=en",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 8,
@@ -8367,7 +7142,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8457,7 +7231,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.balanceur.ro/slackshop/benzi/milky-way/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8612,7 +7385,6 @@
     "wllKn": null,
     "depthMm": 2,
     "url": "https://www.balanceur.ro/slackshop/benzi/pana-corbului/",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8690,32 +7462,6 @@
     ]
   },
   {
-    "id": "slackdb-86",
-    "name": "Black-White",
-    "brand": "Slacktivity",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 88,
-    "mbsKn": 43,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 6
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-136",
     "name": "Half-Marathon",
     "brand": "Slacktivity",
@@ -8729,7 +7475,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slacktivity.com/halfmarathon-50m-500m",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -8755,7 +7500,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -8880,32 +7624,6 @@
     ]
   },
   {
-    "id": "slackdb-138",
-    "name": "Low stretch Webbing",
-    "brand": "Slacktivity",
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 37,
-    "weightGm": 64,
-    "mbsKn": null,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 3
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-3123",
     "name": "LSDTube",
     "brand": "Slacktivity",
@@ -8919,7 +7637,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slacktivity.com/lsdtube",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -8945,7 +7662,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slacktivity.com/marathon-50m-500m",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9103,20 +7819,19 @@
     ]
   },
   {
-    "id": "slackdb-137",
+    "id": "isa-marathonplay",
     "name": "Marathon Play",
     "brand": "Slacktivity",
-    "webbingType": "CS",
+    "webbingType": null,
     "material": [
       "PL"
     ],
-    "widthMm": 25,
-    "weightGm": 65,
-    "mbsKn": 37,
+    "widthMm": null,
+    "weightGm": null,
+    "mbsKn": null,
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": true,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9269,7 +7984,6 @@
     ],
     "stretchSource": "isa",
     "sources": [
-      "slackdb",
       "isa"
     ]
   },
@@ -9287,7 +8001,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slacktivity.com/pinktube-25m-200m",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9410,7 +8123,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slacktivity.com/redtube-30m-200m",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9586,7 +8298,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "https://www.slacktivity.com/y2k",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -9612,7 +8323,6 @@
     "wllKn": 12,
     "depthMm": 2.7,
     "url": "http://spider-slacklines.com/shop/en/longline-webbings/74-edge-line.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9687,7 +8397,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9761,7 +8470,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": "http://spider-slacklines.com/shop/en/longline-webbings/77-fly-line.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -9787,7 +8495,6 @@
     "wllKn": 12,
     "depthMm": 4,
     "url": "http://spider-slacklines.com/shop/en/longline-webbings/73-jumbo-line.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9849,32 +8556,6 @@
     ]
   },
   {
-    "id": "slackdb-117",
-    "name": "Mamba",
-    "brand": "Spider Slacklines",
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 65,
-    "mbsKn": 22,
-    "wllKn": 10,
-    "depthMm": 3.2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 13.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
     "id": "slackdb-3066",
     "name": "NyLove",
     "brand": "Spider Slacklines",
@@ -9888,7 +8569,6 @@
     "wllKn": null,
     "depthMm": 3.4,
     "url": "https://spider-slacklines.com/shop/en/longline-webbings/245-nylove-longline-price-per-meter.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -9963,7 +8643,6 @@
     "wllKn": 5,
     "depthMm": 3.5,
     "url": "https://spider-slacklines.com/shop/en/products/344-3723-rodeo-line.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -9989,7 +8668,6 @@
     "wllKn": 5,
     "depthMm": 3.5,
     "url": "https://spider-slacklines.com/shop/en/highline-webbing/426-2764-sky-diamond-longline-presale.html#/306-select_model-price_by_meter",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
@@ -10015,7 +8693,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -10089,7 +8766,6 @@
     "wllKn": 8,
     "depthMm": 2.5,
     "url": "https://spider-slacklines.com/shop/en/longline-webbings/76-tender-line.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 8,
@@ -10115,7 +8791,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -10189,7 +8864,6 @@
     "wllKn": 12,
     "depthMm": 3.2,
     "url": "http://spider-slacklines.com/shop/en/longline-webbings/69-zao-line.html",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 12,
@@ -10215,7 +8889,6 @@
     "wllKn": null,
     "depthMm": null,
     "url": null,
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 0,
@@ -10253,516 +8926,10 @@
     "wllKn": 7,
     "depthMm": null,
     "url": "https://souzslackline.com/product/violet",
-    "discontinued": false,
     "stretchCurve": [
       {
         "kn": 10,
         "percent": 4
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-2",
-    "name": "Bloodline",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 65,
-    "mbsKn": 30,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 7
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-13",
-    "name": "Chartreuse",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 30,
-    "mbsKn": 20,
-    "wllKn": 6,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 8
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-14",
-    "name": "Dibona",
-    "brand": null,
-    "webbingType": "TB",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 65,
-    "mbsKn": 25,
-    "wllKn": 8,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 10
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-15",
-    "name": "Elia",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 60,
-    "mbsKn": 32,
-    "wllKn": 9,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-16",
-    "name": "Etna II",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 90,
-    "mbsKn": 50,
-    "wllKn": 10,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 2
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-17",
-    "name": "Fuji",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "DY"
-    ],
-    "widthMm": 25,
-    "weightGm": 37,
-    "mbsKn": 40,
-    "wllKn": 10,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 3
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-18",
-    "name": "Krakatoa",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 45,
-    "weightGm": 96,
-    "mbsKn": 45,
-    "wllKn": 8.5,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": null,
-    "stretchSource": null,
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-3025",
-    "name": "Mammut",
-    "brand": null,
-    "webbingType": "CS",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25.8,
-    "weightGm": 76.8,
-    "mbsKn": 25,
-    "wllKn": null,
-    "depthMm": 4.2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 9.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-19",
-    "name": "Mauna Kea",
-    "brand": null,
-    "webbingType": "TB",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 26,
-    "weightGm": 116,
-    "mbsKn": 42,
-    "wllKn": 14,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-115",
-    "name": "Mirage",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 65,
-    "mbsKn": 31,
-    "wllKn": 6.2,
-    "depthMm": 3.2,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 6
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-20",
-    "name": "Pierra Menta",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 54,
-    "mbsKn": 22,
-    "wllKn": 8,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 15
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-24",
-    "name": "Red Zebra",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 25,
-    "weightGm": 62,
-    "mbsKn": 30.9,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 16.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-1",
-    "name": "Ribera",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 26,
-    "weightGm": 80,
-    "mbsKn": 42,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": null,
-    "stretchSource": null,
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-23",
-    "name": "Sat'Elite",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "NY"
-    ],
-    "widthMm": 50,
-    "weightGm": 145,
-    "mbsKn": 75,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": null,
-    "stretchSource": null,
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-56",
-    "name": "Skillshot HS",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 60,
-    "mbsKn": 32,
-    "wllKn": null,
-    "depthMm": 3.1,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 6
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-57",
-    "name": "Skillshot LS",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 59,
-    "mbsKn": 32,
-    "wllKn": null,
-    "depthMm": 2.5,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 4
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-25",
-    "name": "Slack Swan",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 78,
-    "mbsKn": 36.5,
-    "wllKn": null,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 5.8
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-130",
-    "name": "SlackPro 42kN",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 72,
-    "mbsKn": 42,
-    "wllKn": null,
-    "depthMm": 2.7,
-    "url": "http://www.slackpro.de/en/products/2542slackline.shtml",
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 3.5
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-21",
-    "name": "Vercors",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 60,
-    "mbsKn": 30,
-    "wllKn": 8.5,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 6
-      }
-    ],
-    "stretchSource": "slackdb-single",
-    "sources": [
-      "slackdb"
-    ]
-  },
-  {
-    "id": "slackdb-22",
-    "name": "Vesuve",
-    "brand": null,
-    "webbingType": "FL",
-    "material": [
-      "PL"
-    ],
-    "widthMm": 25,
-    "weightGm": 56,
-    "mbsKn": 24,
-    "wllKn": 8,
-    "depthMm": null,
-    "url": null,
-    "discontinued": true,
-    "stretchCurve": [
-      {
-        "kn": 10,
-        "percent": 7
       }
     ],
     "stretchSource": "slackdb-single",

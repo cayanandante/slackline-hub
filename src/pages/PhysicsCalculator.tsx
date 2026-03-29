@@ -22,17 +22,20 @@ function kg2lb(kg: number) { return round1(kg * 2.20462); }
 function lb2kg(lb: number) { return lb / 2.20462; }
 function kN2lbf(kn: number) { return round1(kn * 224.809); }
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
+// ─── Brand tokens ────────────────────────────────────────────────────────────
 const DC = {
   white:  "#ffffff",
-  bg:     "#f5f6f8",
-  navy:   "#0a1628",
-  blue:   "#1a56db",
-  muted:  "#6b7a99",
-  border: "#dde2ed",
-  text:   "#0a1628",
+  bg:     "#f7f8fc",
+  navy:   "#1a237e",
+  blue:   "#2979ff",
+  coral:  "#ef5350",
+  teal:   "#00bfa5",
+  amber:  "#ffc107",
+  muted:  "#5c6685",
+  border: "#dde3f0",
+  text:   "#1a237e",
 };
-const DFONT = "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif";
+const DFONT = "'DM Sans', sans-serif";
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
@@ -44,27 +47,25 @@ const styles = {
     color: DC.text,
   } as React.CSSProperties,
   inner: {
-    maxWidth: 1000,
+    maxWidth: 1500,
     margin: "0 auto",
-    padding: "0 1.5rem 4rem",
+    padding: "0 clamp(2rem,6vw,7rem) 5rem",
   } as React.CSSProperties,
 };
 
 function SafetyBadge({ value, thresholds }: { value: number; thresholds: [number, number] }) {
   const color =
-    value >= thresholds[1] ? "#2d6a4f" :
-    value >= thresholds[0] ? "#92400e" : "#991b1b";
+    value >= thresholds[1] ? "#00bfa5" :
+    value >= thresholds[0] ? "#5c6685" : "#ef5350";
   const bg =
-    value >= thresholds[1] ? "#d1fae5" :
-    value >= thresholds[0] ? "#fef3c7" : "#fee2e2";
+    value >= thresholds[1] ? "rgba(0,191,165,0.1)" :
+    value >= thresholds[0] ? "rgba(92,102,133,0.1)" : "rgba(239,83,80,0.1)";
   const label =
     value >= thresholds[1] ? "✓ Safe" :
     value >= thresholds[0] ? "⚠ Caution" : "✕ Danger";
   return (
     <span style={{
-      background: bg, color, fontFamily: "'DM Mono', monospace",
-      fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 4,
-      letterSpacing: "0.04em",
+      background: bg, color, fontFamily: DFONT, fontSize: 15, fontWeight: 700, padding: "6px 14px", borderRadius: 8,
     }}>{label}</span>
   );
 }
@@ -72,11 +73,11 @@ function SafetyBadge({ value, thresholds }: { value: number; thresholds: [number
 function ResultCard({ label, value, unit, sub }: { label: string; value: string | number; unit?: string; sub?: string }) {
   return (
     <div style={{
-      background: "#ffffff", border: "1px solid #dde2ed",
-      borderRadius: 4, padding: "16px 18px", flex: "1 1 160px",
+      background: DC.bg, border: `1px solid ${DC.border}`,
+      borderRadius: 14, padding: "22px 26px", flex: "1 1 190px",
     }}>
-      <div style={{ fontFamily: DFONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: DC.muted, marginBottom: 6 }}>{label}</div>
-      <div style={{ fontFamily: DFONT, fontSize: 32, fontWeight: 800, color: DC.navy, lineHeight: 1 }}>
+      <div style={{ fontFamily: DFONT, fontSize: 14, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: DC.muted, marginBottom: 10 }}>{label}</div>
+      <div style={{ fontFamily: DFONT, fontSize: 40, fontWeight: 900, color: DC.navy, lineHeight: 1 }}>
         {value}<span style={{ fontSize: 14, fontWeight: 400, color: "#7a7268", marginLeft: 4 }}>{unit}</span>
       </div>
       {sub && <div style={{ fontSize: 11, color: "#7a7268", marginTop: 4 }}>{sub}</div>}
@@ -91,7 +92,7 @@ function SliderRow({ label, value, min, max, step = 1, unit, onChange }: {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-        <label style={{ fontFamily: DFONT, fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: DC.muted }}>{label}</label>
+        <label style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 600, color: DC.muted }}>{label}</label>
         <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 500, color: "#0d0f0e" }}>
           <input
             type="number" value={value} min={min} max={max} step={step}
@@ -111,13 +112,13 @@ function SliderRow({ label, value, min, max, step = 1, unit, onChange }: {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 style={{ fontFamily: DFONT, fontSize: 28, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.01em", color: DC.navy, marginBottom: 6 }}>{children}</h2>
+    <h2 style={{ fontFamily: DFONT, fontSize: 34, fontWeight: 900, color: DC.navy, marginBottom: 12, letterSpacing: "-0.01em" }}>{children}</h2>
   );
 }
 
 function SourceNote({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontFamily: DFONT, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", color: DC.muted, marginTop: 12, padding: "10px 14px", background: DC.bg, border: `1px solid ${DC.border}`, borderRadius: 4, lineHeight: 1.7 }}>
+    <p style={{ fontFamily: DFONT, fontSize: 15, fontWeight: 400, color: DC.muted, marginTop: 16, padding: "14px 18px", background: DC.bg, border: `1px solid ${DC.border}`, borderRadius: 10, lineHeight: 1.7 }}>
       {children}
     </p>
   );
@@ -497,7 +498,7 @@ function AnchorAngleCalc({ units }: { units: Units }) {
         <div>
           {/* Number of legs */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontFamily: DFONT, fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>Number of anchor legs</div>
+            <div style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 600, color: DC.muted, marginBottom: 8 }}>Number of anchor legs</div>
             <div style={{ display: "flex", gap: 8 }}>
               {([2, 3, 4] as const).map(n => (
                 <button key={n} onClick={() => setNumLegs(n)} style={{
@@ -530,7 +531,7 @@ function AnchorAngleCalc({ units }: { units: Units }) {
             <>
               <SliderRow label="Elevation angle of legs (β)" value={beta} min={1} max={90} step={1} unit="°" onChange={setBeta} />
               {beta > 0 && beta < 15 && (
-                <div style={{ background: "#fef3c7", border: "1px solid #fcd34d", borderRadius: 6, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: "#92400e" }}>
+                <div style={{ background: "rgba(41,121,255,0.07)", border: "1px solid rgba(41,121,255,0.2)", borderRadius: 10, padding: "12px 16px", marginBottom: 14, fontSize: 15, color: "#1a237e" }}>
                   ⚠ Very shallow elevation (β &lt; 15°). Forces are very high. Consider increasing elevation or adding more legs.
                 </div>
               )}
@@ -876,7 +877,7 @@ function BackupFallCalc({ units }: { units: Units }) {
           <SliderRow label="Backup sag (S)" value={uBSag} min={uUnit ? 1 : 0.3} max={uUnit ? 66 : 20} step={uUnit ? 0.5 : 0.1} unit={uUnit ? "ft" : "m"} onChange={v => setBackupSag(uUnit ? ft2m(v) : v)} />
 
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: DFONT, fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>Backup webbing type</div>
+            <div style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 600, color: DC.muted, marginBottom: 8 }}>Backup webbing type</div>
             <div style={{ display: "flex", gap: 8 }}>
               {(["dyneema", "nylon", "dynamic"] as const).map(w => (
                 <button key={w} onClick={() => setWebbing(w)} style={{
@@ -1104,7 +1105,7 @@ function MechanicalAdvCalc({ units }: { units: Units }) {
         <div>
           {/* System selector */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontFamily: DFONT, fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: DC.muted, marginBottom: 10 }}>Pulley system</div>
+            <div style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 600, color: DC.muted, marginBottom: 10 }}>Pulley system</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
               {systems.map(s => (
                 <button key={s.ma} onClick={() => setSystem(s.ma as 2|3|4|5|6)} style={{
@@ -1222,21 +1223,21 @@ export default function PhysicsCalculator() {
   return (
     <div style={styles.page}>
       {/* Page header */}
-      <div style={{ borderBottom: `1px solid ${DC.border}`, background: DC.navy }}>
+      <div style={{ borderBottom: `1px solid ${DC.border}`, background: DC.white, boxShadow: "0 2px 16px rgba(26,35,126,0.06)" }}>
         <div style={styles.inner}>
           <div style={{ paddingTop: 32, paddingBottom: 16 }}>
-            <a href="/" style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.4)", textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
+            <a href="/" style={{ fontFamily: DFONT, fontSize: 15, fontWeight: 600, color: DC.muted, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24 }}>
               ← Back to Slackline Hub
             </a>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
               <div>
-                <div style={{ fontFamily: DFONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: DC.blue, marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ fontFamily: DFONT, fontSize: 15, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: DC.blue, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ display: "inline-block", width: 20, height: 1, background: "#c8531a" }} /> Physics Tools
                 </div>
-                <h1 style={{ fontFamily: DFONT, fontSize: "clamp(2.5rem,5vw,4rem)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "-0.01em", color: DC.white, margin: 0, lineHeight: 0.9 }}>
+                <h1 style={{ fontFamily: DFONT, fontSize: "clamp(3rem,5vw,5rem)", fontWeight: 900, letterSpacing: "-0.02em", color: DC.navy, margin: 0, lineHeight: 1 }}>
                   Physics &amp; Forces Calculator
                 </h1>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.5)", margin: "10px 0 0", fontWeight: 400 }}>
+                <p style={{ fontFamily: DFONT, fontSize: 18, color: DC.muted, margin: "14px 0 0", fontWeight: 400 }}>
                   Professional rigging calculations based on ISA standards, DAV research, and Athanasiadis (2013)
                 </p>
               </div>
@@ -1248,7 +1249,7 @@ export default function PhysicsCalculator() {
                     borderRadius: 3, border: "1px solid",
                     borderColor: units === u ? DC.blue : DC.border,
                     background: units === u ? DC.blue : "transparent",
-                    color: units === u ? DC.white : "rgba(255,255,255,0.5)",
+                    color: units === u ? DC.white : DC.muted,
                     cursor: "pointer", letterSpacing: "0.08em", textTransform: "uppercase",
                   }}>
                     {u === "metric" ? "Metric (m/kg/kN)" : "Imperial (ft/lb/lbf)"}
@@ -1260,24 +1261,15 @@ export default function PhysicsCalculator() {
         </div>
       </div>
 
-      {/* Safety banner */}
-      <div style={{ background: "rgba(245,158,11,0.08)", borderBottom: "1px solid rgba(245,158,11,0.2)" }}>
-        <div style={{ ...styles.inner, paddingTop: 10, paddingBottom: 10 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#b45309", margin: 0, display: "flex", gap: 8, alignItems: "flex-start" }}>
-            <span>⚠️</span>
-            <span>These calculations assume <strong>static loads</strong>. Real-world forces can be significantly higher due to dynamic effects, wind, and bouncing. Always verify with a <strong>certified ISA Rigger</strong> before use.</span>
-          </p>
-        </div>
-      </div>
 
       {/* Tab bar */}
-      <div style={{ borderBottom: `1px solid ${DC.border}`, background: DC.navy, position: "sticky", top: 56, zIndex: 50 }}>
+      <div style={{ borderBottom: `1px solid ${DC.border}`, background: DC.white, boxShadow: "0 2px 16px rgba(26,35,126,0.06)", position: "sticky", top: 56, zIndex: 50 }}>
         <div style={styles.inner}>
           <div style={{ display: "flex", gap: 0, paddingTop: 0 }}>
             {tabs.map(t => (
               <button key={t.id} onClick={() => setTab(t.id)} style={{
-                fontFamily: DFONT, fontSize: 14, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-                padding: "16px 22px", border: "none", background: "transparent", cursor: "pointer",
+                fontFamily: DFONT, fontSize: 17, fontWeight: 700,
+                padding: "20px 28px", border: "none", background: "transparent", cursor: "pointer",
                 color: tab === t.id ? DC.blue : DC.muted,
                 borderBottom: `3px solid ${tab === t.id ? DC.blue : "transparent"}`,
                 transition: "all 0.15s",
@@ -1303,7 +1295,7 @@ export default function PhysicsCalculator() {
       {/* Footer disclaimer */}
       <div style={{ borderTop: `1px solid ${DC.border}`, marginTop: 40 }}>
         <div style={{ ...styles.inner, paddingTop: 20, paddingBottom: 20 }}>
-          <p style={{ fontFamily: DFONT, fontSize: 11, fontWeight: 600, color: DC.muted, lineHeight: 1.8, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          <p style={{ fontFamily: DFONT, fontSize: 15, fontWeight: 400, color: DC.muted, lineHeight: 1.8 }}>
             DISCLAIMER: These calculators provide theoretical estimates for educational purposes only.
             They assume static loads, ideal conditions, and perfect equipment. Real-world forces can exceed
             these values due to dynamic loading, equipment wear, environmental factors, and human error.

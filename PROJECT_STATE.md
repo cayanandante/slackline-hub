@@ -1,5 +1,5 @@
 # Slackline Hub — Project State
-> Last updated: March 29, 2026 — end of session 2
+> Last updated: March 29, 2026 — end of session 3
 > Update this file at the end of every work session.
 
 ---
@@ -19,19 +19,53 @@
 | Supabase anon key | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnY2VtZHdzcnV2ZXFkaWRkaGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU5NDQsImV4cCI6MjA5MDMwMTk0NH0.oWvKBSFmKheu0_eUd5e9WuOa9LqVpMDXJA71WXC26Y4 | Safe to store |
 | Cloudflare Worker | https://slackline-hub-worker.cayandantas.workers.dev | Claude API proxy — LIVE |
 | Claude API | via Cloudflare Worker | Key stored as Cloudflare secret |
+| vercel.json | ✅ in repo root | Rewrites all routes to index.html (SPA routing fix) |
 
 ---
 
 ## Tech stack
 
 - **Frontend**: React + TypeScript + Vite (local: ~/slackline-hub/)
-- **Styling**: CSS-in-JS inline styles + src/index.css (NO Tailwind, NO shadcn)
-- **Routing**: react-router-dom
-- **Fonts**: Fraunces (serif) + DM Mono (labels) + DM Sans (body) — loaded in index.html
-- **Maps**: Leaflet.js (for team/spot/events maps)
+- **Styling**: CSS-in-JS inline styles only — NO Tailwind, NO shadcn, NO external CSS libraries
+- **Routing**: react-router-dom (vercel.json required for client-side routing to work)
+- **Fonts**: Barlow Condensed (display/headings) + DM Sans (body) — loaded in index.html via Google Fonts
 - **Database**: Supabase (Postgres + pgvector)
 - **AI**: Claude API claude-sonnet-4-20250514 — via Cloudflare Worker ✅ LIVE
 - **Deploy**: Vercel — auto-deploys from GitHub main in ~30 seconds
+
+---
+
+## Design system (NEW — session 3)
+
+All pages now use a unified design system. NO old Fraunces/DM Mono/warm paper palette.
+
+```
+Colors:
+  navy:   #0a1628   (backgrounds, headlines)
+  blue:   #1a56db   (accent, CTAs, active states)
+  white:  #ffffff   (card backgrounds)
+  bg:     #f5f6f8   (page background)
+  muted:  #6b7a99   (secondary text)
+  border: #dde2ed   (card borders, dividers)
+  text:   #0a1628   (body text)
+
+Typography:
+  FONT = "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif"
+  Body = "'DM Sans', sans-serif"
+
+Layout pattern:
+  - Navy header section with large uppercase headline
+  - White/bg content area below
+  - Blue accent on numbers, tags, active states
+  - Chip/pill buttons: active = blue filled, inactive = white with border
+
+Page header pattern (all inner pages):
+  - Navy background
+  - ← Slackline Hub back link (top left)
+  - Category label (blue, uppercase, small)
+  - Big uppercase headline (clamp 3rem to 6rem)
+  - Stats row (top right, blue numbers)
+```
 
 ---
 
@@ -50,116 +84,143 @@ git push
 
 ```
 slackline-hub/
-├── src/
-│   ├── index.css                   ← global styles + brand tokens
-│   ├── main.tsx                    ← entry point
-│   ├── App.tsx                     ← all routes
-│   └── pages/
-│       ├── Index.tsx               ← homepage (/)
-│       ├── PhysicsCalculator.tsx   ← /tools/physics
-│       ├── KnowledgeLibrary.tsx    ← /knowledge/resources
-│       └── DoubleCheck.tsx         ← /tools/double-check (built, hidden from nav)
-├── index.html                      ← Google Fonts loaded here
+├── vercel.json                     ← SPA routing fix (rewrites all to index.html)
+├── index.html                      ← Google Fonts: Barlow Condensed + DM Sans
+├── package.json
 ├── PROJECT_STATE.md                ← this file
-└── package.json
+└── src/
+    ├── index.css                   ← minimal globals
+    ├── main.tsx                    ← entry point
+    ├── App.tsx                     ← all routes
+    ├── data/
+    │   ├── webbing_database.json   ← 241 webbings merged (SlackDB + ISA + BC)
+    │   └── slack-db_webbing.json   ← original SlackDB export (can delete)
+    └── pages/
+        ├── Index.tsx               ← homepage (/)
+        ├── PhysicsCalculator.tsx   ← /tools/physics
+        ├── KnowledgeLibrary.tsx    ← /knowledge/resources
+        ├── WebbingDatabase.tsx     ← /gear/webbing
+        └── DoubleCheck.tsx         ← /tools/double-check (hidden from nav)
 ```
 
 ---
 
-## Full site structure (planned)
+## Full site structure
 
 ```
 Slackline Hub
 │
-├── /                    Home ✅
+├── /                    Home ✅ LIVE
 │
 ├── /tools
-│   ├── /physics         Forces Calculator ✅
-│   ├── /chat            AI Knowledge Chat (next priority)
-│   ├── /knots           Knot Guide — static visual, click to expand
-│   └── /double-check    AI Safety Check ✅ (built, hidden from nav for now)
+│   ├── /physics         Forces Calculator ✅ LIVE
+│   ├── /chat            AI Knowledge Chat ❌
+│   ├── /knots           Knot Guide ❌
+│   └── /double-check    AI Safety Check ✅ (built, hidden from nav)
 │
 ├── /knowledge
-│   ├── /resources       Resource Library ✅ (463 links from Supabase)
-│   ├── /glossary        PT/EN Glossary (from Glossário PDF)
-│   └── /videos          Video Library (YouTube API)
+│   ├── /resources       Resource Library ✅ LIVE
+│   ├── /glossary        PT/EN Glossary ❌
+│   └── /videos          Video Library ❌
 │
 ├── /community
-│   ├── /teams           World Team Map (ISA slackline-data + Leaflet)
-│   ├── /events          Events Calendar + Map (ISA data API)
-│   └── /incidents       Incidents Database (ISA SAIR + manual curation)
+│   ├── /events          Events Calendar ❌
+│   └── /incidents       Incidents Database ❌
 │
-├── /freestyle           Highline Freestyle (Google Sheet API — 262 tricks, 23 combos)
+├── /freestyle           Highline Freestyle ❌
 │
-├── /gear                Gear Database (SlackDB / ISA SlackData)
+├── /gear
+│   └── /webbing         Webbing Database ✅ LIVE
 │
-├── /rigger              ISA Rigger Flashcards
-│
-└── /blog                Blog (static markdown)
+└── /rigger              ISA Rigger Flashcards ❌
 ```
 
 ---
 
 ## What's built ✅
 
-### Homepage (/) ✅ LIVE
-Nav, hero ("Tools for Slackliners, by Slackliners"), safety banner, tools grid (5 categories, 12 cards — 1 live, 11 coming soon), knowledge base stats (463 resources), footer.
+### Homepage (/) ✅ LIVE — redesigned session 3
+- Navy hero with full-width big condensed headline
+- Blue stats bar (241 webbings, 463 resources, 96 stretch curves, 3 languages)
+- 3 live tool cards (Forces Calculator, Webbing Database, Resource Library)
+- Coming soon grid (6 tools)
+- About section: "Built by a slackliner, for slackliners"
+- Minimal footer: SLACKLINE HUB / Built by Cayan Dantas / cayandantas@proton.me
+- Language selector in nav (EN active, PT/ES coming soon)
+- No yellow warning banners
 
-### Physics Calculator (/tools/physics) ✅ LIVE
-5 calculators with real engineering formulas, metric/imperial toggle, live SVG diagrams:
-1. Line Tension & Anchor Load — DAV formula + exact trig. Safety factor vs MBS.
-2. Anchor Angle & Elevation — 2/3/4 symmetric legs (equally spaced), flat + elevated master point. Top-view + side-view diagrams.
-3. Backup Fall Simulator — Athanasiadis model, H>2(L+S) clearance check, webbing selector.
-4. Midline Safety Height Checker — H>2(L+S) formula, go/no-go display, visual gauge.
-5. Mechanical Advantage Calculator — 5 pulley systems (2:1–6:1), friction loss model.
+### Physics Calculator (/tools/physics) ✅ LIVE — redesigned session 3
+5 calculators, same engineering logic, updated shell to match new design system:
+1. Line Tension & Anchor Load — exact + approximate (Balance Community model), safety factor
+2. Anchor Angle & Elevation — 2/3/4 legs, flat + elevated
+3. Backup Fall Simulator — Athanasiadis model, H>2(L+S)
+4. Midline Safety Height Checker
+5. Mechanical Advantage Calculator — 5 pulley systems
 
-### Resource Library (/knowledge/resources) ✅ LIVE
-- 463 resources loaded from Supabase
-- Grouped by guide section (23 sections)
-- Search + filter by type + filter by language (PT/EN)
-- Collapsible sections
+### Resource Library (/knowledge/resources) ✅ LIVE — redesigned session 3
+- 463 resources from Supabase
+- Navy header, big condensed headline
+- Search + language filter (PT/EN) + type filter (video, article, document, etc.)
+- Collapsible sections with +/− toggle, Expand all / Collapse all
+- Card grid per section with type badge, language badge, author, year, domain link
+- Stats: total, Portuguese, English counts
+
+### Webbing Database (/gear/webbing) ✅ LIVE — built session 3
+- 241 webbings merged from SlackDB + ISA SlackData + Balance Community
+- Data file: `src/data/webbing_database.json` (177KB)
+- 3 view tabs: Stretch Chart / Stretch Table / All Specs
+- **Stretch Chart:**
+  - SVG line chart, 0–12 kN fixed axis, 0–25% stretch
+  - 10 distinct symbols per line (circle, square, triangle, diamond, etc.)
+  - Sidebar legend (scrollable, click to toggle individual webbings)
+  - Legend shows only filtered/active webbings
+  - Hover highlights nearest single line with tooltip: name + % + kN + brand
+  - All on / All off / Show filtered only controls
+  - Dashed lines = discontinued
+- **Stretch Table:** webbings as rows, 1–12 kN as columns, values interpolated
+- **All Specs Table:** sortable by name, brand, MBS, weight, width
+- Filters: search, status (All/Active/Discontinued), material (Polyester/Nylon/Dyneema/Hybrid), sort
+- Status shown as full word "Active" / "Discontinued" (not "DC")
 
 ### AI Double-Check Assistant (/tools/double-check) ✅ BUILT (hidden from nav)
-- Form: line geometry, anchors, webbing, backup, conditions
 - Calls Claude API via Cloudflare Worker
-- Returns structured safety checklist with ✅/⚠/❌ per item
-- Recommendations + ISA citations
+- Returns structured safety checklist
 
 ### Cloudflare Worker ✅ LIVE
 - URL: https://slackline-hub-worker.cayandantas.workers.dev
-- Claude API proxy — hides API key from frontend
-- CORS enabled for slackline-hub.vercel.app
-- API key stored as Cloudflare secret
+- Claude API proxy — CORS enabled
 
-### Supabase Schema ✅ (tables created and seeded)
-- resources — 463 rows ✅ SEEDED
-- teams, events, incidents, gear, glossary — empty, not yet seeded
-- knowledge_chunks (pgvector) — empty, not yet seeded
-- physics_logs, ai_chat_logs — empty
+### Supabase ✅
+- `resources` table — 463 rows seeded
+- Other tables (teams, events, incidents, gear, glossary) — empty
 
-### Knowledge Base JSON ✅
-- knowledge_base_full.json v2.2 — in project files and GitHub
-- 463 unique resources, 87 PT, 376 EN, 397 named, 66 image links
+### Data files ✅
+- `webbing_database.json` — 241 webbings, merged from 3 sources
+  - SlackDB: 204 total, 118 active (MBS, weight, width, type, material, URL)
+  - ISA SlackData: 80 webbings (stretch curves, additional brands)
+  - Balance Community: 22 webbings with precise 1–12 kN stretch data
+  - Schema: id, name, brand, webbingType, material[], widthMm, weightGm, mbsKn, wllKn, depthMm, url, discontinued, stretchCurve[], stretchSource, sources[]
 
 ---
 
 ## What's NOT built yet ❌ (priority order)
 
-1. **Knot Guide** — /tools/knots — static visual, click to expand, custom SVG illustrations
-2. **World Team Map** — /community/teams — ISA slackline-data API + Leaflet
-3. **Events Calendar + Map** — /community/events — ISA data API + Leaflet
-4. **AI Knowledge Chat** — /tools/chat — RAG chatbot over guide content
-5. **Highline Freestyle** — /freestyle — Google Sheet API (262 tricks, 23 combos)
-6. **Gear Database** — /gear — SlackDB + ISA SlackData
-7. **Glossary** — /knowledge/glossary — parse Glossário PDF
-8. **Video Library** — /knowledge/videos — YouTube API
-9. **Rigger Flashcards** — /rigger — ISA certification study
-10. **Incidents Database** — /community/incidents — ISA SAIR
-11. **Blog** — /blog — static markdown
-12. **i18n** — PT/EN/ES via i18next
-13. **Custom domain** — not yet purchased
-14. **vercel.json** — noindex headers (site URL not shared publicly)
-15. **RAG pipeline** — embed guide content into Supabase pgvector for Knowledge Chat
+1. **Tension Calculator update** — update to Balance Community exact+approximate dual model
+2. **Knot Guide** — /tools/knots — custom SVG knots (10–12 highline rigging knots)
+3. **AI Knowledge Chat** — /tools/chat — RAG chatbot over guide content
+4. **Highline Freestyle** — /freestyle — Google Sheet API (262 tricks, 23 combos)
+5. **Glossary** — /knowledge/glossary — from Glossário PDF
+6. **Video Library** — /knowledge/videos — YouTube API
+7. **Events Calendar** — /community/events — ISA data API
+8. **Incidents Database** — /community/incidents
+9. **Rigger Flashcards** — /rigger
+10. **i18n** — PT/EN/ES via i18next (nav selector built as placeholder)
+11. **Custom domain** — not yet purchased
+12. **RAG pipeline** — pgvector embeddings for Knowledge Chat
+
+Removed from roadmap:
+- ~~World Team Map~~ — dropped (Cayan's decision)
+- ~~Blog~~ — deprioritized
 
 ---
 
@@ -168,52 +229,45 @@ Nav, hero ("Tools for Slackliners, by Slackliners"), safety banner, tools grid (
 | Source | What | How to access |
 |--------|------|---------------|
 | ISA slackline-data | Countries, national teams | github.com/International-Slackline-Association/slackline-data |
-| ISA SlackMap API | 7000+ lines, 1700+ spots worldwide | slackmap.slacklineinternational.org/api |
-| ISA Events API | Events, competitions, certifications | data.slacklineinternational.org/events |
-| SlackDB | Gear database (MBS, WLL, weight) | slackdb.com — public endpoints |
+| ISA SlackMap API | 7000+ spots worldwide | slackmap.slacklineinternational.org/api |
+| ISA Events API | Events, competitions | data.slacklineinternational.org/events |
+| ISA SlackData | Webbing specs + stretch curves | github.com/International-Slackline-Association/SlackData |
+| SlackDB | 204 webbings (MBS, WLL, weight) | slackdb.com — fetched via F12/XHR |
+| Balance Community | Precise stretch curves 1–12 kN for 22 webbings | balancecommunity.com/collections/stretch |
 | Highline Freestyle | 262 tricks, 23 combos | Google Sheet (public CSV export) |
-| YouTube API | Videos, documentaries, tutorials | YouTube Data API v3 (free) |
-| AnimatedKnots | NOT usable — copyrighted, no API | Build our own SVG knots instead |
+| YouTube API | Videos | YouTube Data API v3 (free) |
+| AnimatedKnots | NOT usable — copyrighted, no API | Build own SVG knots |
 
 ---
 
 ## Files in Claude project knowledge
 
-- PROJECT_STATE.md — this file
-- main.tex — full LaTeX source of the guide
-- Guia_do_Praticante_de_Highline_1.pdf — guide PDF
-- Glossário_termos_em_ingles_highline.pdf — PT/EN glossary
-- knowledge_base_full.json — 463 resources (v2.2)
-- highline-freestyle.com3-29-2026.json — Freestyle DB export (schema only, data in Google Sheet)
-- PhysicsCalculator.tsx — physics calculator
-- Index.tsx — homepage
-- App.tsx — routes
-- index.css — global styles
-- main.tsx — entry point
-
----
-
-## Design tokens
-
-```css
---ink:    #0d0f0e    --paper:  #f4f1eb    --paper2: #edeae2
---accent: #c8531a    --green:  #2d6a4f    --muted:  #7a7268
---serif: 'Fraunces', serif
---mono:  'DM Mono', monospace
---sans:  'DM Sans', sans-serif
-```
+- `PROJECT_STATE.md` — this file (session source of truth)
+- `guia_do_highline_latex.tex` — full LaTeX source of the guide
+- `knowledge_base_full.json` — 463 resources (v2.2)
+- `highline-freestyle_com3-29-2026.json` — Freestyle DB schema
+- `webbing_database.json` — 241 merged webbings (session 3 output)
+- `slack-db_webbing.json` — original SlackDB export
+- `ISA_webbing.json` — ISA SlackData webbing export
+- `App.tsx` — routes
+- `Index.tsx` — homepage (session 3 design)
+- `PhysicsCalculator.tsx` — physics calculator (session 3 shell)
+- `WebbingDatabase.tsx` — webbing database (session 3)
+- `KnowledgeLibrary.tsx` — resource library (session 3)
+- `DoubleCheck.tsx` — AI safety check
 
 ---
 
 ## Safety principles (non-negotiable)
 
-- All AI advice: "⚠️ Always verify with a certified ISA Rigger"
+- All AI advice must include: "⚠️ Always verify with a certified ISA Rigger"
 - Never hallucinate gear specs, MBS values, or safety thresholds
 - Physics calculators: always show assumptions and limitations
+- No yellow warning banners on UI (removed session 3) — safety note lives in AI responses only
 
 ---
 
 ## Contact
 
 - **Owner**: Cayan Dantas — cayandantas@proton.me
-- **Role**: ISA-certified Rigger, mechanical engineering MSc, Brazil
+- **Role**: ISA-certified Rigger, Mechanical Engineer, Brazil
