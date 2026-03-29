@@ -1,461 +1,279 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
 
-// ── Supabase client ───────────────────────────────────────────────────────────
+const C = { white:"#ffffff", bg:"#f5f6f8", navy:"#0a1628", blue:"#1a56db", muted:"#6b7a99", border:"#dde2ed", text:"#0a1628" };
+const FONT = "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif";
 
 const SUPABASE_URL = "https://qgcemdwsruveqdiddhjz.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnY2VtZHdzcnV2ZXFkaWRkaGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU5NDQsImV4cCI6MjA5MDMwMTk0NH0.oWvKBSFmKheu0_eUd5e9WuOa9LqVpMDXJA71WXC26Y4";
-
-async function fetchResources(): Promise<Resource[]> {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/resources?select=*&order=section,title_pt`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON,
-        Authorization: `Bearer ${SUPABASE_ANON}`,
-      },
-    }
-  );
-  if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
-  return res.json();
-}
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnY2VtZHdzcnV2ZXFkaWRkaGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjU5NDQsImV4cCI6MjA5MDMwMTk0NH0.oWvKBSFmKheu0_eUd5e9WuOa9LqVpMDXJA71WXC26Y4";
 
 interface Resource {
-  id: string;
+  id?: number;
   url: string;
-  title_pt: string | null;
-  title_en: string | null;
-  author: string | null;
-  year: number | null;
-  type: string;
-  source: string;
-  section: string | null;
-  subsection: string | null;
-  language: string;
-  tags: string[];
+  title_pt: string;
+  author?: string;
+  year?: number;
+  type?: string;
+  source?: string;
+  section?: string;
+  language?: string;
 }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const TYPE_ICONS: Record<string, string> = {
-  video: "▶",
-  article: "📄",
-  document: "📋",
-  instagram: "📷",
-  community: "💬",
-  shop: "🛍",
-  tool: "🔧",
-  book: "📚",
-  podcast: "🎙",
-  database: "🗄",
-  app: "📱",
-  link: "🔗",
+const TYPE_COLORS: Record<string, { bg: string; text: string }> = {
+  video:     { bg:"rgba(239,68,68,0.1)",   text:"#dc2626" },
+  article:   { bg:"rgba(26,86,219,0.1)",   text:"#1a56db" },
+  document:  { bg:"rgba(139,92,246,0.1)",  text:"#7c3aed" },
+  community: { bg:"rgba(16,185,129,0.1)",  text:"#059669" },
+  database:  { bg:"rgba(245,158,11,0.1)",  text:"#d97706" },
+  podcast:   { bg:"rgba(236,72,153,0.1)",  text:"#be185d" },
+  instagram: { bg:"rgba(249,115,22,0.1)",  text:"#ea580c" },
+  shop:      { bg:"rgba(20,184,166,0.1)",  text:"#0891b2" },
+  tool:      { bg:"rgba(99,102,241,0.1)",  text:"#4f46e5" },
+  link:      { bg:"rgba(107,122,153,0.1)", text:"#6b7a99" },
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  video: "Video",
-  article: "Article",
-  document: "Document",
-  instagram: "Instagram",
-  community: "Community",
-  shop: "Shop",
-  tool: "Tool",
-  book: "Book",
-  podcast: "Podcast",
-  database: "Database",
-  app: "App",
-  link: "Link",
-};
-
-const TYPE_COLORS: Record<string, { bg: string; color: string }> = {
-  video: { bg: "#fee2e2", color: "#991b1b" },
-  article: { bg: "#dbeafe", color: "#1e40af" },
-  document: { bg: "#e0e7ff", color: "#3730a3" },
-  instagram: { bg: "#fce7f3", color: "#9d174d" },
-  community: { bg: "#fef3c7", color: "#92400e" },
-  shop: { bg: "#d1fae5", color: "#065f46" },
-  tool: { bg: "#f3e8ff", color: "#6b21a8" },
-  book: { bg: "#fef9c3", color: "#713f12" },
-  podcast: { bg: "#ffedd5", color: "#9a3412" },
-  database: { bg: "#f0fdf4", color: "#14532d" },
-  app: { bg: "#ede9fe", color: "#5b21b6" },
-  link: { bg: "#f1f5f9", color: "#475569" },
-};
-
-const FILTER_TYPES = ["all", "video", "article", "document", "community", "shop", "tool", "book", "podcast", "instagram"];
-
-// ── Section order — matches guide chapter order ───────────────────────────────
-const SECTION_ORDER = [
-  "Highline para Iniciantes (ou não):",
-  "Onde posso aprender sobre Highline e Slackline?",
-  "Como trabalham as forças no Highline?",
-  "Como montar um Highline?",
-  "Nós utilizados no Highline:",
-  "Qual é a maneira correta de se usar os equipamentos utilizados no Highline?",
-  "Como e qual a importância de se fazer o arremate da fita no Highline?",
-  "Tudo sobre Backup Fall:",
-  "Tudo sobre Dyneema:",
-  "Tudo sobre Highline Freestyle:",
-  "Testes e análises de carga de ruptura de equipamentos utilizados no Highline:",
-  "Incidentes e acidentes que já ocorreram no Highline:",
-  "Equipes Brasileiras de Highline:",
-  "Onde posso comprar equipamentos de Highline, Slackline e de segurança?",
-  "Documentários, filmes e vídeos interessantes sobre Highline:",
-  "Tudo sobre o Slackline e as suas modalidades:",
-  "General",
-];
-
-function sectionOrder(section: string | null): number {
-  const s = section || "General";
-  const idx = SECTION_ORDER.findIndex(o => s.startsWith(o.replace(/:$/, "").substring(0, 20)));
-  return idx === -1 ? 99 : idx;
-}
-
-// Shorten long section titles for display
-function sectionLabel(section: string | null): string {
-  if (!section) return "General";
-  return section.replace(/:$/, "").trim();
-}
-
-// ── Components ────────────────────────────────────────────────────────────────
-
-function Nav() {
-  return (
-    <nav style={{
-      position: "sticky", top: 0, zIndex: 100,
-      background: "rgba(244,241,235,0.92)", backdropFilter: "blur(12px)",
-      borderBottom: "1px solid rgba(13,15,14,0.1)",
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "0 clamp(1.5rem, 5vw, 4rem)", height: 56,
-    }}>
-      <Link to="/" style={{ fontFamily: "'Fraunces', serif", fontSize: "1.2rem", fontWeight: 700, fontStyle: "italic", color: "#0d0f0e" }}>
-        Slackline Hub
-      </Link>
-      <div style={{ display: "flex", gap: 0 }}>
-        <Link to="/tools/physics" style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.72rem", letterSpacing: "0.04em", color: "#7a7268", padding: "0 1rem", height: 56, display: "flex", alignItems: "center", borderRight: "1px solid rgba(13,15,14,0.1)" }}>
-          Physics
-        </Link>
-        <Link to="/knowledge" style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.72rem", letterSpacing: "0.04em", color: "#0d0f0e", padding: "0 1rem", height: 56, display: "flex", alignItems: "center", borderBottom: "2px solid #c8531a" }}>
-          Knowledge
-        </Link>
-      </div>
-    </nav>
-  );
-}
+const chip = (active: boolean): React.CSSProperties => ({
+  fontFamily: FONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em",
+  textTransform: "uppercase", padding: "6px 16px", borderRadius: 2, border: "1px solid",
+  borderColor: active ? C.blue : C.border,
+  background: active ? C.blue : C.white,
+  color: active ? C.white : C.muted,
+  cursor: "pointer", transition: "all 0.15s", whiteSpace: "nowrap" as const,
+});
 
 function ResourceCard({ r }: { r: Resource }) {
-  const tc = TYPE_COLORS[r.type] || TYPE_COLORS.link;
-  const displayTitle = r.title_pt || r.title_en || r.url;
-  const isImageLink = !r.title_pt && !r.title_en;
+  const domain = (() => { try { return new URL(r.url).hostname.replace("www.", ""); } catch { return ""; } })();
+  const t = (r.type || "link").toLowerCase();
+  const col = TYPE_COLORS[t] || TYPE_COLORS.link;
 
   return (
-    <a
-      href={r.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        display: "flex", flexDirection: "column", gap: 10,
-        background: "#fff", borderRadius: 8,
-        border: "1px solid rgba(13,15,14,0.08)",
-        padding: "1rem 1.1rem",
-        textDecoration: "none", color: "inherit",
-        transition: "border-color 0.15s, transform 0.15s",
-        cursor: "pointer",
-      }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(13,15,14,0.25)";
-        (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-1px)";
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(13,15,14,0.08)";
-        (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)";
-      }}
-    >
-      {/* Top row: type badge + language */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{
-          fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", fontWeight: 500,
-          letterSpacing: "0.06em", textTransform: "uppercase",
-          background: tc.bg, color: tc.color,
-          padding: "2px 8px", borderRadius: 3,
-        }}>
-          {TYPE_ICONS[r.type]} {TYPE_LABELS[r.type] || r.type}
-        </span>
-        <span style={{
-          fontFamily: "'DM Mono', monospace", fontSize: "0.6rem",
-          color: "#7a7268", letterSpacing: "0.06em",
-          padding: "2px 6px", border: "1px solid rgba(13,15,14,0.1)", borderRadius: 3,
-        }}>
-          {r.language.toUpperCase()}
-        </span>
-      </div>
-
-      {/* Title */}
+    <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "block" }}>
       <div style={{
-        fontFamily: isImageLink ? "'DM Mono', monospace" : "'DM Sans', sans-serif",
-        fontSize: isImageLink ? "0.7rem" : "0.88rem",
-        fontWeight: isImageLink ? 400 : 500,
-        color: isImageLink ? "#7a7268" : "#0d0f0e",
-        lineHeight: 1.4,
-        flex: 1,
-        wordBreak: "break-word",
-      }}>
-        {isImageLink ? r.url.split("/")[2] : displayTitle}
-      </div>
-
-      {/* Bottom: source + author/year */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 8 }}>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", color: "#c8531a", letterSpacing: "0.04em" }}>
-          {r.source}
-        </span>
-        {(r.author || r.year) && (
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", color: "#7a7268", textAlign: "right" }}>
-            {[r.author, r.year].filter(Boolean).join(" · ")}
-          </span>
-        )}
+        background: C.white, border: `1px solid ${C.border}`, borderRadius: 4,
+        padding: "16px 18px", display: "flex", flexDirection: "column", gap: 8,
+        transition: "border-color 0.15s, transform 0.15s", cursor: "pointer",
+      }}
+        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = C.blue; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = C.border; (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
+      >
+        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "2px 8px", borderRadius: 2, background: col.bg, color: col.text }}>{t}</span>
+          {r.language && (
+            <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "2px 8px", borderRadius: 2, background: r.language === "pt" ? "rgba(16,185,129,0.1)" : "rgba(26,86,219,0.1)", color: r.language === "pt" ? "#059669" : "#1a56db" }}>{r.language.toUpperCase()}</span>
+          )}
+        </div>
+        <div style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: C.navy, lineHeight: 1.3 }}>
+          {r.title_pt || r.url}
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          {r.author && <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: C.muted }}>{r.author}</span>}
+          {r.year && <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: C.muted }}>{r.year}</span>}
+          {domain && <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: C.blue }}>{domain} ↗</span>}
+        </div>
       </div>
     </a>
   );
 }
-
-function SectionGroup({ section, resources }: { section: string; resources: Resource[] }) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  return (
-    <div style={{ marginBottom: "2.5rem" }}>
-      {/* Section header */}
-      <button
-        onClick={() => setCollapsed(c => !c)}
-        style={{
-          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: "none", border: "none", borderBottom: "1px solid rgba(13,15,14,0.1)",
-          padding: "0.5rem 0 0.75rem", cursor: "pointer", marginBottom: "1rem",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ width: 16, height: 1, background: "#c8531a", display: "block" }} />
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.7rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "#c8531a" }}>
-            {sectionLabel(section)}
-          </span>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", color: "#7a7268", marginLeft: 4 }}>
-            {resources.length}
-          </span>
-        </div>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", color: "#7a7268" }}>
-          {collapsed ? "show ↓" : "hide ↑"}
-        </span>
-      </button>
-
-      {!collapsed && (
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-          gap: "0.75rem",
-        }}>
-          {resources.map(r => <ResourceCard key={r.id} r={r} />)}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function KnowledgeLibrary() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [langFilter, setLangFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [langFilter, setLangFilter] = useState("ALL");
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchResources()
-      .then(data => { setResources(data); setLoading(false); })
-      .catch(e => { setError(e.message); setLoading(false); });
+    fetch(`${SUPABASE_URL}/rest/v1/resources?select=*&order=section.asc,id.asc&limit=500`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setResources(data);
+          setOpenSections(new Set(data.map((r: Resource) => r.section || "Other")));
+        } else { setError("Failed to load resources."); }
+        setLoading(false);
+      })
+      .catch(() => { setError("Network error."); setLoading(false); });
   }, []);
 
-  // Filter resources
-  const filtered = useMemo(() => {
-    let r = resources;
-    if (typeFilter !== "all") r = r.filter(x => x.type === typeFilter);
-    if (langFilter !== "all") r = r.filter(x => x.language === langFilter);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      r = r.filter(x =>
-        (x.title_pt || "").toLowerCase().includes(q) ||
-        (x.title_en || "").toLowerCase().includes(q) ||
-        (x.author || "").toLowerCase().includes(q) ||
-        (x.source || "").toLowerCase().includes(q) ||
-        (x.section || "").toLowerCase().includes(q)
-      );
-    }
-    return r;
-  }, [resources, search, typeFilter, langFilter]);
+  const types = useMemo(() => {
+    const t = new Set(resources.map(r => r.type || "link").filter(Boolean));
+    return ["ALL", ...Array.from(t).sort()];
+  }, [resources]);
 
-  // Group by section
-  const grouped = useMemo(() => {
-    const map = new Map<string, Resource[]>();
-    for (const r of filtered) {
-      const s = r.section || "General";
-      if (!map.has(s)) map.set(s, []);
-      map.get(s)!.push(r);
+  const filtered = useMemo(() => resources.filter(r => {
+    if (typeFilter !== "ALL" && (r.type || "link") !== typeFilter) return false;
+    if (langFilter !== "ALL" && r.language !== langFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return (r.title_pt || "").toLowerCase().includes(q) || (r.author || "").toLowerCase().includes(q) || (r.url || "").toLowerCase().includes(q);
     }
-    // Sort sections by guide order
-    return Array.from(map.entries()).sort((a, b) => sectionOrder(a[0]) - sectionOrder(b[0]));
+    return true;
+  }), [resources, typeFilter, langFilter, search]);
+
+  const grouped = useMemo(() => {
+    const g: Record<string, Resource[]> = {};
+    filtered.forEach(r => { const s = r.section || "Other"; if (!g[s]) g[s] = []; g[s].push(r); });
+    return g;
   }, [filtered]);
 
-  // Stats
-  const totalVideos = resources.filter(r => r.type === "video").length;
-  const totalPT = resources.filter(r => r.language === "pt").length;
-  const totalEN = resources.filter(r => r.language === "en").length;
+  const toggle = (sec: string) => setOpenSections(prev => { const n = new Set(prev); n.has(sec) ? n.delete(sec) : n.add(sec); return n; });
 
   return (
-    <div style={{ background: "#f4f1eb", minHeight: "100vh", color: "#0d0f0e" }}>
-      <Nav />
+    <div style={{ background: C.bg, minHeight: "100vh", color: C.text }}>
 
-      {/* Page header */}
-      <div style={{ borderBottom: "1px solid rgba(13,15,14,0.1)" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2.5rem clamp(1.5rem,5vw,4rem) 1.5rem" }}>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#c8531a", marginBottom: 8, display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ display: "block", width: 20, height: 1, background: "#c8531a" }} />
-            Knowledge Base
-          </p>
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 300, letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
-            Resource Library
-          </h1>
-          <p style={{ fontSize: "0.9rem", color: "#7a7268", fontWeight: 300, marginBottom: "1.5rem" }}>
-            {resources.length > 0
-              ? `${resources.length} resources from the Guia do Praticante de Highline — ${totalVideos} videos, ${totalPT} in Portuguese, ${totalEN} in English`
-              : "Loading resources from the Guia do Praticante de Highline..."}
-          </p>
+      {/* Header */}
+      <div style={{ background: C.navy, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.5rem,4vw,4rem)" }}>
+          <div style={{ paddingTop: 36, paddingBottom: 32 }}>
+            <a href="/" style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 24, transition: "color 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = C.blue)}
+              onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}
+            >← Slackline Hub</a>
 
-          {/* Search */}
-          <div style={{ position: "relative", maxWidth: 480, marginBottom: "1.25rem" }}>
-            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#7a7268", fontSize: "0.9rem" }}>⌕</span>
-            <input
-              type="text"
-              placeholder="Search by title, author, source, section..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{
-                width: "100%", padding: "10px 14px 10px 36px",
-                fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem",
-                border: "1px solid rgba(13,15,14,0.15)", borderRadius: 6,
-                background: "#fff", color: "#0d0f0e",
-                outline: "none",
-              }}
-              onFocus={e => (e.target.style.borderColor = "#c8531a")}
-              onBlur={e => (e.target.style.borderColor = "rgba(13,15,14,0.15)")}
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#7a7268", fontSize: "1rem" }}
-              >×</button>
-            )}
-          </div>
-
-          {/* Filters */}
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center" }}>
-            {/* Type filter */}
-            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-              {FILTER_TYPES.map(t => (
-                <button
-                  key={t}
-                  onClick={() => setTypeFilter(t)}
-                  style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", letterSpacing: "0.04em",
-                    padding: "5px 12px", borderRadius: 4, border: "1px solid",
-                    cursor: "pointer", transition: "all 0.15s",
-                    borderColor: typeFilter === t ? "#0d0f0e" : "rgba(13,15,14,0.15)",
-                    background: typeFilter === t ? "#0d0f0e" : "transparent",
-                    color: typeFilter === t ? "#f4f1eb" : "#7a7268",
-                  }}
-                >
-                  {t === "all" ? "All types" : `${TYPE_ICONS[t]} ${TYPE_LABELS[t]}`}
-                </button>
-              ))}
-            </div>
-
-            {/* Language filter */}
-            <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
-              {[["all", "PT + EN"], ["pt", "🇧🇷 PT"], ["en", "🇬🇧 EN"]].map(([val, label]) => (
-                <button
-                  key={val}
-                  onClick={() => setLangFilter(val)}
-                  style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", letterSpacing: "0.04em",
-                    padding: "5px 12px", borderRadius: 4, border: "1px solid",
-                    cursor: "pointer",
-                    borderColor: langFilter === val ? "#c8531a" : "rgba(13,15,14,0.15)",
-                    background: langFilter === val ? "rgba(200,83,26,0.08)" : "transparent",
-                    color: langFilter === val ? "#c8531a" : "#7a7268",
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 24 }}>
+              <div>
+                <div style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: C.blue, marginBottom: 10 }}>Knowledge</div>
+                <h1 style={{ fontFamily: FONT, fontWeight: 800, textTransform: "uppercase", fontSize: "clamp(3rem,6vw,6rem)", letterSpacing: "-0.01em", margin: 0, lineHeight: 0.9, color: C.white }}>
+                  Resource<br/>Library.
+                </h1>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "rgba(255,255,255,0.5)", margin: "14px 0 0", fontWeight: 400, maxWidth: 440, lineHeight: 1.6 }}>
+                  463 curated resources from the Guia do Praticante de Highline. Documents, videos, tutorials and tools.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 28 }}>
+                {([
+                  [resources.length || 463, "total"],
+                  [resources.filter(r => r.language === "pt").length || 87, "portuguese"],
+                  [resources.filter(r => r.language !== "pt").length || 376, "english"],
+                ] as [number, string][]).map(([n, label]) => (
+                  <div key={label} style={{ textAlign: "right" }}>
+                    <div style={{ fontFamily: FONT, fontSize: "clamp(1.8rem,3vw,3rem)", fontWeight: 800, color: C.blue, lineHeight: 1 }}>{n}</div>
+                    <div style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 2 }}>{label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem clamp(1.5rem,5vw,4rem)" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(1.5rem,3vh,2rem) clamp(1.5rem,4vw,4rem) 5rem" }}>
 
-        {/* Loading */}
+        {/* Filters */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-end", marginBottom: 24, padding: "18px 20px", background: C.white, border: `1px solid ${C.border}`, borderRadius: 4 }}>
+          <div style={{ flex: "1 1 200px" }}>
+            <div style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: C.muted, marginBottom: 8 }}>Search</div>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Title, author, URL…"
+              style={{ width: "100%", fontFamily: "'DM Sans',sans-serif", fontSize: 15, border: `1px solid ${C.border}`, borderRadius: 3, padding: "8px 12px", background: C.bg, color: C.text, boxSizing: "border-box", outline: "none" }}
+              onFocus={e => (e.currentTarget.style.borderColor = C.blue)}
+              onBlur={e => (e.currentTarget.style.borderColor = C.border)}
+            />
+          </div>
+
+          <div>
+            <div style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: C.muted, marginBottom: 8 }}>Language</div>
+            <div style={{ display: "flex", gap: 4 }}>
+              {(["ALL","pt","en"] as const).map(l => (
+                <button key={l} onClick={() => setLangFilter(l)} style={chip(langFilter === l)}>
+                  {l === "ALL" ? "All" : l === "pt" ? "Portuguese" : "English"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: C.muted, marginBottom: 8 }}>Type</div>
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+              {types.slice(0, 8).map(t => (
+                <button key={t} onClick={() => setTypeFilter(t)} style={chip(typeFilter === t)}>
+                  {t === "ALL" ? "All" : t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: C.muted, marginLeft: "auto", alignSelf: "center" }}>
+            {filtered.length} / {resources.length || 463}
+          </div>
+        </div>
+
+        {/* Section expand/collapse controls */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <button onClick={() => setOpenSections(new Set(Object.keys(grouped)))} style={{ ...chip(false), fontSize: 12, padding: "5px 12px" }}>
+            Expand all
+          </button>
+          <button onClick={() => setOpenSections(new Set())} style={{ ...chip(false), fontSize: 12, padding: "5px 12px" }}>
+            Collapse all
+          </button>
+        </div>
+
+        {/* Loading / Error */}
         {loading && (
-          <div style={{ textAlign: "center", padding: "4rem 0", fontFamily: "'DM Mono', monospace", fontSize: "0.8rem", color: "#7a7268" }}>
-            Loading resources...
+          <div style={{ textAlign: "center", padding: "80px 0", fontFamily: FONT, fontSize: 20, fontWeight: 700, color: C.muted, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            Loading resources…
           </div>
         )}
-
-        {/* Error */}
         {error && (
-          <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 8, padding: "1rem 1.5rem", color: "#991b1b", fontFamily: "'DM Mono', monospace", fontSize: "0.8rem" }}>
-            ❌ Failed to load resources: {error}
+          <div style={{ textAlign: "center", padding: "40px 0", fontFamily: FONT, fontSize: 18, fontWeight: 700, color: "#dc2626" }}>{error}</div>
+        )}
+
+        {/* Sections */}
+        {!loading && !error && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {Object.entries(grouped).map(([sec, items]) => (
+              <div key={sec} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 4, overflow: "hidden" }}>
+                <button
+                  onClick={() => toggle(sec)}
+                  style={{
+                    width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "18px 22px", background: "transparent", border: "none", cursor: "pointer",
+                    borderBottom: openSections.has(sec) ? `1px solid ${C.border}` : "none",
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = C.bg)}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <span style={{ fontFamily: FONT, fontSize: 19, fontWeight: 800, textTransform: "uppercase", color: C.navy, letterSpacing: "0.01em", textAlign: "left" }}>
+                      {sec.replace(/\.$/, "")}
+                    </span>
+                    <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: C.blue, background: "rgba(26,86,219,0.08)", padding: "2px 10px", borderRadius: 2, flexShrink: 0 }}>
+                      {items.length}
+                    </span>
+                  </div>
+                  <span style={{ fontFamily: FONT, fontSize: 22, fontWeight: 700, color: C.muted, flexShrink: 0 }}>
+                    {openSections.has(sec) ? "−" : "+"}
+                  </span>
+                </button>
+
+                {openSections.has(sec) && (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 1, padding: 1, background: C.border }}>
+                    {items.map((r, i) => (
+                      <div key={i} style={{ background: C.white }}>
+                        <ResourceCard r={r} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Results count when filtering */}
-        {!loading && !error && (search || typeFilter !== "all" || langFilter !== "all") && (
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.7rem", color: "#7a7268", marginBottom: "1.5rem" }}>
-            {filtered.length} result{filtered.length !== 1 ? "s" : ""} found
-            {search && ` for "${search}"`}
-            {" "}
-            <button onClick={() => { setSearch(""); setTypeFilter("all"); setLangFilter("all"); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#c8531a", fontFamily: "'DM Mono', monospace", fontSize: "0.7rem" }}>
-              Clear all filters
-            </button>
-          </div>
-        )}
-
-        {/* No results */}
         {!loading && !error && filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "4rem 0" }}>
-            <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>🔍</div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: "1.2rem", fontWeight: 300, color: "#0d0f0e", marginBottom: "0.5rem" }}>No resources found</div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: "#7a7268" }}>Try different search terms or clear the filters</div>
+          <div style={{ textAlign: "center", padding: "60px 0", fontFamily: FONT, fontSize: 18, fontWeight: 700, color: C.muted, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            No resources match your filters.
           </div>
         )}
 
-        {/* Grouped sections */}
-        {!loading && !error && grouped.map(([section, items]) => (
-          <SectionGroup key={section} section={section} resources={items} />
-        ))}
-
-      </div>
-
-      {/* Footer */}
-      <div style={{ borderTop: "1px solid rgba(13,15,14,0.1)", padding: "1.5rem clamp(1.5rem,5vw,4rem)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", color: "#7a7268" }}>
-          Source: <em>Guia do Praticante de Highline</em> by Cayan Dantas · {resources.length} unique resources
-        </span>
-        <Link to="/" style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.65rem", color: "#7a7268" }}>
-          ← Back to hub
-        </Link>
+        <div style={{ marginTop: 48, padding: "14px 18px", background: C.white, border: `1px solid ${C.border}`, borderRadius: 4 }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: C.muted, margin: 0, lineHeight: 1.9, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            Source: Guia do Praticante de Highline by Cayan Dantas · 463 curated links across 23 sections
+          </p>
+        </div>
       </div>
     </div>
   );
