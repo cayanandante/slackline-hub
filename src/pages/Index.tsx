@@ -5,14 +5,14 @@ import { Link } from "react-router-dom";
 // Font: Barlow Condensed (loaded via index.html or index.css)
 
 const C = {
-  white:   "#ffffff",
-  bg:      "#f5f6f8",
-  navy:    "#0a1628",
-  blue:    "#1a56db",
-  mid:     "#3b5a8a",
-  muted:   "#6b7a99",
-  border:  "#dde2ed",
-  text:    "#0a1628",
+  white: "#ffffff",
+  bg: "#f5f6f8",
+  navy: "#0a1628",
+  blue: "#1a56db",
+  mid: "#3b5a8a",
+  muted: "#6b7a99",
+  border: "#dde2ed",
+  text: "#0a1628",
 };
 
 // ─── Tool data ────────────────────────────────────────────────────────────────
@@ -65,8 +65,8 @@ function Nav() {
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M3 15L10 5L17 15" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M6 11H14" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+            <path d="M3 15L10 5L17 15" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M6 11H14" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </div>
         <span style={{
@@ -96,7 +96,7 @@ function Nav() {
         ))}
         {/* Language selector */}
         <div style={{ display: "flex", gap: 2, marginLeft: 12, borderLeft: `1px solid ${C.border}`, paddingLeft: 12 }}>
-          {["EN","PT","ES"].map((lang, i) => (
+          {["EN", "PT", "ES"].map((lang, i) => (
             <button key={lang} style={{
               fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
               fontSize: 12, fontWeight: 700, letterSpacing: "0.1em",
@@ -237,27 +237,6 @@ function StatsBar() {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-// ─── Safety bar ───────────────────────────────────────────────────────────────
-
-function SafetyBar() {
-  return (
-    <div style={{
-      background: "#fef3c7", borderBottom: `1px solid #fcd34d`,
-      padding: "12px clamp(1.5rem,5vw,5rem)",
-      display: "flex", alignItems: "center", gap: 10,
-    }}>
-      <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
-      <p style={{
-        fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
-        fontSize: 13, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase",
-        color: "#92400e", margin: 0,
-      }}>
-        Always verify with a certified ISA Rigger before use
-      </p>
     </div>
   );
 }
@@ -406,7 +385,7 @@ function About() {
             Created by <strong style={{ color: C.white }}>Cayan Dantas</strong>, ISA Certified Rigger and Mechanical Engineer from Brazil.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {["ISA Open Data","SlackDB","Balance Community","RopeLab","HowNOT2"].map(s => (
+            {["ISA Open Data", "SlackDB", "Balance Community", "RopeLab", "HowNOT2"].map(s => (
               <span key={s} style={{
                 fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
                 fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
