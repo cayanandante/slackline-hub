@@ -11,7 +11,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/tools/physics" element={<PhysicsCalculator />} />
-        <Route path="/knowledge" element={<KnowledgeLibrary />} />
+        <Route path="/knowledge/resources" element={<KnowledgeLibrary />} />
         <Route path="/tools/double-check" element={<DoubleCheck />} />
         <Route path="/gear/webbing" element={<WebbingDatabase />} />
       </Routes>

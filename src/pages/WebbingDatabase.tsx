@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import rawWebbingData from "../data/webbing_database.json" assert { type: "json" };
+import rawWebbingData from "../data/webbing_database.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
