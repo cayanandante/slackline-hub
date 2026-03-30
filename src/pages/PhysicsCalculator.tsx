@@ -694,8 +694,6 @@ function AnchorAngleCalc({ units }: { units: Units }) {
                 // MP at world (0,0,1.8) — elevated above ground origin
                 const mpH = 1.8 + beta * 0.025; // height scales with beta
                 const MP = iso(0,0,mpH);
-                // Ground plane center
-                const GC = iso(0,0,0);
                 // Bolt positions on ground: n legs at equal angles around MP projection
                 const boltRadius = 1.4;
                 const bolts = Array.from({length:numLegs}, (_,i) => {
