@@ -94,22 +94,6 @@ const styles = {
   } as React.CSSProperties,
 };
 
-function SafetyBadge({ value, thresholds }: { value: number; thresholds: [number, number] }) {
-  const color =
-    value >= thresholds[1] ? "#00bfa5" :
-    value >= thresholds[0] ? "#5c6685" : "#ef5350";
-  const bg =
-    value >= thresholds[1] ? "rgba(0,191,165,0.1)" :
-    value >= thresholds[0] ? "rgba(92,102,133,0.1)" : "rgba(239,83,80,0.1)";
-  const label =
-    value >= thresholds[1] ? "✓ Safe" :
-    value >= thresholds[0] ? "⚠ Caution" : "✕ Danger";
-  return (
-    <span style={{
-      background: bg, color, fontFamily: DFONT, fontSize: 15, fontWeight: 700, padding: "6px 14px", borderRadius: 8,
-    }}>{label}</span>
-  );
-}
 
 function ResultCard({ label, value, unit, sub }: { label: string; value: string | number; unit?: string; sub?: string }) {
   return (
@@ -214,8 +198,6 @@ function LineTensionCalc({ units }: { units: Units }) {
   const FA_total = round2(FA_exact + T0);
   const FB_total = round2(FB_exact + T0);
 
-  // Approx (DAV formula for center, adjusted for position) — kept for reference
-  const Fapprox = round2((W * G * L) / (4 * Math.max(0.01, S) * 1000));
 
   const thetaADeg = round2(deg(thetaA));
   const thetaBDeg = round2(deg(thetaB));
@@ -521,7 +503,7 @@ function AnchorAngleCalc({ units }: { units: Units }) {
 
   const legPositions: { x: number; y: number; angleDeg: number }[] = [];
   for (let i = 0; i < numLegs; i++) {
-    const angleDeg = numLegs === 1 ? 0 : -alpha / 2 + (alpha / (numLegs - 1)) * i;
+    const angleDeg = numLegs <= 1 ? 0 : -alpha / 2 + (alpha / (numLegs - 1)) * i;
     const r = rad(angleDeg);
     legPositions.push({
       x: mpX + legLen * Math.sin(r),
@@ -530,23 +512,13 @@ function AnchorAngleCalc({ units }: { units: Units }) {
     });
   }
 
-  // Angle arc: should be concave toward master point (away from legs)
-  // i.e. arc curves UPWARD (toward y=0), away from the legs which go downward
+  // Angle arc
   const arcR = 44;
   const arcPath = alpha > 5 && alpha < 175
     ? `M ${mpX + arcR * Math.sin(rad(-alpha/2))} ${mpY + arcR * Math.cos(rad(-alpha/2))}
        A ${arcR} ${arcR} 0 0 0
        ${mpX + arcR * Math.sin(rad(alpha/2))} ${mpY + arcR * Math.cos(rad(alpha/2))}`
     : "";
-
-  // ── Side-view geometry ───────────────────────────────────────────────────────
-  const sideW = 480, sideH = 220;
-  const groundY2 = sideH - 30;
-  const boltX = 80, boltY = groundY2 - 20;  // bolt is on a flat surface (ground)
-  const legLenSide = 130;
-  // MP is elevated above bolt
-  const mpSX = boltX + legLenSide * Math.cos(betaR);
-  const mpSY = boltY - legLenSide * Math.sin(betaR);
 
   return (
     <div>
