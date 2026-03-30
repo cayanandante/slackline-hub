@@ -35,6 +35,7 @@ const DC = {
   border: "#dde3f0",
   text:   "#1a237e",
 };
+const C_white = "#ffffff"; // alias for education section cards
 const DFONT = "'DM Sans', sans-serif";
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
@@ -127,11 +128,11 @@ function SourceNote({ children }: { children: React.ReactNode }) {
 // ─── Calculator 1: Line Tension ───────────────────────────────────────────────
 
 function LineTensionCalc({ units }: { units: Units }) {
-  const [L, setL] = useState(100);   // line length m
-  const [S, setS] = useState(3);     // sag m
-  const [W, setW] = useState(75);    // body weight kg
-  const [T0, setT0] = useState(2);   // pre-tension kN
-  const [mbs, setMbs] = useState(50); // anchor MBS kN
+  const [L, setL] = useState(100);      // line length m
+  const [S, setS] = useState(3);        // sag m
+  const [W, setW] = useState(75);       // body weight kg
+  const [T0, setT0] = useState(2);      // pre-tension kN
+  const [pos, setPos] = useState(50);   // slackliner position % from anchor A (0–100)
 
   const uL = units === "imperial" ? m2ft(L) : L;
   const uS = units === "imperial" ? m2ft(S) : S;
@@ -142,223 +143,324 @@ function LineTensionCalc({ units }: { units: Units }) {
   const setUS = (v: number) => setS(uUnit ? ft2m(v) : v);
   const setUW = (v: number) => setW(uUnit ? lb2kg(v) : v);
 
-  // Calculations
-  const theta = Math.atan(S / (L / 2));           // sag angle at anchor
-  const thetaDeg = round2(deg(theta));
-  const Fapprox = round2((W * G * L) / (4 * S * 1000));  // kN DAV formula
-  const Fexact = round2((W * G) / (2 * Math.sin(theta) * 1000));   // kN exact
-  const Ttotal = round2(Fexact + T0);
-  const safetyFactor = round2(mbs / Ttotal);
+  // ── Physics ──────────────────────────────────────────────────────────────────
+  // Slackliner at position p (0..1) along line, sag S at that point (parabolic approx)
+  // Sag at position p: S_p = 4 * S_max * p * (1-p)  (parabola, max at center)
+  // Angle at anchor A: tan(θ_A) = (S_p / (p * L)) → θ_A = atan(S_p / (p * L))
+  // Angle at anchor B: tan(θ_B) = (S_p / ((1-p) * L)) → θ_B = atan(S_p / ((1-p) * L))
+  // Force equilibrium: W*g = T_A * sin(θ_A) + T_B * sin(θ_B)
+  // Horizontal: T_A * cos(θ_A) = T_B * cos(θ_B) = T_line (line tension)
+  // → T_line = W*g / (tan(θ_A) + tan(θ_B)) = W*g * p*(1-p)*L / (S_p * ... )
+  // Simplified for parabolic sag:
+  //   T_line ≈ W*g*L / (8*S_max)  when at center (standard formula, DAV 2006)
+  //   At position p: T_A = T_line / cos(θ_A),  T_B = T_line / cos(θ_B)
+
+  const p = Math.max(0.02, Math.min(0.98, pos / 100));
+  const Sp = 4 * S * p * (1 - p);       // sag at person's position
+  const Sp_safe = Math.max(0.01, Sp);
+
+  // Angles at each anchor
+  const thetaA = Math.atan(Sp_safe / (p * L));       // angle at anchor A
+  const thetaB = Math.atan(Sp_safe / ((1 - p) * L)); // angle at anchor B
+
+  // Line tension (horizontal component — constant along line)
+  const Tline = round2((W * G) / ((Math.tan(thetaA) + Math.tan(thetaB)) * 1000));
+
+  // Force on each anchor = tension along the leg
+  const FA_exact = round2(Tline / Math.cos(thetaA));   // force on anchor A
+  const FB_exact = round2(Tline / Math.cos(thetaB));   // force on anchor B
+
+  // Add pre-tension to each anchor
+  const FA_total = round2(FA_exact + T0);
+  const FB_total = round2(FB_exact + T0);
+
+  // Approx (DAV formula for center, adjusted for position) — kept for reference
+  const Fapprox = round2((W * G * L) / (4 * Math.max(0.01, S) * 1000));
+
+  const thetaADeg = round2(deg(thetaA));
+  const thetaBDeg = round2(deg(thetaB));
+
+  const maxForce = Math.max(FA_total, FB_total);
+
+  // Safety status based on equipment failure, not anchor MBS
+  const safetyStatus: "ok" | "caution" | "danger" =
+    maxForce >= 18 ? "danger" : maxForce >= 12 ? "caution" : "ok";
+
+  const statusColor = safetyStatus === "danger" ? DC.coral : safetyStatus === "caution" ? DC.amber : DC.teal;
+  const statusLabel = safetyStatus === "danger" ? "Danger — Equipment failure risk" : safetyStatus === "caution" ? "Caution — High load, reduce tension" : "Safe — Within normal operating range";
 
   const wDisp = (kn: number) => `≈ ${Math.round(kN2kg(kn))} kg`;
 
-  // SVG diagram — live updating
-  const svgW = 480, svgH = 200;
-  const ax = 40, ay = 60;
-  const bx = svgW - 40, by = 60;
-  const sagFrac = Math.min(0.9, S / (L * 0.1 + S));
-  const midY = ay + sagFrac * 120;
-  const d = `M ${ax} ${ay} Q ${svgW / 2} ${midY + 20} ${bx} ${by}`;
+  // ── SVG diagram ──────────────────────────────────────────────────────────────
+  const svgW = 560, svgH = 280;
+  const AX = 50, AY = 90, BX = svgW - 50, BY = 90;
+
+  // Pre-tension straightens line: with high T0 relative to body weight,
+  // line is more taut (less sag). We model visual sag as:
+  // visual_sag = S * (1 + W*G/(T0*1000 + 1)) / something
+  // Simpler: visual sag proportional to S, reduced by pre-tension
+  const pretensionStraighten = Math.max(0.1, 1 - T0 / (T0 + 5));
+  const visualSagMax = Math.max(2, Math.min(svgH - AY - 60, (Sp_safe / (L * 0.005 + Sp_safe)) * (svgH - AY - 60) * pretensionStraighten));
+
+  // Person X position on line
+  const personX = AX + p * (BX - AX);
+  // Person Y on catenary curve (quadratic approx)
+  const personY = AY + 4 * visualSagMax * p * (1 - p);
+
+  // Parabolic curve through 3 points: A, person, B
+  // Control point for quadratic bezier
+  const cpY = AY + visualSagMax * (1 / (4 * p * (1 - p))) * 4 * p * (1 - p) / 1;
+  // Simpler: just use visually correct sag
+  const midSagY = AY + visualSagMax;
+  const lineD = `M ${AX} ${AY} Q ${svgW / 2} ${midSagY} ${BX} ${BY}`;
+
+  // Force arrow directions at each anchor
+  const arrowAX = Math.cos(Math.PI + thetaA) * 30;
+  const arrowAY = -Math.sin(thetaA) * 30;
+  const arrowBX = Math.cos(-thetaB) * 30;
+  const arrowBY = -Math.sin(thetaB) * 30;
 
   return (
     <div>
-      <SectionTitle>Line tension & anchor load</SectionTitle>
-      <p style={{ fontSize: 14, color: "#7a7268", marginBottom: 24, lineHeight: 1.65 }}>
-        Calculates the tension in your highline and the force on each anchor.
-        Based on the DAV formula (German Alpine Club, 2006) — the standard used by ISA.
+      <SectionTitle>Line Tension & Anchor Load</SectionTitle>
+      <p style={{ fontSize: 17, color: DC.muted, marginBottom: 32, lineHeight: 1.7, maxWidth: 640 }}>
+        Calculates the tension in your highline and the force on each anchor based on the slackliner's position.
+        Uses the DAV formula (German Alpine Club, 2006) — the standard adopted by ISA.
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
+        {/* Controls */}
         <div>
           <SliderRow label="Line length (L)" value={uL} min={uUnit ? 33 : 10} max={uUnit ? 6561 : 2000} step={uUnit ? 10 : 1} unit={uUnit ? "ft" : "m"} onChange={setUL} />
-          <SliderRow label="Sag under load (S)" value={uS} min={uUnit ? 0.5 : 0.1} max={uUnit ? 164 : 50} step={uUnit ? 0.5 : 0.1} unit={uUnit ? "ft" : "m"} onChange={setUS} />
+          <SliderRow label="Sag under load (S)" value={uS} min={uUnit ? 0.2 : 0.1} max={uUnit ? 164 : 50} step={uUnit ? 0.2 : 0.1} unit={uUnit ? "ft" : "m"} onChange={setUS} />
           <SliderRow label="Body weight (W)" value={uW} min={uUnit ? 88 : 40} max={uUnit ? 330 : 150} step={1} unit={uUnit ? "lb" : "kg"} onChange={setUW} />
-          <SliderRow label="Pre-tension (T₀)" value={T0} min={0} max={20} step={0.5} unit="kN" onChange={setT0} />
+          <SliderRow label="Pre-tension (T₀)" value={T0} min={0} max={15} step={0.5} unit="kN" onChange={setT0} />
 
-          <div style={{ marginTop: 20, padding: "12px 14px", background: "rgba(13,15,14,0.04)", borderRadius: 8 }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7a7268", marginBottom: 8 }}>Safety check — anchor MBS</div>
-            <SliderRow label="Anchor MBS" value={mbs} min={10} max={100} step={1} unit="kN" onChange={setMbs} />
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 13 }}>Safety factor: <strong>{safetyFactor}×</strong></span>
-              <SafetyBadge value={safetyFactor} thresholds={[2, 3]} />
+          <div style={{ marginTop: 24, padding: "18px 20px", background: DC.bg, borderRadius: 12, border: `1px solid ${DC.border}` }}>
+            <div style={{ fontFamily: DFONT, fontSize: 14, fontWeight: 700, color: DC.muted, marginBottom: 12, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              Slackliner position along the line
+            </div>
+            <SliderRow
+              label={`Position: ${pos}% from Anchor A`}
+              value={pos} min={5} max={95} step={1} unit="%"
+              onChange={v => setPos(v)}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between", fontFamily: DFONT, fontSize: 13, color: DC.muted, marginTop: -8 }}>
+              <span>Anchor A</span>
+              <span>Center</span>
+              <span>Anchor B</span>
+            </div>
+          </div>
+
+          {/* Status badge */}
+          <div style={{ marginTop: 20, padding: "16px 20px", borderRadius: 12, background: `${statusColor}15`, border: `2px solid ${statusColor}`, display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 12, height: 12, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
+            <div>
+              <div style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 800, color: statusColor }}>{statusLabel}</div>
+              <div style={{ fontFamily: DFONT, fontSize: 14, color: DC.muted, marginTop: 2 }}>
+                Max force: <strong style={{ color: statusColor }}>{maxForce} kN</strong>
+                {safetyStatus !== "ok" && " — Reduce sag or pre-tension"}
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Diagram + Results */}
         <div>
-          {/* Live SVG diagram */}
-          <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ marginBottom: 16, borderRadius: 8, background: "rgba(13,15,14,0.02)", border: "1px solid rgba(13,15,14,0.08)" }}>
-            {/* Ground */}
-            <line x1={0} y1={svgH - 20} x2={svgW} y2={svgH - 20} stroke="#c8c0b0" strokeWidth={1} />
-            {/* Height line */}
-            <line x1={svgW / 2} y1={midY + 22} x2={svgW / 2} y2={svgH - 20} stroke="#7a7268" strokeWidth={1} strokeDasharray="3,3" />
-            <text x={svgW / 2 + 5} y={svgH - 28} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">S = {uUnit ? `${m2ft(S)}ft` : `${S}m`}</text>
-            {/* Anchor points */}
-            <circle cx={ax} cy={ay} r={6} fill="#0d0f0e" />
-            <circle cx={bx} cy={by} r={6} fill="#0d0f0e" />
-            <circle cx={ax} cy={ay} r={3} fill="#c8531a" />
-            <circle cx={bx} cy={by} r={3} fill="#c8531a" />
-            {/* Backup (dashed) */}
-            <path d={`M ${ax} ${ay + 8} Q ${svgW / 2} ${midY + 38} ${bx} ${by + 8}`} fill="none" stroke="#7a7268" strokeWidth={1.5} strokeDasharray="4,3" />
-            {/* Main line */}
-            <path d={d} fill="none" stroke="#0d0f0e" strokeWidth={3} />
-            <path d={d} fill="none" stroke="#c8531a" strokeWidth={1.5} opacity={0.6} />
-            {/* Person */}
-            <circle cx={svgW / 2} cy={midY + 10} r={7} fill="#0d0f0e" />
-            {/* Force arrows */}
-            <line x1={ax} y1={ay} x2={ax - 18} y2={ay - 22} stroke="#c8531a" strokeWidth={2} markerEnd="url(#arrowR)" />
-            <line x1={bx} y1={by} x2={bx + 18} y2={by - 22} stroke="#c8531a" strokeWidth={2} markerEnd="url(#arrowR)" />
-            {/* Labels */}
-            <text x={ax - 26} y={ay - 28} fontSize={9} fill="#c8531a" fontFamily="'DM Mono', monospace">F</text>
-            <text x={bx + 22} y={by - 28} fontSize={9} fill="#c8531a" fontFamily="'DM Mono', monospace">F</text>
-            <text x={ax - 4} y={ay + 20} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">A</text>
-            <text x={bx + 6} y={by + 20} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">B</text>
-            <text x={svgW / 2 - 16} y={midY + 34} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">θ={thetaDeg}°</text>
+          <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ marginBottom: 20, borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}` }}>
             <defs>
-              <marker id="arrowR" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={6} markerHeight={6} orient="auto-start-reverse">
-                <path d="M2 1L8 5L2 9" fill="none" stroke="#c8531a" strokeWidth={1.5} />
+              <marker id="arrT" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
+                <path d="M2 1L8 5L2 9" fill="none" stroke={DC.coral} strokeWidth={1.5}/>
               </marker>
+              {/* Person silhouette clip */}
             </defs>
+
+            {/* Sky background hint */}
+            <rect x={0} y={0} width={svgW} height={svgH - 40} fill="none"/>
+
+            {/* Ground */}
+            <rect x={0} y={svgH - 40} width={svgW} height={40} fill={`${DC.border}50`} rx={0}/>
+            <line x1={0} y1={svgH - 40} x2={svgW} y2={svgH - 40} stroke={DC.border} strokeWidth={1.5}/>
+
+            {/* Vertical lines from anchors to ground */}
+            <line x1={AX} y1={AY} x2={AX} y2={svgH - 40} stroke={DC.border} strokeWidth={1} strokeDasharray="3,3"/>
+            <line x1={BX} y1={BY} x2={BX} y2={svgH - 40} stroke={DC.border} strokeWidth={1} strokeDasharray="3,3"/>
+
+            {/* Height marker */}
+            <line x1={svgW/2 - 60} y1={personY} x2={svgW/2 - 60} y2={svgH - 40} stroke={DC.muted} strokeWidth={1} strokeDasharray="2,3" opacity={0.5}/>
+
+            {/* Backup line (dashed, slightly below main) */}
+            <path d={`M ${AX} ${AY + 6} Q ${svgW/2} ${midSagY + 10} ${BX} ${BY + 6}`} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="5,4" opacity={0.4}/>
+
+            {/* Main line */}
+            <path d={lineD} fill="none" stroke={DC.navy} strokeWidth={3}/>
+            <path d={lineD} fill="none" stroke={DC.blue} strokeWidth={1.5} opacity={0.5}/>
+
+            {/* Force arrows at anchors */}
+            <line
+              x1={AX} y1={AY}
+              x2={AX + arrowAX} y2={AY + arrowAY}
+              stroke={DC.coral} strokeWidth={2.5} markerEnd="url(#arrT)"
+            />
+            <line
+              x1={BX} y1={BY}
+              x2={BX - arrowBX} y2={BY + arrowBY}
+              stroke={DC.coral} strokeWidth={2.5} markerEnd="url(#arrT)"
+            />
+
+            {/* Force labels */}
+            <text x={AX - 8} y={AY - 36} fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="800" textAnchor="middle">{FA_total} kN</text>
+            <text x={BX + 8} y={BY - 36} fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="800" textAnchor="middle">{FB_total} kN</text>
+
+            {/* Anchor dots */}
+            <circle cx={AX} cy={AY} r={8} fill={DC.navy}/>
+            <circle cx={AX} cy={AY} r={4} fill={DC.blue}/>
+            <circle cx={BX} cy={BY} r={8} fill={DC.navy}/>
+            <circle cx={BX} cy={BY} r={4} fill={DC.blue}/>
+
+            {/* Anchor labels */}
+            <text x={AX} y={AY + 22} fontSize={14} fill={DC.navy} fontFamily={DFONT} fontWeight="700" textAnchor="middle">A</text>
+            <text x={BX} y={BY + 22} fontSize={14} fill={DC.navy} fontFamily={DFONT} fontWeight="700" textAnchor="middle">B</text>
+
+            {/* Minimalist person silhouette on line */}
+            {/* Body */}
+            <circle cx={personX} cy={personY - 10} r={5} fill={DC.navy}/>
+            {/* Torso */}
+            <line x1={personX} y1={personY - 5} x2={personX} y2={personY + 8} stroke={DC.navy} strokeWidth={2.5} strokeLinecap="round"/>
+            {/* Legs (spread slightly) */}
+            <line x1={personX} y1={personY + 8} x2={personX - 5} y2={personY + 18} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+            <line x1={personX} y1={personY + 8} x2={personX + 5} y2={personY + 18} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+            {/* Arms out */}
+            <line x1={personX - 9} y1={personY + 2} x2={personX + 9} y2={personY + 2} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+            {/* Leash to line */}
+            <line x1={personX} y1={personY + 18} x2={personX} y2={personY} stroke={DC.muted} strokeWidth={1} strokeDasharray="2,2" opacity={0.6}/>
           </svg>
 
-          {/* Results */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            <ResultCard label="Sag angle θ" value={thetaDeg} unit="°" />
-            <ResultCard label="Anchor force (approx)" value={uUnit ? kN2lbf(Fapprox) : Fapprox} unit={uUnit ? "lbf" : "kN"} sub={wDisp(Fapprox)} />
-            <ResultCard label="Anchor force (exact)" value={uUnit ? kN2lbf(Fexact) : Fexact} unit={uUnit ? "lbf" : "kN"} sub={wDisp(Fexact)} />
-            <ResultCard label="Total with pre-tension" value={uUnit ? kN2lbf(Ttotal) : Ttotal} unit={uUnit ? "lbf" : "kN"} sub={`Safety: ${safetyFactor}×`} />
+          {/* Result cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <ResultCard label="Force on Anchor A" value={uUnit ? kN2lbf(FA_total) : FA_total} unit={uUnit ? "lbf" : "kN"} sub={`${wDisp(FA_total)} · θ=${thetaADeg}°`} />
+            <ResultCard label="Force on Anchor B" value={uUnit ? kN2lbf(FB_total) : FB_total} unit={uUnit ? "lbf" : "kN"} sub={`${wDisp(FB_total)} · θ=${thetaBDeg}°`} />
+            <ResultCard label="Line tension (T)" value={uUnit ? kN2lbf(Tline) : Tline} unit={uUnit ? "lbf" : "kN"} sub="horizontal component" />
+            <ResultCard label="Pre-tension (T₀)" value={uUnit ? kN2lbf(T0) : T0} unit={uUnit ? "lbf" : "kN"} sub="applied before load" />
           </div>
         </div>
       </div>
 
       <SourceNote>
-        FORMULA: F ≈ (W × g × L) / (4 × S) — DAV Research (2006). Exact: F = (W × g) / (2 × sin θ).
-        Source: Bergfreunde.eu, ISA Safety Standards. Assumes static load, person at center, level anchors.
+        FORMULAS: Sag at position p: S(p) = 4·S_max·p·(1-p). Line tension: T = W·g / (tan θ_A + tan θ_B).
+        Anchor forces: F_A = T / cos θ_A, F_B = T / cos θ_B. Pre-tension adds directly to anchor force.
+        DAV Research (2006), ISA Safety Standards. Static load only — dynamic loads can be 1.5–3× higher.
       </SourceNote>
+
+      {/* ── Education section ── */}
+      <div style={{ marginTop: 60, borderTop: `2px solid ${DC.border}`, paddingTop: 48 }}>
+        <h3 style={{ fontFamily: DFONT, fontSize: 28, fontWeight: 800, color: DC.navy, marginBottom: 36, letterSpacing: "-0.01em" }}>Understanding the Physics</h3>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+
+          {/* What is sag */}
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px 28px", borderLeft: `5px solid ${DC.blue}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>What is Sag (S)?</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              Sag is the vertical distance between the anchor points and the lowest point of the line when loaded.
+              A deeper sag <strong style={{ color: DC.navy }}>reduces</strong> the tension in the line.
+              A shallow (tight) line dramatically <strong style={{ color: DC.coral }}>increases</strong> anchor forces.
+              Most riggers aim for 3–6% of line length as minimum safe sag.
+            </p>
+          </div>
+
+          {/* What is kN */}
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px 28px", borderLeft: `5px solid ${DC.teal}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>What is kN?</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              Kilonewton (kN) is a unit of force. 1 kN ≈ 102 kg of force (at Earth's gravity).
+              A 75 kg person exerts about <strong style={{ color: DC.navy }}>0.74 kN</strong> of gravitational force.
+              Highline anchors routinely experience <strong style={{ color: DC.coral }}>10–20 kN</strong> due to the line geometry.
+            </p>
+          </div>
+
+          {/* MBS vs WLL */}
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px 28px", borderLeft: `5px solid ${DC.coral}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>MBS vs WLL</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: DC.navy }}>MBS (Minimum Breaking Strength)</strong> is the force at which a new piece of equipment is guaranteed to break.
+              <strong style={{ color: DC.navy }}> WLL (Working Load Limit)</strong> is the maximum safe working load, typically MBS ÷ 10 for dynamic use.
+              Slackline equipment typically fails between <strong style={{ color: DC.coral }}>15–25 kN</strong>. The weakest link in your system sets the limit.
+            </p>
+          </div>
+
+          {/* Position effect */}
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px 28px", borderLeft: `5px solid ${DC.amber}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Position Changes the Load</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              When the slackliner is at the <strong style={{ color: DC.navy }}>center</strong>, both anchors share the load equally.
+              Moving toward one anchor increases the force on that anchor and reduces the other.
+              The <strong style={{ color: DC.coral }}>nearest anchor always carries more force</strong> than the far one.
+              Use the position slider to see how this changes dynamically.
+            </p>
+          </div>
+
+          {/* Formulas */}
+          <div style={{ background: DC.navy, borderRadius: 14, padding: "28px 28px", gridColumn: "1 / -1" }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.white, marginBottom: 16 }}>Key Formulas</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
+              {[
+                { label: "Sag at position p", formula: "S(p) = 4 · S_max · p · (1−p)", note: "Parabolic model" },
+                { label: "Anchor A angle", formula: "θ_A = arctan( S(p) / (p · L) )", note: "Measured from horizontal" },
+                { label: "Line tension", formula: "T = W·g / (tan θ_A + tan θ_B)", note: "Horizontal component" },
+                { label: "Force on Anchor A", formula: "F_A = T / cos(θ_A) + T₀", note: "Includes pre-tension" },
+                { label: "Approx. (DAV, center)", formula: "F ≈ W·g·L / (4·S)", note: "Person at midpoint" },
+                { label: "Exact (any position)", formula: "F = W·g / (2·sin θ)", note: "Symmetric case" },
+              ].map(f => (
+                <div key={f.label}>
+                  <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{f.label}</div>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 600, color: DC.blue, marginBottom: 4 }}>{f.formula}</div>
+                  <div style={{ fontFamily: DFONT, fontSize: 13, color: "rgba(255,255,255,0.4)" }}>{f.note}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Dynamic loads */}
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px 28px", gridColumn: "1 / -1", borderLeft: `5px solid ${DC.coral}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Dynamic Loads: Why Real Forces Are Higher</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, marginBottom: 16 }}>
+              This calculator shows <strong style={{ color: DC.navy }}>static loads</strong> — the forces when the system is in equilibrium.
+              In reality, highline forces are <strong style={{ color: DC.coral }}>dynamic</strong>: a fall, a bounce, or sudden movement
+              can multiply the static force by <strong style={{ color: DC.coral }}>1.5× to 3×</strong> or more.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
+              {[
+                { situation: "Static (standing still)", multiplier: "1.0×", color: DC.teal },
+                { situation: "Walking / bouncing gently", multiplier: "1.2–1.5×", color: DC.amber },
+                { situation: "Fall onto the line", multiplier: "1.5–2.5×", color: DC.coral },
+                { situation: "Leash fall (backup loaded)", multiplier: "2–4×", color: DC.coral },
+                { situation: "Slam factor (rigid anchor)", multiplier: "up to 6×", color: DC.navy },
+                { situation: "Why we use safety factors", multiplier: "MBS ÷ 10 = WLL", color: DC.navy },
+              ].map(s => (
+                <div key={s.situation} style={{ background: C_white, borderRadius: 10, padding: "16px 18px", borderTop: `4px solid ${s.color}` }}>
+                  <div style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 900, color: s.color, marginBottom: 4 }}>{s.multiplier}</div>
+                  <div style={{ fontFamily: DFONT, fontSize: 14, color: DC.muted, lineHeight: 1.5 }}>{s.situation}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }
 
+
 // ─── Calculator 2: Anchor Angle ───────────────────────────────────────────────
 
-/*
- * PHYSICS NOTES
- * ─────────────
- * HORIZONTAL SPREAD (α = angle between legs, viewed from above / front)
- *   2-leg: F_leg = F / (2 × cos(α/2))
- *   3-leg: legs equally spaced at 120° apart.
- *          Each leg carries F/3 in the horizontal plane, resolved vertically.
- *          F_leg = F / (3 × cos(β))  where β = elevation angle (0 if flat).
- *          With β=0: F_leg = F/3. Horizontal component per leg = F_leg × sin(120°/2) etc.
- *          General symmetric 3-leg: F_leg = F / (n × cos(β))  — see below.
- *   4-leg: legs equally spaced at 90°.
- *          F_leg = F / (4 × cos(β))  (with β=0 → F/4 each)
- *
- * ELEVATED MASTER POINT (β = elevation angle above horizontal)
- *   When the master point is raised (A-frame/cavalete), the anchor legs go UP
- *   at angle β from horizontal. The vertical component of each leg force contributes
- *   to supporting the downward load F. This REDUCES the force each leg must carry.
- *
- *   For n symmetric legs, each at elevation β and horizontal spread φ from vertical:
- *     Vertical equilibrium: n × F_leg × sin(β) = F
- *     → F_leg = F / (n × sin(β))     [when β > 0, elevation only]
- *
- *   Combined (spread α AND elevation β):
- *     Each leg direction vector: (sin(φ_i)×cos(β), cos(φ_i)×cos(β), sin(β))
- *     where φ_i = horizontal angle of leg i.
- *     Vertical equilibrium: n × F_leg × sin(β) = F
- *     Horizontal equilibrium: satisfied by symmetry.
- *     → F_leg = F / (n × sin(β))
- *
- *   When β = 0 (flat, no elevation):
- *     Reduce to 2-leg formula: F_leg = F / (2 × cos(α/2))
- *     For n legs equally spaced: F_leg = F / (n × cos(0)) = F/n ... but this ignores
- *     that legs must also resolve horizontally.
- *
- *   Full combined formula for n symmetric legs:
- *     Each leg makes angle β with horizontal and the horizontal projection makes
- *     angle (360°/n) between adjacent legs.
- *     Resultant vertical: F_leg × sin(β) × n = F  → F_leg = F/(n×sin(β))
- *     This is valid when β > ~10°. When β → 0, horizontal spread α dominates.
- *
- *   Transition formula (ISA-aligned, valid for all β):
- *     The leg direction unit vector z-component = sin(β)
- *     For 2-leg with spread α and elevation β:
- *       F_leg = F / (2 × sqrt(sin²(β) + cos²(β)×sin²(90°-α/2)))
- *             = F / (2 × sqrt(sin²(β) + cos²(β)×cos²(α/2)))
- *     Simplified: F_leg = F / (2 × cos(γ))  where γ = angle of leg from load axis
- *       cos(γ) = sin(β) + cos(β)×cos(α/2)  ... no, use full 3D vector.
- *
- *   Most practical form used by RopeLab and ISA:
- *     For 2 legs: F_leg = (F/2) / cos(θ_leg_from_vertical)
- *     θ_leg_from_vertical = arctan(cos(α/2) / tan(β)) when both spread and elevation
- *     But for rigging practice, we separate the two modes and combine:
- *
- *   FINAL IMPLEMENTATION:
- *   Mode A — Horizontal spread only (β=0):
- *     n=2: F_leg = F / (2cos(α/2))
- *     n=3: F_leg = F / (2cos(30°)) = F / 1.732  (legs at 120° spacing, horizontal)
- *          ... more precisely each leg has horizontal component that must resolve F.
- *          For 3 equal legs spaced 120°: sum of horizontal vectors = 0, no vertical
- *          component → system is indeterminate unless we add geometry. In practice
- *          a 3-leg flat anchor has α₁₂ between each pair of adjacent legs.
- *          We use: F_leg = F / (3 × cos(α_from_vertical))
- *          where for equilateral: each leg is 120° from others → α_from_vertical = 60°
- *          F_leg = F/(3×cos(60°)) = F/(3×0.5) = 2F/3. Hmm — let's use the correct
- *          vector resolution.
- *
- *   CORRECT GENERAL FORMULA (used in implementation):
- *   For n symmetric legs, horizontal spread angle between adjacent legs = 360°/n,
- *   elevation angle β (angle each leg makes WITH horizontal, i.e. 0=flat, 90=vertical):
- *
- *   The resultant vertical force from all legs:
- *     F_vertical = n × F_leg × sin(β)  = F  (if β > 0)
- *   The resultant horizontal forces cancel by symmetry.
- *   → F_leg = F / (n × sin(β))   [elevation-dominated, β > 0]
- *
- *   When β = 0 (flat), use horizontal spread:
- *   For 2-leg: F_leg = F / (2 × cos(α/2))
- *   For 3-leg: sum of 3 unit vectors in horizontal plane must have vertical resultant F.
- *     But in a flat 3-leg anchor, legs go sideways, not down — this is actually a
- *     lateral anchor (e.g. 3 bolts in a face). The "load" F is the horizontal pull
- *     from the line. We treat α as the angle of the V formed by the two outermost
- *     legs for 3-leg, and the middle leg adds redundancy.
- *     Simplified: F_leg_outer = F / (2cos(α_half)) for the outer legs,
- *                  F_leg_middle = 0 to F (load sharing depends on equalization).
- *     For practical purposes with equalized 3-leg: F_leg ≈ F/3 × 1/cos(α_spread/n)
- *
- *   PRACTICAL IMPLEMENTATION DECISION:
- *   We implement the two physically distinct modes separately and clearly:
- *   1. Horizontal spread mode (β=0): classic V-anchor for 2/3/4 legs
- *   2. Elevated master point mode (β>0): A-frame effect for 2/3/4 legs
- *   And show both simultaneously so riggers can understand the combined effect.
- */
-
 function AnchorAngleCalc({ units }: { units: Units }) {
-  const [F, setF] = useState(10);          // load on master point kN
-  const [numLegs, setNumLegs] = useState<2|3|4>(2); // number of legs
-  const [alpha, setAlpha] = useState(60);  // horizontal spread angle between OUTER legs °
-  const [beta, setBeta] = useState(0);     // elevation angle of master point above horizontal °
+  const [F, setF] = useState(10);
+  const [numLegs, setNumLegs] = useState<2|3|4>(2);
+  const [alpha, setAlpha] = useState(60);
+  const [beta, setBeta] = useState(30);
   const [showElevated, setShowElevated] = useState(false);
-
-  // ── Calculations ──────────────────────────────────────────────────────────
-
-  // Force per leg — combined spread + elevation
-  // Uses 3D vector equilibrium for symmetric n-leg anchor:
-  //   Each leg unit vector: (sin(φ_i)·cos(β), cos(φ_i)·cos(β), sin(β))
-  //   For vertical load F downward, equilibrium gives:
-  //     If β > 0:  F_leg = F / (n · sin(β))
-  //     If β = 0:  depends on spread geometry
-  //
-  // For β=0 horizontal spread:
-  //   2-leg: standard V-anchor: F_leg = F / (2·cos(α/2))
-  //   3-leg equilateral (α=120° between outer, 60° between each pair):
-  //     The 3 legs resolve the horizontal load F.
-  //     For equilateral 3-leg: F_leg = F/3 / cos(0°) = F/3
-  //     For non-equilateral (user sets α = angle between two front legs):
-  //       back leg at 180°-α/2 from each front. Simplified: F_leg ≈ F/(3·cos(α_half/2))
-  //   4-leg: typically two V-anchors in parallel: F_leg ≈ F/(2·2·cos(α/2)) = F/(4·cos(α/2)) ... 
-  //     or all 4 symmetric: F_leg = F/(4·cos(α/4))
 
   const betaR = rad(beta);
   const alphaR = rad(alpha);
@@ -366,152 +468,114 @@ function AnchorAngleCalc({ units }: { units: Units }) {
   let Fleg: number;
   let formula: string;
 
-  if (beta > 0) {
-    // Elevation dominates — use vertical equilibrium
+  if (showElevated && beta > 0) {
     const sinB = Math.sin(betaR);
-    if (sinB < 0.001) {
-      Fleg = 999; // near-zero elevation, degenerate
-    } else {
-      Fleg = round2(F / (numLegs * sinB));
-    }
-    formula = `F_leg = F / (n × sin(β)) = ${F} / (${numLegs} × sin(${beta}°))`;
+    Fleg = sinB < 0.001 ? 999 : round2(F / (numLegs * sinB));
+    formula = `F_leg = F / (n × sin β) = ${F} / (${numLegs} × sin ${beta}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
   } else {
-    // Flat anchor — use horizontal spread
     if (numLegs === 2) {
-      const cosHalf = Math.cos(alphaR / 2);
-      Fleg = cosHalf < 0.001 ? 999 : round2(F / (2 * cosHalf));
-      formula = `F_leg = F / (2 × cos(α/2)) = ${F} / (2 × cos(${alpha/2}°))`;
+      const c = Math.cos(alphaR / 2);
+      Fleg = c < 0.001 ? 999 : round2(F / (2 * c));
+      formula = `F_leg = F / (2 × cos(α/2)) = ${F} / (2 × cos ${alpha/2}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
     } else if (numLegs === 3) {
-      // 3-leg equilateral: α is angle between front two legs
-      // Back leg bisects. Each leg at 120° in equilateral config.
-      // General: use α as spread between outermost pair, middle leg adds redundancy.
-      // Force per leg (equal sharing assumption with equalization):
-      // Average: F_leg ≈ F / (3 × cos(α/3))  — simplified practical formula
-      const cosThird = Math.cos(alphaR / 3);
-      Fleg = cosThird < 0.001 ? 999 : round2(F / (3 * cosThird));
-      formula = `F_leg ≈ F / (3 × cos(α/3)) = ${F} / (3 × cos(${round1(alpha/3)}°))`;
+      const c = Math.cos(alphaR / 3);
+      Fleg = c < 0.001 ? 999 : round2(F / (3 * c));
+      formula = `F_leg ≈ F / (3 × cos(α/3)) = ${F} / (3 × cos ${round1(alpha/3)}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
     } else {
-      // 4-leg: two V-anchors in parallel, each V has angle α
-      const cosHalf = Math.cos(alphaR / 2);
-      Fleg = cosHalf < 0.001 ? 999 : round2(F / (4 * cosHalf));
-      formula = `F_leg = F / (4 × cos(α/2)) = ${F} / (4 × cos(${alpha/2}°))`;
+      const c = Math.cos(alphaR / 2);
+      Fleg = c < 0.001 ? 999 : round2(F / (4 * c));
+      formula = `F_leg = F / (4 × cos(α/2)) = ${F} / (4 × cos ${alpha/2}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
     }
   }
 
-  const K = round2(Fleg / F); // multiplier per leg
-  const danger = (Fleg >= F) || (alpha >= 120 && numLegs === 2 && beta === 0);
-  const warn = (Fleg >= F * 0.7) || (alpha >= 90 && numLegs === 2 && beta === 0);
-  const anchorColor = danger ? "#dc2626" : warn ? "#d97706" : "#2d6a4f";
+  const K = round2(Fleg / F);
+  const danger = Fleg >= F || (alpha >= 120 && numLegs === 2 && !showElevated);
+  const warn = Fleg >= F * 0.7 || (alpha >= 90 && numLegs === 2 && !showElevated);
+  const col = danger ? DC.coral : warn ? DC.amber : DC.teal;
 
-  // Horizontal spread reference table
-  const refAngles = [0, 30, 45, 60, 90, 120, 150];
-  const refTable = refAngles.map(a => {
-    let f2: number, f3: number, f4: number;
-    const c2 = Math.cos(rad(a / 2));
-    f2 = c2 < 0.001 ? 999 : round2(F / (2 * c2));
-    const c3 = Math.cos(rad(a / 3));
-    f3 = c3 < 0.001 ? 999 : round2(F / (3 * c3));
-    f4 = c2 < 0.001 ? 999 : round2(F / (4 * c2));
-    return { a, f2, f3, f4 };
-  });
+  // ── Top-view geometry ────────────────────────────────────────────────────────
+  // Layout: diagram left (x 0..360), labels right (x 360..480)
+  const mpX = 170, mpY = 90, legLen = 110;
+  const topW = 480, topH = 300;
 
-  // Elevation reference table
-  const elAngles = [5, 10, 15, 20, 30, 45, 60, 90];
-  const elevTable = elAngles.map(b => {
-    const s = Math.sin(rad(b));
-    return {
-      b,
-      f2: round2(F / (2 * s)),
-      f3: round2(F / (3 * s)),
-      f4: round2(F / (4 * s)),
-    };
-  });
-
-  // ── SVG geometry — top-view (plan view) ──────────────────────────────────
-  // All legs equally and symmetrically spaced around the master point.
-  // α = total spread angle. Legs fan from -α/2 to +α/2 equally spaced.
-  const svgCX = 240, topY = 60, legLen = 105;
-
-  const legPositions: { x: number; y: number; angle: number }[] = [];
+  const legPositions: { x: number; y: number; angleDeg: number }[] = [];
   for (let i = 0; i < numLegs; i++) {
-    const legAngleDeg = -alpha / 2 + (alpha / (numLegs - 1)) * i;
-    const legAngleR = rad(legAngleDeg);
+    const angleDeg = numLegs === 1 ? 0 : -alpha / 2 + (alpha / (numLegs - 1)) * i;
+    const r = rad(angleDeg);
     legPositions.push({
-      x: svgCX + legLen * Math.sin(legAngleR),
-      y: topY + legLen * Math.cos(legAngleR),
-      angle: legAngleDeg,
+      x: mpX + legLen * Math.sin(r),
+      y: mpY + legLen * Math.cos(r),
+      angleDeg,
     });
   }
 
-  // Elevated master point visual shift in top-view
-  const elevShift = beta > 0 ? Math.min(55, beta * 1.2) : 0;
-  const mpY = topY - elevShift;
+  // Angle arc: should be concave toward master point (away from legs)
+  // i.e. arc curves UPWARD (toward y=0), away from the legs which go downward
+  const arcR = 44;
+  const arcPath = alpha > 5 && alpha < 175
+    ? `M ${mpX + arcR * Math.sin(rad(-alpha/2))} ${mpY + arcR * Math.cos(rad(-alpha/2))}
+       A ${arcR} ${arcR} 0 0 1
+       ${mpX + arcR * Math.sin(rad(alpha/2))} ${mpY + arcR * Math.cos(rad(alpha/2))}`
+    : "";
 
-  // ── SVG geometry — side-view (elevation diagram) ─────────────────────────
-  // Rock face = vertical line. Master point floats to the right at angle β.
-  // Shows: bolt on face, horizontal dashed reference, leg at angle β, MP.
+  // ── Side-view geometry ───────────────────────────────────────────────────────
   const sideW = 480, sideH = 220;
-  const rockX = 90;
-  const boltMidY = sideH - 80;
+  const groundY2 = sideH - 30;
+  const boltX = 80, boltY = groundY2 - 20;  // bolt is on a flat surface (ground)
   const legLenSide = 130;
-  const mpSideX = rockX + legLenSide * Math.cos(betaR);
-  const mpSideY = boltMidY - legLenSide * Math.sin(betaR);
+  // MP is elevated above bolt
+  const mpSX = boltX + legLenSide * Math.cos(betaR);
+  const mpSY = boltY - legLenSide * Math.sin(betaR);
 
   return (
     <div>
-      <SectionTitle>Anchor angle & elevation force calculator</SectionTitle>
-      <p style={{ fontSize: 14, color: "#7a7268", marginBottom: 20, lineHeight: 1.65 }}>
+      <SectionTitle>Anchor Angle & Elevation</SectionTitle>
+      <p style={{ fontFamily: DFONT, fontSize: 17, color: DC.muted, marginBottom: 28, lineHeight: 1.7, maxWidth: 640 }}>
         Calculates the force on each anchor leg for symmetric 2, 3 and 4-leg systems.
-        Includes the elevated master point effect — when an A-frame (cavalete) raises the
-        master point above the rock face, the vertical component of each leg partially
-        supports the load, <em>reducing</em> the force per leg.
+        For elevated master points (A-frame / cavalete), the upward angle of each leg
+        reduces the force per bolt.
       </p>
 
       {danger && (
-        <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 8, padding: "12px 16px", marginBottom: 16, display: "flex", gap: 10 }}>
-          <span>⚠️</span>
-          <div>
-            <strong style={{ color: "#991b1b", fontSize: 13 }}>DANGER: Force per leg exceeds total load</strong>
-            <p style={{ color: "#991b1b", fontSize: 12, margin: "4px 0 0" }}>
-              {beta === 0 && alpha >= 120 ? "Spread angle exceeds 120°. Each leg carries MORE than the full load." : "Reduce the spread angle or increase elevation."}
-            </p>
-          </div>
+        <div style={{ background: `${DC.coral}15`, border: `2px solid ${DC.coral}`, borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <div style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 800, color: DC.coral }}>Danger — Reduce spread angle or increase elevation</div>
         </div>
       )}
 
-      {/* Mode tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+      {/* Mode selector */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
         {[false, true].map(elevated => (
-          <button key={String(elevated)} onClick={() => { setShowElevated(elevated); if (!elevated) setBeta(0); }} style={{
-            fontFamily: "'DM Mono', monospace", fontSize: 11, padding: "8px 16px", borderRadius: 6,
-            border: "1px solid", cursor: "pointer",
-            borderColor: showElevated === elevated ? "#c8531a" : "rgba(13,15,14,0.2)",
-            background: showElevated === elevated ? "rgba(200,83,26,0.08)" : "#fff",
-            color: showElevated === elevated ? "#c8531a" : "#0d0f0e",
+          <button key={String(elevated)} onClick={() => setShowElevated(elevated)} style={{
+            fontFamily: DFONT, fontSize: 15, fontWeight: 700, padding: "10px 22px", borderRadius: 10,
+            border: "2px solid", cursor: "pointer",
+            borderColor: showElevated === elevated ? DC.blue : DC.border,
+            background: showElevated === elevated ? `${DC.blue}12` : DC.white,
+            color: showElevated === elevated ? DC.blue : DC.muted,
           }}>
-            {elevated ? "⬆ Elevated master point (A-frame)" : "➡ Flat anchor (horizontal spread)"}
+            {elevated ? "⬆ Elevated master point" : "↔ Flat anchor (spread)"}
           </button>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
+        {/* Controls */}
         <div>
-          {/* Number of legs */}
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 600, color: DC.muted, marginBottom: 8 }}>Number of anchor legs</div>
-            <div style={{ display: "flex", gap: 8 }}>
+          {/* Leg selector */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontFamily: DFONT, fontSize: 14, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 12 }}>Number of anchor legs</div>
+            <div style={{ display: "flex", gap: 10 }}>
               {([2, 3, 4] as const).map(n => (
                 <button key={n} onClick={() => setNumLegs(n)} style={{
-                  flex: 1, padding: "10px 0", borderRadius: 6, cursor: "pointer",
-                  fontFamily: "'Fraunces', serif", fontSize: 20, fontStyle: "italic",
-                  border: "1px solid",
-                  borderColor: numLegs === n ? "#c8531a" : "rgba(13,15,14,0.15)",
-                  background: numLegs === n ? "rgba(200,83,26,0.06)" : "#fff",
-                  color: numLegs === n ? "#c8531a" : "#0d0f0e",
+                  flex: 1, padding: "14px 0", borderRadius: 12, cursor: "pointer",
+                  fontFamily: DFONT, fontSize: 24, fontWeight: 900,
+                  border: "2px solid",
+                  borderColor: numLegs === n ? DC.blue : DC.border,
+                  background: numLegs === n ? `${DC.blue}10` : DC.white,
+                  color: numLegs === n ? DC.blue : DC.navy,
                 }}>
                   {n}
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, display: "block", color: "#7a7268", fontStyle: "normal" }}>
-                    {n === 2 ? "Sliding-X / BFK" : n === 3 ? "Equalette / 3-bolt" : "4-point"}
+                  <span style={{ fontFamily: DFONT, fontSize: 12, display: "block", color: DC.muted, fontWeight: 600, marginTop: 4 }}>
+                    {n === 2 ? "Sliding-X / BFK" : n === 3 ? "Sliding-X / BFK" : "Sliding-X / BFK"}
                   </span>
                 </button>
               ))}
@@ -522,306 +586,226 @@ function AnchorAngleCalc({ units }: { units: Units }) {
 
           {!showElevated && (
             <SliderRow
-              label={numLegs === 2 ? "Angle between legs (α)" : numLegs === 3 ? "Spread angle between outer legs (α)" : "Angle between adjacent legs (α)"}
+              label="Angle between legs (α)"
               value={alpha} min={0} max={179} step={1} unit="°" onChange={setAlpha}
             />
           )}
 
           {showElevated && (
             <>
-              <SliderRow label="Elevation angle of legs (β)" value={beta} min={1} max={90} step={1} unit="°" onChange={setBeta} />
-              {beta > 0 && beta < 15 && (
-                <div style={{ background: "rgba(41,121,255,0.07)", border: "1px solid rgba(41,121,255,0.2)", borderRadius: 10, padding: "12px 16px", marginBottom: 14, fontSize: 15, color: "#1a237e" }}>
-                  ⚠ Very shallow elevation (β &lt; 15°). Forces are very high. Consider increasing elevation or adding more legs.
+              <SliderRow label="Elevation angle (β)" value={beta} min={1} max={90} step={1} unit="°" onChange={setBeta} />
+              {beta < 15 && (
+                <div style={{ background: `${DC.amber}15`, border: `1px solid ${DC.amber}`, borderRadius: 10, padding: "12px 16px", marginBottom: 14, fontFamily: DFONT, fontSize: 15, color: DC.navy }}>
+                  Very shallow elevation (β &lt; 15°) — forces are very high.
                 </div>
               )}
-              <SliderRow label="Horizontal spread (α)" value={alpha} min={0} max={120} step={1} unit="°" onChange={setAlpha} />
             </>
           )}
 
-          {/* Main results */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
-            <ResultCard
-              label={`Force per leg (×${numLegs})`}
-              value={Fleg >= 500 ? "∞" : units === "imperial" ? kN2lbf(Fleg) : Fleg}
-              unit={Fleg >= 500 ? "" : units === "imperial" ? "lbf" : "kN"}
-              sub={Fleg < 500 ? `≈ ${Math.round(kN2kg(Fleg))} kg` : "Impossible geometry"}
-            />
-            <ResultCard label="Load multiplier" value={Fleg >= 500 ? "∞" : K + "×"} unit="" />
-            <ResultCard label="Total load in system" value={units === "imperial" ? kN2lbf(Fleg < 500 ? Fleg * numLegs : 0) : Fleg < 500 ? round2(Fleg * numLegs) : "∞"} unit={units === "imperial" ? "lbf" : "kN"} sub="sum of all legs" />
+          {/* Results */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20 }}>
+            <ResultCard label={`Force per leg (×${numLegs})`} value={Fleg >= 500 ? "∞" : units === "imperial" ? kN2lbf(Fleg) : Fleg} unit={Fleg >= 500 ? "" : units === "imperial" ? "lbf" : "kN"} sub={Fleg < 500 ? `≈ ${Math.round(kN2kg(Fleg))} kg` : "Impossible geometry"} />
+            <ResultCard label="Load multiplier" value={Fleg >= 500 ? "∞" : `${K}×`} unit="" />
+            <ResultCard label="Total system load" value={Fleg < 500 ? round2(Fleg * numLegs) : "∞"} unit="kN" sub="sum of all legs" />
           </div>
 
-          {/* Formula display */}
-          <div style={{ background: "rgba(13,15,14,0.04)", borderRadius: 6, padding: "10px 12px", marginTop: 12, fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#7a7268", lineHeight: 1.6 }}>
+          <div style={{ background: DC.bg, borderRadius: 10, padding: "14px 16px", marginTop: 14, fontFamily: "'DM Mono', monospace", fontSize: 14, color: DC.muted, lineHeight: 1.6 }}>
             {formula}
-          </div>
-
-          {/* Safety status */}
-          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 10 }}>
-            <SafetyBadge value={Fleg < 500 ? F / Fleg : 0} thresholds={[0.7, 1.0]} />
-            <span style={{ fontSize: 12, color: "#7a7268" }}>
-              {Fleg < F ? "Each leg carries less than total load ✓" :
-               Fleg === F ? "Each leg carries exactly the full load ⚠" :
-               "Each leg carries more than total load ✕"}
-            </span>
           </div>
         </div>
 
+        {/* Diagrams */}
         <div>
-          {/* ── TOP-VIEW: plan view of anchor spread ── */}
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a7268", marginBottom: 6 }}>
-            Top view — anchor spread
-          </div>
-          <svg width="100%" viewBox="0 0 480 280" style={{ borderRadius: 8, background: "rgba(13,15,14,0.02)", border: "1px solid rgba(13,15,14,0.08)", marginBottom: 16 }}>
-            <defs>
-              <marker id="arrowDown" viewBox="0 0 10 10" refX={5} refY={8} markerWidth={6} markerHeight={6} orient="auto">
-                <path d="M1 1L5 9L9 1" fill="none" stroke="#0d0f0e" strokeWidth={1.5} />
-              </marker>
-            </defs>
-
-            {/* Elevation indicator in top view */}
-            {beta > 0 && (
-              <>
-                <line x1={svgCX} y1={mpY} x2={svgCX} y2={topY} stroke="#c8531a" strokeWidth={1} strokeDasharray="3,2" opacity={0.5} />
-                <text x={svgCX + 6} y={(mpY + topY) / 2 + 4} fontSize={9} fill="#c8531a" fontFamily="'DM Mono', monospace">↑ β={beta}°</text>
-              </>
-            )}
-
-            {/* Spread angle arc between outermost legs */}
-            {numLegs >= 2 && alpha > 5 && alpha < 175 && (
-              <>
-                <path
-                  d={`M ${svgCX + 34 * Math.sin(rad(alpha / 2))} ${mpY + 34 * Math.cos(rad(alpha / 2))}
-                      A 34 34 0 0 0
-                      ${svgCX - 34 * Math.sin(rad(alpha / 2))} ${mpY + 34 * Math.cos(rad(alpha / 2))}`}
-                  fill="none" stroke="#7a7268" strokeWidth={1} strokeDasharray="3,2"
-                />
-                <text x={svgCX - 14} y={mpY + 60} fontSize={10} fill="#7a7268" fontFamily="'DM Mono', monospace">α={alpha}°</text>
-              </>
-            )}
-
-            {/* Spacing label for 3/4 legs */}
-            {numLegs >= 3 && alpha > 0 && (
-              <text x={svgCX + 55} y={mpY + 26} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">
-                spacing={round1(alpha / (numLegs - 1))}°
-              </text>
-            )}
-
-            {/* All legs — symmetrically spaced, generated from legPositions array */}
-            {legPositions.map((leg, i) => (
-              <g key={i}>
-                {/* Leg line */}
-                <line x1={svgCX} y1={mpY} x2={leg.x} y2={leg.y} stroke={anchorColor} strokeWidth={3} strokeLinecap="round" />
-                {/* Bolt/anchor point */}
-                <circle cx={leg.x} cy={leg.y} r={7} fill="#0d0f0e" />
-                <circle cx={leg.x} cy={leg.y} r={3} fill="#c8531a" />
-                {/* Rock face tick mark — perpendicular to leg */}
-                <line
-                  x1={leg.x - 13 * Math.cos(rad(leg.angle))}
-                  y1={leg.y + 13 * Math.sin(rad(leg.angle))}
-                  x2={leg.x + 13 * Math.cos(rad(leg.angle))}
-                  y2={leg.y - 13 * Math.sin(rad(leg.angle))}
-                  stroke="#0d0f0e" strokeWidth={2}
-                />
-                {/* Force label — offset based on leg direction */}
-                <text
-                  x={leg.x + (leg.angle <= -30 ? -48 : leg.angle >= 30 ? 8 : 8)}
-                  y={leg.y + (Math.abs(leg.angle) < 30 ? 20 : 4)}
-                  fontSize={9} fill={anchorColor} fontFamily="'DM Mono', monospace"
-                >
-                  {Fleg < 500 ? round2(Fleg) + "kN" : "∞"}
-                </text>
-              </g>
-            ))}
-
-            {/* Master point — drawn on top of legs */}
-            <circle cx={svgCX} cy={mpY} r={9} fill={anchorColor} />
-            <circle cx={svgCX} cy={mpY} r={4} fill="#fff" />
-            <text x={svgCX - 44} y={mpY - 14} fontSize={10} fill="#7a7268" fontFamily="'DM Mono', monospace">Master point</text>
-
-            {/* Downward load arrow */}
-            <line x1={svgCX} y1={mpY - 55} x2={svgCX} y2={mpY - 11} stroke="#0d0f0e" strokeWidth={2} markerEnd="url(#arrowDown)" />
-            <text x={svgCX + 6} y={mpY - 36} fontSize={10} fill="#0d0f0e" fontFamily="'DM Mono', monospace">F={F}kN</text>
-          </svg>
-
-          {/* ── SIDE-VIEW: elevation diagram — only shown when elevated mode is active ── */}
-          {showElevated && (
+          {!showElevated ? (
             <>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a7268", marginBottom: 6 }}>
-                Side view — elevated master point (β = {beta}°)
+              <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>
+                Top view — anchor spread
               </div>
-              <svg width="100%" viewBox={`0 0 ${sideW} ${sideH}`} style={{ borderRadius: 8, background: "rgba(13,15,14,0.02)", border: "1px solid rgba(13,15,14,0.08)", marginBottom: 12 }}>
+              <svg width="100%" viewBox={`0 0 ${topW} ${topH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}`, marginBottom: 12 }}>
                 <defs>
-                  <marker id="arrowSide" viewBox="0 0 10 10" refX={5} refY={8} markerWidth={6} markerHeight={6} orient="auto">
-                    <path d="M1 1L5 9L9 1" fill="none" stroke="#0d0f0e" strokeWidth={1.5} />
+                  <marker id="arrowUp2" viewBox="0 0 10 10" refX={5} refY={2} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
+                    <path d="M1 9L5 1L9 9" fill="none" stroke={DC.navy} strokeWidth={1.5}/>
                   </marker>
                 </defs>
 
-                {/* Rock face — vertical hatched wall */}
-                <line x1={rockX} y1={20} x2={rockX} y2={sideH - 20} stroke="#0d0f0e" strokeWidth={3} />
-                {[0,1,2,3,4,5,6].map(i => (
-                  <line key={i} x1={rockX - 14} y1={28 + i * 26} x2={rockX} y2={42 + i * 26} stroke="#0d0f0e" strokeWidth={1} opacity={0.35} />
+                {/* Load arrow pointing UP from master point */}
+                <line x1={mpX} y1={mpY - 16} x2={mpX} y2={mpY - 58}
+                  stroke={DC.navy} strokeWidth={2.5} markerEnd="url(#arrowUp2)"/>
+                <text x={mpX + 8} y={mpY - 42} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">F = {F} kN</text>
+
+                {/* Legs */}
+                {legPositions.map((leg, i) => (
+                  <g key={i}>
+                    <line x1={mpX} y1={mpY} x2={leg.x} y2={leg.y} stroke={col} strokeWidth={3} strokeLinecap="round"/>
+                    {/* Bolt — dot only, no cross line */}
+                    <circle cx={leg.x} cy={leg.y} r={8} fill={DC.navy}/>
+                    <circle cx={leg.x} cy={leg.y} r={4} fill={DC.blue}/>
+                    {/* Force label positioned near bolt */}
+                    <text
+                      x={leg.x + (leg.angleDeg < -15 ? -52 : 12)}
+                      y={leg.y + (Math.abs(leg.angleDeg) < 20 ? 22 : 4)}
+                      fontSize={12} fill={col} fontFamily={DFONT} fontWeight="700"
+                    >{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
+                  </g>
                 ))}
-                <text x={rockX - 4} y={sideH - 8} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace" textAnchor="middle">Rock</text>
 
-                {/* Anchor bolt on rock face */}
-                <circle cx={rockX} cy={boltMidY} r={7} fill="#0d0f0e" />
-                <circle cx={rockX} cy={boltMidY} r={3} fill="#c8531a" />
-                <text x={rockX - 32} y={boltMidY + 4} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">Bolt</text>
+                {/* Master point */}
+                <circle cx={mpX} cy={mpY} r={11} fill={col}/>
+                <circle cx={mpX} cy={mpY} r={5} fill={DC.white}/>
+                <text x={mpX - 48} y={mpY + 4} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Master Point</text>
 
-                {/* Horizontal reference dashed line from bolt */}
-                <line x1={rockX} y1={boltMidY} x2={Math.min(sideW - 20, mpSideX + 50)} y2={boltMidY}
-                  stroke="#7a7268" strokeWidth={1} strokeDasharray="5,4" />
-                <text x={rockX + 50} y={boltMidY - 5} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">horizontal</text>
+                {/* Angle arc — concave toward MP (curves away from legs) */}
+                {arcPath && (
+                  <path d={arcPath} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3"/>
+                )}
 
-                {/* β angle arc — from horizontal reference to leg */}
+                {/* Labels on RIGHT side of diagram */}
+                <line x1={360} y1={20} x2={360} y2={topH - 20} stroke={DC.border} strokeWidth={1}/>
+                <text x={370} y={50} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">α = {alpha}°</text>
+                <text x={370} y={72} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">angle between legs</text>
+                {numLegs >= 3 && (
+                  <>
+                    <text x={370} y={105} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">{round1(alpha / (numLegs - 1))}°</text>
+                    <text x={370} y={127} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">between adjacent</text>
+                  </>
+                )}
+                <text x={370} y={160} fontSize={13} fill={col} fontFamily={DFONT} fontWeight="800">{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
+                <text x={370} y={182} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">per leg</text>
+                <text x={370} y={215} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">{K}×</text>
+                <text x={370} y={237} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">load multiplier</text>
+              </svg>
+            </>
+          ) : (
+            <>
+              <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>
+                Side view — elevated master point
+              </div>
+              <svg width="100%" viewBox={`0 0 ${sideW} ${sideH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}`, marginBottom: 12 }}>
+                <defs>
+                  <marker id="arrowLeftSide" viewBox="0 0 10 10" refX={2} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
+                    <path d="M9 1L1 5L9 9" fill="none" stroke={DC.navy} strokeWidth={1.5}/>
+                  </marker>
+                </defs>
+
+                {/* Ground — flat horizontal surface */}
+                <rect x={0} y={groundY2} width={sideW - 140} height={sideH - groundY2} fill={`${DC.border}60`}/>
+                <line x1={0} y1={groundY2} x2={sideW - 140} y2={groundY2} stroke={DC.navy} strokeWidth={2.5}/>
+                {/* Ground hatch marks (horizontal surface) */}
+                {[0,1,2,3,4,5,6,7].map(i => (
+                  <line key={i} x1={16 + i * 26} y1={groundY2} x2={8 + i * 26} y2={groundY2 + 14} stroke={DC.navy} strokeWidth={1} opacity={0.3}/>
+                ))}
+
+                {/* Bolt on flat surface — horizontal bolt */}
+                <circle cx={boltX} cy={boltY} r={8} fill={DC.navy}/>
+                <circle cx={boltX} cy={boltY} r={4} fill={DC.blue}/>
+                <text x={boltX} y={groundY2 + 16} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="700" textAnchor="middle">Bolt</text>
+
+                {/* Horizontal reference from bolt */}
+                <line x1={boltX} y1={boltY} x2={Math.min(sideW - 150, mpSX + 30)} y2={boltY}
+                  stroke={DC.muted} strokeWidth={1} strokeDasharray="5,4" opacity={0.5}/>
+
+                {/* β arc */}
                 {beta > 2 && beta < 88 && (
                   <>
                     <path
-                      d={`M ${rockX + 44} ${boltMidY}
-                          A 44 44 0 0 0
-                          ${rockX + 44 * Math.cos(betaR)} ${boltMidY - 44 * Math.sin(betaR)}`}
-                      fill="none" stroke="#c8531a" strokeWidth={1.5} strokeDasharray="3,2"
+                      d={`M ${boltX + 46} ${boltY} A 46 46 0 0 0 ${boltX + 46 * Math.cos(betaR)} ${boltY - 46 * Math.sin(betaR)}`}
+                      fill="none" stroke={DC.coral} strokeWidth={1.5} strokeDasharray="3,2"
                     />
-                    <text
-                      x={rockX + 52 * Math.cos(betaR / 2) + 2}
-                      y={boltMidY - 52 * Math.sin(betaR / 2) + 4}
-                      fontSize={10} fill="#c8531a" fontFamily="'DM Mono', monospace"
-                    >β={beta}°</text>
+                    <text x={boltX + 54 * Math.cos(betaR / 2) + 4} y={boltY - 54 * Math.sin(betaR / 2) + 5}
+                      fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="700">β = {beta}°</text>
                   </>
                 )}
 
-                {/* Anchor leg — from bolt to elevated master point */}
-                <line x1={rockX} y1={boltMidY} x2={mpSideX} y2={mpSideY}
-                  stroke={anchorColor} strokeWidth={3.5} strokeLinecap="round" />
+                {/* Anchor leg */}
+                <line x1={boltX} y1={boltY} x2={mpSX} y2={mpSY}
+                  stroke={col} strokeWidth={4} strokeLinecap="round"/>
 
-                {/* Force label on leg */}
-                <text
-                  x={(rockX + mpSideX) / 2 + 6}
-                  y={(boltMidY + mpSideY) / 2 - 10}
-                  fontSize={9} fill={anchorColor} fontFamily="'DM Mono', monospace"
-                >
-                  {Fleg < 500 ? round2(Fleg) + "kN/leg" : "∞"}
-                </text>
+                {/* Height indicator */}
+                <line x1={mpSX + 16} y1={mpSY} x2={mpSX + 16} y2={boltY}
+                  stroke={DC.muted} strokeWidth={1} strokeDasharray="3,3" opacity={0.6}/>
+                <line x1={mpSX + 10} y1={mpSY} x2={mpSX + 22} y2={mpSY} stroke={DC.muted} strokeWidth={1}/>
+                <line x1={mpSX + 10} y1={boltY} x2={mpSX + 22} y2={boltY} stroke={DC.muted} strokeWidth={1}/>
 
-                {/* Vertical height indicator — dashed line from MP down to bolt level */}
-                <line x1={mpSideX} y1={mpSideY} x2={mpSideX} y2={boltMidY}
-                  stroke="#7a7268" strokeWidth={1} strokeDasharray="3,3" />
-                <line x1={mpSideX - 8} y1={mpSideY} x2={mpSideX + 8} y2={mpSideY} stroke="#7a7268" strokeWidth={1} />
-                <line x1={mpSideX - 8} y1={boltMidY} x2={mpSideX + 8} y2={boltMidY} stroke="#7a7268" strokeWidth={1} />
-                <text x={mpSideX + 12} y={(mpSideY + boltMidY) / 2 + 4} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">
-                  h·sin(β)
-                </text>
+                {/* Master point */}
+                <circle cx={mpSX} cy={mpSY} r={11} fill={col}/>
+                <circle cx={mpSX} cy={mpSY} r={5} fill={DC.white}/>
 
-                {/* Horizontal span indicator */}
-                <line x1={rockX} y1={boltMidY + 22} x2={mpSideX} y2={boltMidY + 22}
-                  stroke="#7a7268" strokeWidth={1} strokeDasharray="3,3" />
-                <line x1={rockX} y1={boltMidY + 16} x2={rockX} y2={boltMidY + 28} stroke="#7a7268" strokeWidth={1} />
-                <line x1={mpSideX} y1={boltMidY + 16} x2={mpSideX} y2={boltMidY + 28} stroke="#7a7268" strokeWidth={1} />
-                <text x={(rockX + mpSideX) / 2 - 16} y={boltMidY + 36} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">
-                  h·cos(β)
-                </text>
+                {/* Force arrow pointing to OPPOSITE direction of bolt (left/away from bolt) */}
+                <line x1={mpSX - 14} y1={mpSY} x2={mpSX - 56} y2={mpSY}
+                  stroke={DC.navy} strokeWidth={2.5} markerEnd="url(#arrowLeftSide)"/>
+                <text x={mpSX - 80} y={mpSY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">F = {F} kN</text>
 
-                {/* Master point — elevated */}
-                <circle cx={mpSideX} cy={mpSideY} r={10} fill={anchorColor} />
-                <circle cx={mpSideX} cy={mpSideY} r={5} fill="#fff" />
-                <text x={mpSideX + 14} y={mpSideY + 4} fontSize={10} fill="#0d0f0e" fontFamily="'DM Mono', monospace">MP</text>
-
-                {/* Downward load arrow at master point */}
-                <line x1={mpSideX} y1={mpSideY - 44} x2={mpSideX} y2={mpSideY - 12}
-                  stroke="#0d0f0e" strokeWidth={2} markerEnd="url(#arrowSide)" />
-                <text x={mpSideX + 6} y={mpSideY - 26} fontSize={10} fill="#0d0f0e" fontFamily="'DM Mono', monospace">F={F}kN</text>
-
-                {/* Key insight label at bottom */}
-                <rect x={rockX} y={sideH - 22} width={sideW - rockX - 10} height={16} rx={3} fill="rgba(45,106,79,0.08)" />
-                <text x={rockX + 8} y={sideH - 10} fontSize={9} fill="#2d6a4f" fontFamily="'DM Mono', monospace">
-                  ↑ Higher β = lower F_leg. F_leg = F / (n·sin(β)) = {F} / ({numLegs}·sin({beta}°)) = {Fleg < 500 ? round2(Fleg) : "∞"}kN
-                </text>
+                {/* Right-side label panel */}
+                <line x1={sideW - 138} y1={14} x2={sideW - 138} y2={sideH - 14} stroke={DC.border} strokeWidth={1}/>
+                <text x={sideW - 128} y={44} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">β = {beta}°</text>
+                <text x={sideW - 128} y={64} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">elevation angle</text>
+                <text x={sideW - 128} y={100} fontSize={13} fill={col} fontFamily={DFONT} fontWeight="800">{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
+                <text x={sideW - 128} y={120} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">per leg</text>
+                <text x={sideW - 128} y={156} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">Master Point</text>
+                <text x={sideW - 128} y={176} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">height above bolt</text>
+                <text x={sideW - 128} y={196} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">{round1(legLenSide * Math.sin(betaR) / 10)}× leg len</text>
               </svg>
             </>
-          )}
-
-          {/* Reference table — switches between spread and elevation */}
-          {!showElevated ? (
-            <div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a7268", marginBottom: 8 }}>
-                Force per leg (kN) for F = {F}kN load
-              </div>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
-                <thead>
-                  <tr style={{ borderBottom: "1px solid rgba(13,15,14,0.12)" }}>
-                    {["Spread α", "2 legs", "3 legs", "4 legs"].map(h => (
-                      <th key={h} style={{ textAlign: "left", padding: "5px 8px", color: "#7a7268", fontWeight: 500 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {refTable.map(row => {
-                    const isActive = row.a === alpha;
-                    const isDanger = row.f2 >= F;
-                    return (
-                      <tr key={row.a} style={{ background: isActive ? "rgba(200,83,26,0.06)" : "transparent", borderBottom: "1px solid rgba(13,15,14,0.06)" }}>
-                        <td style={{ padding: "5px 8px", fontWeight: isActive ? 600 : 400 }}>{row.a}°</td>
-                        <td style={{ padding: "5px 8px", color: isDanger ? "#dc2626" : "#0d0f0e" }}>{row.f2 >= 500 ? "∞" : row.f2}</td>
-                        <td style={{ padding: "5px 8px" }}>{row.f3 >= 500 ? "∞" : row.f3}</td>
-                        <td style={{ padding: "5px 8px" }}>{row.f4 >= 500 ? "∞" : row.f4}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#7a7268", marginBottom: 8 }}>
-                Force per leg (kN) for F = {F}kN — elevated master point
-              </div>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
-                <thead>
-                  <tr style={{ borderBottom: "1px solid rgba(13,15,14,0.12)" }}>
-                    {["Elevation β", "2 legs", "3 legs", "4 legs", "Effect"].map(h => (
-                      <th key={h} style={{ textAlign: "left", padding: "5px 8px", color: "#7a7268", fontWeight: 500 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {elevTable.map(row => {
-                    const isActive = row.b === beta;
-                    const reduction = round1(100 - (row.f2 / (F / 2)) * 100);
-                    return (
-                      <tr key={row.b} style={{ background: isActive ? "rgba(200,83,26,0.06)" : "transparent", borderBottom: "1px solid rgba(13,15,14,0.06)" }}>
-                        <td style={{ padding: "5px 8px", fontWeight: isActive ? 600 : 400 }}>{row.b}°</td>
-                        <td style={{ padding: "5px 8px" }}>{row.f2}</td>
-                        <td style={{ padding: "5px 8px" }}>{row.f3}</td>
-                        <td style={{ padding: "5px 8px" }}>{row.f4}</td>
-                        <td style={{ padding: "5px 8px", color: "#2d6a4f", fontSize: 10 }}>
-                          {reduction > 0 ? `−${reduction}%` : ""}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              <p style={{ fontSize: 11, color: "#7a7268", marginTop: 8, lineHeight: 1.5 }}>
-                % reduction vs flat 2-leg anchor at same load. Higher elevation = lower force per leg.
-                Practical A-frames typically achieve β = 20–45°.
-              </p>
-            </div>
           )}
         </div>
       </div>
 
-      <SourceNote>
-        FLAT ANCHOR — 2-leg: F_leg = F/(2·cos(α/2)) | 3-leg: F_leg ≈ F/(3·cos(α/3)) | 4-leg: F_leg = F/(4·cos(α/2)).
-        ELEVATED MASTER POINT — n legs: F_leg = F/(n·sin(β)) where β = elevation angle above horizontal.
-        Sources: ISA Anchor Analysis (2021), RopeLab Force Calculators, ISA Cavaletes em Slacklines (2017).
-        Rule: never exceed 120° spread between legs. Minimum recommended elevation: 20°.
-      </SourceNote>
+      {/* ── Education section ── */}
+      <div style={{ marginTop: 60, borderTop: `2px solid ${DC.border}`, paddingTop: 48 }}>
+        <h3 style={{ fontFamily: DFONT, fontSize: 28, fontWeight: 800, color: DC.navy, marginBottom: 36 }}>Understanding Anchor Angles</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.blue}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>The Golden Rule: Stay Below 60°</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              With a 2-leg anchor at <strong style={{ color: DC.navy }}>60°</strong> spread, each leg carries exactly the full load (1.0×).
+              At 90°, each leg carries <strong style={{ color: DC.amber }}>1.41×</strong> the load.
+              At 120°, each leg carries <strong style={{ color: DC.coral }}>2×</strong> the load — the most fragile equipment may fail.
+              ISA recommends keeping the spread angle under 60°.
+            </p>
+          </div>
+
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.teal}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>A-Frame (Cavalete) Effect</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              When the master point is elevated above the bolts, the legs run at an upward angle β.
+              The vertical component of each leg's force supports the load, dramatically <strong style={{ color: DC.teal }}>reducing</strong> the force per bolt.
+              At β = 30°, each of 2 legs carries F/2 = 50% of the total load.
+              At β = 90° (vertical), each leg carries F/n exactly.
+            </p>
+          </div>
+
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.coral}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Sliding-X vs BFK vs Equalette</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: DC.navy }}>Sliding-X / Magic X</strong>: 2-leg system, self-equalizing, no extension on failure. Simple and widely used.<br/>
+              <strong style={{ color: DC.navy }}>BFK (Bowline Knot Fixo)</strong>: 2-leg with fixed master point, very strong and common in Brazil.<br/>
+              <strong style={{ color: DC.navy }}>Equalette</strong>: 3-leg, redundant, used for critical highline anchors.
+            </p>
+          </div>
+
+          <div style={{ background: DC.navy, borderRadius: 14, padding: "28px" }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.white, marginBottom: 16 }}>Key Formulas</h4>
+            {[
+              { label: "2-leg flat anchor", formula: "F_leg = F / (2 × cos(α/2))", note: "α = angle between legs" },
+              { label: "3-leg flat anchor", formula: "F_leg ≈ F / (3 × cos(α/3))", note: "Equalized loading" },
+              { label: "Elevated n-leg", formula: "F_leg = F / (n × sin β)", note: "β = elevation above horizontal" },
+            ].map(f => (
+              <div key={f.label} style={{ marginBottom: 18 }}>
+                <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{f.label}</div>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 600, color: DC.blue, marginBottom: 2 }}>{f.formula}</div>
+                <div style={{ fontFamily: DFONT, fontSize: 13, color: "rgba(255,255,255,0.4)" }}>{f.note}</div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Calculator 3: Backup Fall ────────────────────────────────────────────────
+
 
 function BackupFallCalc({ units }: { units: Units }) {
   const [lineLen, setLineLen] = useState(100);
@@ -952,11 +936,12 @@ function BackupFallCalc({ units }: { units: Units }) {
 }
 
 // ─── Calculator 4: Midline Safety ─────────────────────────────────────────────
+// ─── Calculator 4: Midline Safety ─────────────────────────────────────────────
 
 function MidlineSafetyCalc({ units }: { units: Units }) {
-  const [H, setH] = useState(8);      // height m
-  const [L, setL] = useState(2);      // leash m
-  const [S, setS] = useState(2);      // backup sag m
+  const [H, setH] = useState(8);
+  const [L, setL] = useState(2);
+  const [S, setS] = useState(2);
 
   const uUnit = units === "imperial";
   const uH = uUnit ? m2ft(H) : H;
@@ -969,106 +954,186 @@ function MidlineSafetyCalc({ units }: { units: Units }) {
   const safe = H > required;
   const pct = Math.min(100, Math.max(0, (H / (required * 1.5)) * 100));
 
+  // ── SVG geometry ─────────────────────────────────────────────────────────────
+  const svgW = 460, svgH = 300;
+
+  // Ground at fixed bottom
+  const groundY = svgH - 30;
+
+  // Main line Y: moves up/down based on H — more height = line higher up
+  // Scale: H range 1–50m maps to Y range 40..220
+  const lineY = Math.max(40, groundY - Math.min(220, H * 4.2));
+
+  // Person hangs BELOW the backup, connected by leash
+  // Backup sags: more S = deeper sag
+  const backupSagPx = Math.min(80, S * 10 + 12);
+  const backupMidY = lineY + 6 + backupSagPx;
+
+  // Person position: hanging from backup by leash
+  const personX = svgW / 2;
+  const leashLenPx = Math.min(50, L * 8 + 8);
+  const personY = backupMidY + leashLenPx;  // person hangs BELOW backup midpoint
+
+  // Person silhouette center
+  const headY = personY;
+  const bodyEndY = headY + 22;
+
   return (
     <div>
-      <SectionTitle>Midline safety height checker</SectionTitle>
-      <p style={{ fontSize: 14, color: "#7a7268", marginBottom: 16, lineHeight: 1.65 }}>
+      <SectionTitle>Midline Safety Height Checker</SectionTitle>
+      <p style={{ fontFamily: DFONT, fontSize: 17, color: DC.muted, marginBottom: 28, lineHeight: 1.7, maxWidth: 640 }}>
         A midline is a highline rigged at low height. The ISA requires a minimum height so the
-        backup doesn't contact the ground during a backup fall.
+        backup doesn't contact the ground during a fall. Adjust the sliders to check your setup.
       </p>
 
-      {/* Formula display */}
-      <div style={{ background: "#0d0f0e", borderRadius: 10, padding: "16px 24px", marginBottom: 28, textAlign: "center" }}>
-        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 300, color: "#f4f1eb", letterSpacing: "-0.02em" }}>
-          H &gt; 2 × (L + S)
-        </div>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "#7a7268", marginTop: 8, letterSpacing: "0.06em" }}>
-          H = height of main line | L = leash length | S = backup sag at center
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
+        {/* Controls + result */}
         <div>
           <SliderRow label="Height of main line (H)" value={uH} min={uUnit ? 3 : 1} max={uUnit ? 164 : 50} step={uUnit ? 0.5 : 0.1} unit={uUnit ? "ft" : "m"} onChange={v => setH(uUnit ? ft2m(v) : v)} />
-          <SliderRow label="Leash length (L)" value={uL} min={uUnit ? 3 : 1} max={uUnit ? 13 : 4} step={uUnit ? 0.5 : 0.1} unit={uUnit ? "ft" : "m"} onChange={v => setL(uUnit ? ft2m(v) : v)} />
+          <SliderRow label="Leash length (L)" value={uL} min={uUnit ? 1 : 0.5} max={uUnit ? 13 : 4} step={uUnit ? 0.5 : 0.1} unit={uUnit ? "ft" : "m"} onChange={v => setL(uUnit ? ft2m(v) : v)} />
           <SliderRow label="Backup sag (S)" value={uS} min={uUnit ? 1 : 0.3} max={uUnit ? 33 : 10} step={uUnit ? 0.5 : 0.1} unit={uUnit ? "ft" : "m"} onChange={v => setS(uUnit ? ft2m(v) : v)} />
 
-          {/* Big result */}
-          <div style={{
-            padding: 24, borderRadius: 12, textAlign: "center", marginTop: 20,
-            background: safe ? "#d1fae5" : "#fee2e2",
-            border: `2px solid ${safe ? "#6ee7b7" : "#fca5a5"}`,
-          }}>
-            <div style={{ fontSize: 48 }}>{safe ? "✅" : "❌"}</div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, marginTop: 8, color: safe ? "#065f46" : "#991b1b" }}>
+          {/* Safety status */}
+          <div style={{ padding: 24, borderRadius: 14, textAlign: "center", marginTop: 24, background: safe ? "rgba(0,191,165,0.1)" : "rgba(239,83,80,0.1)", border: `2px solid ${safe ? DC.teal : DC.coral}` }}>
+            <div style={{ fontFamily: DFONT, fontSize: 52, fontWeight: 900, color: safe ? DC.teal : DC.coral, lineHeight: 1 }}>
+              {safe ? "✓" : "✕"}
+            </div>
+            <div style={{ fontFamily: DFONT, fontSize: 22, fontWeight: 800, marginTop: 8, color: safe ? DC.teal : DC.coral }}>
               {safe ? "SAFE" : "NOT SAFE"}
             </div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, marginTop: 6, color: safe ? "#065f46" : "#991b1b", lineHeight: 1.8 }}>
-              Min required: {round1(uRequired)}{uUnit ? "ft" : "m"}<br />
-              Your height: {uH}{uUnit ? "ft" : "m"}<br />
+            <div style={{ fontFamily: DFONT, fontSize: 16, marginTop: 8, color: DC.muted, lineHeight: 1.8 }}>
+              Min required: <strong style={{ color: DC.navy }}>{round1(uRequired)}{uUnit ? " ft" : " m"}</strong><br/>
+              Your height: <strong style={{ color: DC.navy }}>{uH}{uUnit ? " ft" : " m"}</strong><br/>
               {safe
-                ? `Safety margin: +${uUnit ? m2ft(margin) : margin}${uUnit ? "ft" : "m"}`
-                : `You need ${uUnit ? m2ft(Math.abs(margin)) : Math.abs(margin)}${uUnit ? "ft" : "m"} more`
+                ? <span style={{ color: DC.teal }}>Safety margin: +{uUnit ? m2ft(margin) : margin}{uUnit ? " ft" : " m"}</span>
+                : <span style={{ color: DC.coral }}>Need {uUnit ? m2ft(Math.abs(margin)) : Math.abs(margin)}{uUnit ? " ft" : " m"} more height</span>
               }
             </div>
           </div>
-        </div>
 
-        <div>
-          {/* Visual gauge */}
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#7a7268", marginBottom: 8, letterSpacing: "0.06em" }}>
-              <span>0{uUnit ? "ft" : "m"}</span>
-              <span>Required: {round1(uRequired)}{uUnit ? "ft" : "m"}</span>
-              <span>{uUnit ? m2ft(required * 1.5) : round1(required * 1.5)}{uUnit ? "ft" : "m"}</span>
+          {/* Progress gauge */}
+          <div style={{ marginTop: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontFamily: DFONT, fontSize: 13, color: DC.muted, marginBottom: 8 }}>
+              <span>0</span>
+              <span>Required: {round1(uRequired)}{uUnit ? " ft" : " m"}</span>
+              <span>{uUnit ? m2ft(round1(required * 1.5)) : round1(required * 1.5)}{uUnit ? " ft" : " m"}</span>
             </div>
-            <div style={{ height: 20, background: "rgba(13,15,14,0.08)", borderRadius: 10, overflow: "hidden", position: "relative" }}>
-              <div style={{ position: "absolute", left: "66.7%", top: 0, bottom: 0, width: 2, background: "#c8531a", zIndex: 2 }} />
-              <div style={{
-                height: "100%", borderRadius: 10, transition: "width 0.3s",
-                width: `${pct}%`,
-                background: safe ? "#2d6a4f" : "#dc2626",
-              }} />
-            </div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#7a7268", marginTop: 4, textAlign: "right" }}>
-              ↑ minimum safe height
+            <div style={{ height: 16, background: DC.bg, borderRadius: 8, overflow: "hidden", position: "relative", border: `1px solid ${DC.border}` }}>
+              <div style={{ position: "absolute", left: "66.7%", top: 0, bottom: 0, width: 2, background: DC.coral, zIndex: 2 }}/>
+              <div style={{ height: "100%", borderRadius: 8, transition: "width 0.3s, background 0.3s", width: `${pct}%`, background: safe ? DC.teal : DC.coral }}/>
             </div>
           </div>
+        </div>
 
-          {/* SVG side-view */}
-          <svg width="100%" viewBox="0 0 300 280" style={{ borderRadius: 8, background: "rgba(13,15,14,0.02)", border: "1px solid rgba(13,15,14,0.08)" }}>
+        {/* Diagram */}
+        <div>
+          <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>
+            Side view
+          </div>
+          <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}` }}>
             {/* Ground */}
-            <rect x={0} y={240} width={300} height={40} fill={safe ? "rgba(45,106,79,0.1)" : "rgba(220,38,38,0.15)"} />
-            <line x1={0} y1={240} x2={300} y2={240} stroke={safe ? "#2d6a4f" : "#dc2626"} strokeWidth={2} />
-            {/* Anchors */}
-            <rect x={10} y={80} width={10} height={160} fill="#c8c0b0" />
-            <rect x={280} y={80} width={10} height={160} fill="#c8c0b0" />
-            {/* Main line */}
-            <line x1={20} y1={80} x2={280} y2={80} stroke="#0d0f0e" strokeWidth={2.5} />
-            {/* Backup */}
-            <path d="M 20 84 Q 150 140 280 84" fill="none" stroke="#7a7268" strokeWidth={1.5} strokeDasharray="4,3" />
-            {/* Person */}
-            <circle cx={150} cy={72} r={7} fill="#0d0f0e" />
-            {/* Leash */}
-            <line x1={150} y1={79} x2={150} y2={100} stroke="#7a7268" strokeWidth={1.5} strokeDasharray="3,2" />
-            {/* H dimension */}
-            <line x1={260} y1={80} x2={260} y2={240} stroke="#c8531a" strokeWidth={1} strokeDasharray="3,2" />
-            <text x={264} y={165} fontSize={9} fill="#c8531a" fontFamily="'DM Mono', monospace">H</text>
-            <line x1={255} y1={80} x2={265} y2={80} stroke="#c8531a" strokeWidth={1} />
-            <line x1={255} y1={240} x2={265} y2={240} stroke="#c8531a" strokeWidth={1} />
+            <rect x={0} y={groundY} width={svgW} height={svgH - groundY}
+              fill={safe ? "rgba(0,191,165,0.08)" : "rgba(239,83,80,0.1)"}/>
+            <line x1={0} y1={groundY} x2={svgW} y2={groundY}
+              stroke={safe ? DC.teal : DC.coral} strokeWidth={2.5}/>
+            <text x={14} y={groundY + 18} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Ground</text>
+
+            {/* Main highline — full width, horizontal */}
+            <line x1={20} y1={lineY} x2={svgW - 100} y2={lineY}
+              stroke={DC.navy} strokeWidth={3}/>
+            <text x={24} y={lineY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Highline</text>
+
+            {/* Backup — dashed, sagging below main line */}
+            <path
+              d={`M 20 ${lineY + 5} Q ${personX} ${backupMidY} ${svgW - 100} ${lineY + 5}`}
+              fill="none" stroke={DC.muted} strokeWidth={2} strokeDasharray="6,4"/>
+            <text x={24} y={backupMidY + 4} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">Backup</text>
+
+            {/* Leash from backup to person */}
+            <line x1={personX} y1={backupMidY} x2={personX} y2={headY - 5}
+              stroke={DC.muted} strokeWidth={1.5} strokeDasharray="3,2"/>
+
+            {/* Person silhouette — hanging upside down / suspended below backup */}
+            {/* Head */}
+            <circle cx={personX} cy={headY} r={6} fill={DC.navy}/>
+            {/* Torso */}
+            <line x1={personX} y1={headY + 5} x2={personX} y2={bodyEndY} stroke={DC.navy} strokeWidth={2.5} strokeLinecap="round"/>
+            {/* Arms */}
+            <line x1={personX - 10} y1={headY + 11} x2={personX + 10} y2={headY + 11} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+            {/* Legs spread */}
+            <line x1={personX} y1={bodyEndY} x2={personX - 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+            <line x1={personX} y1={bodyEndY} x2={personX + 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+
+            {/* H dimension arrow */}
+            <line x1={svgW - 60} y1={lineY} x2={svgW - 60} y2={groundY}
+              stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3"/>
+            <line x1={svgW - 67} y1={lineY} x2={svgW - 53} y2={lineY} stroke={DC.blue} strokeWidth={1.5}/>
+            <line x1={svgW - 67} y1={groundY} x2={svgW - 53} y2={groundY} stroke={DC.blue} strokeWidth={1.5}/>
+            <text x={svgW - 55} y={(lineY + groundY) / 2 + 5} fontSize={14} fill={DC.blue} fontFamily={DFONT} fontWeight="800">H</text>
+
+            {/* 2(L+S) indicator */}
+            <line x1={svgW - 80} y1={lineY} x2={svgW - 80} y2={Math.min(groundY, lineY + Math.min(100, required * 4))}
+              stroke={safe ? DC.teal : DC.coral} strokeWidth={2} strokeDasharray="3,2" opacity={0.5}/>
           </svg>
         </div>
       </div>
 
-      <SourceNote>
-        FORMULA: H {">"} 2×(L+S) — Athanasiadis (2013). Source: ISA Midline Advisory (2015).
-        slacklineinternational.org/wp-content/uploads/2016/06/ISA-MidlineAdvisory-PR.pdf
-      </SourceNote>
+      {/* ── Education section ── */}
+      <div style={{ marginTop: 60, borderTop: `2px solid ${DC.border}`, paddingTop: 48 }}>
+        <h3 style={{ fontFamily: DFONT, fontSize: 28, fontWeight: 800, color: DC.navy, marginBottom: 36 }}>Understanding Midline Safety</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.blue}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>What is a Midline?</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              A midline is a highline rigged at low height — typically under 10m.
+              The key danger: if the main line fails, the person falls onto the backup.
+              If there isn't enough height, the backup (and person) can hit the ground.
+              The ISA requires a <strong style={{ color: DC.navy }}>minimum height H {">"} 2×(L+S)</strong>.
+            </p>
+          </div>
+
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.teal}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Leash Length (L)</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              The leash connects the slackliner's harness to the backup line.
+              When the main line fails, the person falls the length of the leash before the backup catches them.
+              Shorter leash = less fall distance = safer for low lines.
+              Most highline leashes are <strong style={{ color: DC.navy }}>1.5–2.5m</strong>.
+            </p>
+          </div>
+
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.coral}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Backup Sag (S)</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              The backup line always hangs lower than the main line due to gravity.
+              This sag (S) adds to the effective fall distance.
+              A deeply sagged backup is dangerous on a midline.
+              Keep backup sag tight on low lines — under 1m if possible.
+            </p>
+          </div>
+
+          <div style={{ background: DC.navy, borderRadius: 14, padding: "28px" }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.white, marginBottom: 16 }}>The Formula</h4>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 22, fontWeight: 700, color: DC.blue, marginBottom: 12, letterSpacing: "0.02em" }}>
+              H {">"} 2 × (L + S)
+            </div>
+            <div style={{ fontFamily: DFONT, fontSize: 15, color: "rgba(255,255,255,0.6)", lineHeight: 1.8 }}>
+              <strong style={{ color: DC.white }}>H</strong> = height of main line above ground<br/>
+              <strong style={{ color: DC.white }}>L</strong> = leash length<br/>
+              <strong style={{ color: DC.white }}>S</strong> = backup sag at center<br/>
+              <br/>
+              Source: Athanasiadis (2013), adopted by ISA Midline Advisory (2015)
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Calculator 5: Mechanical Advantage ──────────────────────────────────────
+
 
 function MechanicalAdvCalc({ units }: { units: Units }) {
   const [system, setSystem] = useState<2 | 3 | 4 | 5 | 6>(3);
