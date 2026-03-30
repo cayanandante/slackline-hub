@@ -40,16 +40,24 @@ const DFONT = "'DM Sans', sans-serif";
 
 // ─── Shared SVG helpers ──────────────────────────────────────────────────────
 
-// Person standing ON a line (feet touch lineY)
+// Person standing ON a line (feet touch lineY exactly)
 function PersonOnLine(px: number, lineY: number, color = "#1a237e"): React.ReactNode {
-  const headR = 5, headCY = lineY - 26;
+  // Total height: head(10) + neck(2) + torso(13) + leg(11) = 36px above lineY
+  const footY = lineY;
+  const legJointY = footY - 11;
+  const shoulderY = legJointY - 13;
+  const headCY = shoulderY - 2 - 5; // 2=neck, 5=headR
+  const headR = 5;
   return (
     <>
       <circle cx={px} cy={headCY} r={headR} fill={color}/>
-      <line x1={px} y1={headCY+headR} x2={px} y2={headCY+headR+13} stroke={color} strokeWidth={2.5} strokeLinecap="round"/>
-      <line x1={px-9} y1={headCY+headR+5} x2={px+9} y2={headCY+headR+5} stroke={color} strokeWidth={2} strokeLinecap="round"/>
-      <line x1={px} y1={headCY+headR+13} x2={px-5} y2={lineY} stroke={color} strokeWidth={2} strokeLinecap="round"/>
-      <line x1={px} y1={headCY+headR+13} x2={px+5} y2={lineY} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+      {/* neck + torso */}
+      <line x1={px} y1={headCY+headR} x2={px} y2={shoulderY+13} stroke={color} strokeWidth={2.5} strokeLinecap="round"/>
+      {/* arms */}
+      <line x1={px-9} y1={shoulderY+5} x2={px+9} y2={shoulderY+5} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+      {/* legs — feet exactly at lineY */}
+      <line x1={px} y1={legJointY} x2={px-5} y2={footY} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+      <line x1={px} y1={legJointY} x2={px+5} y2={footY} stroke={color} strokeWidth={2} strokeLinecap="round"/>
     </>
   );
 }
@@ -68,24 +76,6 @@ function PersonHanging(px: number, topY: number, color = "#1a237e"): React.React
   );
 }
 
-// Looped backup line path (like a real highline with loops every ~40px)
-function backupLoopPath(x1: number, y1: number, x2: number, y2: number, sagY: number, loopH = 10, loopSpacing = 38): string {
-  const totalW = x2 - x1;
-  const nLoops = Math.max(1, Math.round(totalW / loopSpacing));
-  const pts: string[] = [];
-  for (let i = 0; i <= nLoops; i++) {
-    const t = i / nLoops;
-    const baseY = y1 + (y2 - y1) * t + 4 * (sagY - Math.max(y1,y2)) * t * (1-t);
-    const lx = x1 + t * totalW;
-    pts.push(`${lx.toFixed(1)},${(baseY - loopH * (1 - Math.abs(2*t-1))).toFixed(1)}`);
-    if (i < nLoops) {
-      const t2 = (i + 0.5) / nLoops;
-      const midY = y1 + (y2 - y1) * t2 + 4 * (sagY - Math.max(y1,y2)) * t2 * (1-t2);
-      pts.push(`${(x1 + t2 * totalW).toFixed(1)},${(midY + loopH * 0.5).toFixed(1)}`);
-    }
-  }
-  return "M " + pts.join(" L ");
-}
 
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
@@ -245,30 +235,33 @@ function LineTensionCalc({ units }: { units: Units }) {
   const svgW = 560, svgH = 280;
   const AX = 50, AY = 90, BX = svgW - 50, BY = 90;
 
-  // Pre-tension straightens line: with high T0 relative to body weight,
-  // line is more taut (less sag). We model visual sag as:
-  // visual_sag = S * (1 + W*G/(T0*1000 + 1)) / something
-  // Simpler: visual sag proportional to S, reduced by pre-tension
+  // Visual sag: proportional to S, reduced by pre-tension
   const pretensionStraighten = Math.max(0.1, 1 - T0 / (T0 + 5));
   const visualSagMax = Math.max(2, Math.min(svgH - AY - 60, (Sp_safe / (L * 0.005 + Sp_safe)) * (svgH - AY - 60) * pretensionStraighten));
 
   // Person X position on line
   const personX = AX + p * (BX - AX);
-  // Person Y on catenary curve (quadratic approx)
+  // Person Y exactly on catenary curve (parabolic approx)
   const personY = AY + 4 * visualSagMax * p * (1 - p);
 
-  // Parabolic curve through 3 points: A, person, B
-  // Control point for quadratic bezier
-  const cpY = AY + visualSagMax * (1 / (4 * p * (1 - p))) * 4 * p * (1 - p) / 1;
-  // Simpler: just use visually correct sag
   const midSagY = AY + visualSagMax;
   const lineD = `M ${AX} ${AY} Q ${svgW / 2} ${midSagY} ${BX} ${BY}`;
 
-  // Force arrow directions at each anchor
-  const arrowAX = Math.cos(Math.PI + thetaA) * 30;
-  const arrowAY = -Math.sin(thetaA) * 30;
-  const arrowBX = Math.cos(-thetaB) * 30;
-  const arrowBY = -Math.sin(thetaB) * 30;
+  // Backup line: same anchor points but MORE sag (1.5× main visual sag + offset)
+  const backupSagExtra = visualSagMax * 1.5 + 18;
+  const backupMidY = AY + backupSagExtra;
+
+  // Force arrows: point outward along the line direction at each anchor
+  // Slope of line at anchor A: dy/dx from quadratic bezier derivative at t=0
+  // For Q (AX,AY) (cpX,cpY) (BX,BY): slope at t=0 = 2*(cpY-AY)/(BX-AX) ... simplified:
+  // angle at A: theta_A upward from horizontal
+  const arrLen = 36;
+  // Arrow at A points outward-left-and-upward (along line away from B)
+  const arrowAEndX = AX - arrLen * Math.cos(thetaA);
+  const arrowAEndY = AY - arrLen * Math.sin(thetaA);
+  // Arrow at B points outward-right-and-upward
+  const arrowBEndX = BX + arrLen * Math.cos(thetaB);
+  const arrowBEndY = BY - arrLen * Math.sin(thetaB);
 
   return (
     <div>
@@ -317,36 +310,38 @@ function LineTensionCalc({ units }: { units: Units }) {
 
         {/* Diagram + Results */}
         <div>
-          <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ marginBottom: 20, borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}` }}>
+          <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ marginBottom: 20, borderRadius: 12, background: DC.white, border: `1px solid ${DC.border}` }}>
             <defs>
               <marker id="arrT" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
                 <path d="M2 1L8 5L2 9" fill="none" stroke={DC.coral} strokeWidth={1.5}/>
               </marker>
-              {/* Person silhouette clip */}
             </defs>
 
-            {/* Looped backup line — like a real highline */}
-            <path d={backupLoopPath(AX, AY+6, BX, BY+6, midSagY+12)} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3" opacity={0.45}/>
+            {/* Backup line — dashed, curves MORE than main line */}
+            <path
+              d={`M ${AX} ${AY} Q ${svgW / 2} ${backupMidY} ${BX} ${BY}`}
+              fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.55}/>
+            <text x={svgW/2 + 6} y={backupMidY + 14} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600" textAnchor="start">Backup</text>
 
             {/* Main line */}
             <path d={lineD} fill="none" stroke={DC.navy} strokeWidth={3}/>
             <path d={lineD} fill="none" stroke={DC.blue} strokeWidth={1.5} opacity={0.5}/>
 
-            {/* Force arrows at anchors — always point outward horizontally */}
+            {/* Force arrows at anchors — outward along line direction */}
             <line
               x1={AX} y1={AY}
-              x2={AX - 34} y2={AY}
+              x2={arrowAEndX} y2={arrowAEndY}
               stroke={DC.coral} strokeWidth={2.5} markerEnd="url(#arrT)"
             />
             <line
               x1={BX} y1={BY}
-              x2={BX + 34} y2={BY}
+              x2={arrowBEndX} y2={arrowBEndY}
               stroke={DC.coral} strokeWidth={2.5} markerEnd="url(#arrT)"
             />
 
             {/* Force labels */}
-            <text x={AX - 8} y={AY - 36} fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="800" textAnchor="middle">{FA_total} kN</text>
-            <text x={BX + 8} y={BY - 36} fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="800" textAnchor="middle">{FB_total} kN</text>
+            <text x={arrowAEndX - 4} y={arrowAEndY - 8} fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="800" textAnchor="middle">{FA_total} kN</text>
+            <text x={arrowBEndX + 4} y={arrowBEndY - 8} fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="800" textAnchor="middle">{FB_total} kN</text>
 
             {/* Anchor dots */}
             <circle cx={AX} cy={AY} r={8} fill={DC.navy}/>
@@ -358,10 +353,8 @@ function LineTensionCalc({ units }: { units: Units }) {
             <text x={AX} y={AY + 22} fontSize={14} fill={DC.navy} fontFamily={DFONT} fontWeight="700" textAnchor="middle">A</text>
             <text x={BX} y={BY + 22} fontSize={14} fill={DC.navy} fontFamily={DFONT} fontWeight="700" textAnchor="middle">B</text>
 
-            {/* Person standing ON the line */}
+            {/* Person standing ON the catenary — feet at personY */}
             {PersonOnLine(personX, personY, DC.navy)}
-            {/* Red leash from feet to line point */}
-            <line x1={personX} y1={personY - 1} x2={personX} y2={personY + 1} stroke={DC.coral} strokeWidth={2} strokeLinecap="round"/>
           </svg>
 
           {/* Result cards */}
@@ -649,7 +642,7 @@ function AnchorAngleCalc({ units }: { units: Units }) {
               <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>
                 Top view — anchor spread
               </div>
-              <svg width="100%" viewBox={`0 0 ${topW} ${topH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}`, marginBottom: 12 }}>
+              <svg width="100%" viewBox={`0 0 ${topW} ${topH}`} style={{ borderRadius: 12, background: DC.white, border: `1px solid ${DC.border}`, marginBottom: 12 }}>
                 <defs>
                   <marker id="arrowUp2" viewBox="0 0 10 10" refX={5} refY={2} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
                     <path d="M1 9L5 1L9 9" fill="none" stroke={DC.navy} strokeWidth={1.5}/>
@@ -660,25 +653,26 @@ function AnchorAngleCalc({ units }: { units: Units }) {
                 </defs>
 
                 {/* Load arrow pointing UP from master point */}
-                <line x1={mpX} y1={mpY - 16} x2={mpX} y2={mpY - 58}
+                <line x1={mpX} y1={mpY - 16} x2={mpX} y2={mpY - 60}
                   stroke={DC.navy} strokeWidth={2.5} markerEnd="url(#arrowUp2)"/>
-                <text x={mpX + 8} y={mpY - 42} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">F = {F} kN</text>
+                <text x={mpX + 8} y={mpY - 44} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">F = {F} kN</text>
 
                 {/* Legs with arrow toward MP */}
                 {legPositions.map((leg, i) => {
                   const dx = mpX - leg.x, dy = mpY - leg.y;
                   const dist = Math.sqrt(dx*dx + dy*dy);
                   const ux = dx/dist, uy = dy/dist;
-                  const arrowX = leg.x + ux * 28, arrowY = leg.y + uy * 28;
+                  // Arrow starting from near the bolt, pointing toward MP
+                  const arrowStartX = leg.x + ux * 18, arrowStartY = leg.y + uy * 18;
+                  const arrowEndX = leg.x + ux * 46, arrowEndY = leg.y + uy * 46;
                   return (
                     <g key={i}>
                       <line x1={mpX} y1={mpY} x2={leg.x} y2={leg.y} stroke={col} strokeWidth={3} strokeLinecap="round"/>
                       {/* Arrow on leg pointing toward MP */}
-                      <line x1={leg.x} y1={leg.y} x2={arrowX} y2={arrowY} stroke={col} strokeWidth={2.5} markerEnd="url(#arrLeg)"/>
+                      <line x1={arrowStartX} y1={arrowStartY} x2={arrowEndX} y2={arrowEndY} stroke={col} strokeWidth={2.5} markerEnd="url(#arrLeg)"/>
                       {/* Bolt */}
                       <circle cx={leg.x} cy={leg.y} r={8} fill={DC.navy}/>
                       <circle cx={leg.x} cy={leg.y} r={4} fill={DC.blue}/>
-                      {/* Force label near bolt, in right panel area only for outermost */}
                     </g>
                   );
                 })}
@@ -686,15 +680,18 @@ function AnchorAngleCalc({ units }: { units: Units }) {
                 {/* Master point */}
                 <circle cx={mpX} cy={mpY} r={11} fill={col}/>
                 <circle cx={mpX} cy={mpY} r={5} fill={DC.white}/>
-                <text x={mpX + 14} y={mpY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Master Point</text>
+                {/* "Master Point" label next to the circle, not on it */}
+                <text x={mpX + 16} y={mpY + 5} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Master Point</text>
 
-                {/* Angle arc — concave toward MP (curves away from legs) */}
+                {/* Angle arc — concave DOWNWARD from master point (toward legs, not away) */}
                 {arcPath && (
                   <path d={arcPath} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3"/>
                 )}
 
-                {/* Labels on RIGHT side of diagram */}
+                {/* Divider line */}
                 <line x1={355} y1={20} x2={355} y2={topH - 20} stroke={DC.border} strokeWidth={1}/>
+
+                {/* Labels on RIGHT side — angles only */}
                 <text x={365} y={46} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">α = {alpha}°</text>
                 <text x={365} y={64} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">outer legs angle</text>
                 {numLegs >= 3 && (
@@ -750,7 +747,7 @@ function AnchorAngleCalc({ units }: { units: Units }) {
                 // Force downward arrow at MP
                 const mpAbove = iso(0,0,mpH+0.9);
                 return (
-                  <svg width="100%" viewBox={`0 0 ${W3} ${H3}`} style={{ borderRadius:12, background:DC.bg, border:`1px solid ${DC.border}`, marginBottom:12 }}>
+                  <svg width="100%" viewBox={`0 0 ${W3} ${H3}`} style={{ borderRadius:12, background:DC.white, border:`1px solid ${DC.border}`, marginBottom:12 }}>
                     <defs>
                       <marker id="arr3d" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={7} markerHeight={7} orient="auto">
                         <path d="M2 1L8 5L2 9" fill="none" stroke={DC.coral} strokeWidth={1.5}/>
@@ -876,36 +873,122 @@ function BackupFallCalc({ units }: { units: Units }) {
   const uBSag = uUnit ? m2ft(backupSag) : backupSag;
   const uW = uUnit ? kg2lb(weight) : weight;
 
-  // Athanasiadis midline formula
+  // Athanasiadis midline formula: minimum height for clearance
   const requiredH = 2 * (leash + backupSag);
   const clearanceOk = height > requiredH;
   const margin = round1(height - requiredH);
 
-  // Simplified backup fall force estimation
-  // Fall distance = leash length (approximation for center of line)
-  // Using energy methods: F = W*g*(1 + sqrt(1 + 2*k*h/(W*g)))
-  // Stiffness approximation by webbing type
+  // Peak backup force — energy method
+  // k (spring constant) = W*g / (stretch_factor * L)  [N/m]
   const stretchFactor = webbing === "dyneema" ? 0.01 : webbing === "nylon" ? 0.05 : 0.25;
-  const k_approx = (weight * G * 10) / (stretchFactor * lineLen); // simplified spring constant
-  const fallDist = leash;
+  const k_approx = (weight * G) / (stretchFactor * Math.max(1, lineLen)); // N/m
+  const fallDist = leash; // fall = leash length before backup arrests
+  // F_peak = W*g * (1 + sqrt(1 + 2*k*d/(W*g)))
   const peakForce = round2(weight * G * (1 + Math.sqrt(1 + (2 * k_approx * fallDist) / (weight * G))) / 1000);
-  const clampedForce = Math.min(peakForce, 40); // physical clamp
+  const clampedForce = Math.min(peakForce, 40);
 
-  const svgH2 = 280;
-  const svgW2 = 480;
-  const groundY = svgH2 - 30;
-  const lineY = groundY - Math.min(200, height * 4);
-  const backupY = lineY + Math.min(60, backupSag * 8);
-  const personX = svgW2 / 2;
+  // Est. fall distance (to lowest point of person)
+  const estFallDist = round1(leash + backupSag * 0.3);
+
+  // ── SVG Diagram ──────────────────────────────────────────────────────────────
+  // SVG coordinate system: y increases downward
+  const bW = 560, bH = 320;
+  const bGroundY = bH - 30;
+
+  // Scale: height maps to pixel distance. Clamp so diagram is always visible.
+  // 1m = ~4px, but anchored so ground = bGroundY, line = bGroundY - height*px
+  const pxPerM = Math.min(6.5, (bH - 80) / Math.max(1, height));
+  const bLineY = Math.max(44, bGroundY - height * pxPerM);
+  const bAX = 40, bBX = bW - 40;
+
+  // Backup line: sags below main line
+  const backupSagPx = Math.max(10, Math.min(70, backupSag * pxPerM * 2));
+  const backupMidY = bLineY + 8 + backupSagPx;
+
+  // Person hangs from backup midpoint by leash
+  const bPersonX = bW / 2;
+  const leashPx = Math.max(12, Math.min(50, leash * pxPerM * 2.5));
+  // Leash attaches to backup mid, person feet hang down
+  const leashTopY = backupMidY; // attachment point on backup
+  const personTopY = leashTopY + leashPx; // where person's head is (hanging)
 
   return (
     <div>
-      <SectionTitle>Backup fall simulator</SectionTitle>
+      <SectionTitle>Backup Fall Simulator</SectionTitle>
       <p style={{ fontFamily: DFONT, fontSize: 17, color: DC.muted, marginBottom: 28, lineHeight: 1.7, maxWidth: 640 }}>
         Simulates forces when the main line fails and the backup is loaded.
         Uses the Athanasiadis (2013) model adopted by ISA for minimum height requirements.
       </p>
 
+      {/* ── DIAGRAM FIRST ── */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>
+          Side view — after main line failure
+        </div>
+        <svg width="100%" viewBox={`0 0 ${bW} ${bH}`} style={{ borderRadius: 12, background: DC.white, border: `1px solid ${DC.border}` }}>
+          <defs>
+            <marker id="arrH2" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={6} markerHeight={6} orient="auto">
+              <path d="M2 1L8 5L2 9" fill="none" stroke={DC.blue} strokeWidth={1.5}/>
+            </marker>
+          </defs>
+
+          {/* Ground — colored by clearance status */}
+          <line x1={0} y1={bGroundY} x2={bW} y2={bGroundY} stroke={clearanceOk ? DC.teal : DC.coral} strokeWidth={3}/>
+          {/* Ground hatch marks */}
+          {Array.from({length: Math.floor(bW/20)}).map((_,i) => (
+            <line key={i} x1={i*20+4} y1={bGroundY} x2={i*20} y2={bGroundY+10} stroke={clearanceOk ? DC.teal : DC.coral} strokeWidth={1} opacity={0.4}/>
+          ))}
+          <text x={10} y={bGroundY - 6} fontSize={13} fill={clearanceOk ? DC.teal : DC.coral} fontFamily={DFONT} fontWeight="700">Ground</text>
+
+          {/* Main line — dashed (broken) */}
+          <line x1={bAX} y1={bLineY} x2={bBX} y2={bLineY} stroke={DC.navy} strokeWidth={2.5} strokeDasharray="8,5" opacity={0.45}/>
+          <text x={bAX + 6} y={bLineY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700" opacity={0.5}>Main line (failed)</text>
+
+          {/* Anchor circles — same style as Line Tension calc */}
+          <circle cx={bAX} cy={bLineY} r={8} fill={DC.navy}/>
+          <circle cx={bAX} cy={bLineY} r={4} fill={DC.blue}/>
+          <circle cx={bBX} cy={bLineY} r={8} fill={DC.navy}/>
+          <circle cx={bBX} cy={bLineY} r={4} fill={DC.blue}/>
+
+          {/* Backup line — dashed, curves below main line */}
+          <path
+            d={`M ${bAX} ${bLineY} Q ${bW/2} ${backupMidY} ${bBX} ${bLineY}`}
+            fill="none" stroke={DC.muted} strokeWidth={2} strokeDasharray="6,4"/>
+          <text x={bAX + 6} y={backupMidY + 16} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Backup line</text>
+
+          {/* Red leash from backup to person (person hangs from it) */}
+          <line x1={bPersonX} y1={leashTopY} x2={bPersonX} y2={personTopY}
+            stroke={DC.coral} strokeWidth={3} strokeLinecap="round"/>
+          <text x={bPersonX + 6} y={(leashTopY + personTopY)/2 + 4} fontSize={12} fill={DC.coral} fontFamily={DFONT} fontWeight="700">Leash (L)</text>
+
+          {/* Person hanging from leash (head at top, feet down) */}
+          {PersonHanging(bPersonX, personTopY, DC.navy)}
+
+          {/* H dimension — height of main line above ground */}
+          <line x1={bW - 28} y1={bLineY} x2={bW - 28} y2={bGroundY} stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3"/>
+          <line x1={bW - 34} y1={bLineY} x2={bW - 22} y2={bLineY} stroke={DC.blue} strokeWidth={1.5}/>
+          <line x1={bW - 34} y1={bGroundY} x2={bW - 22} y2={bGroundY} stroke={DC.blue} strokeWidth={1.5}/>
+          <text x={bW - 20} y={(bLineY + bGroundY)/2 + 5} fontSize={14} fill={DC.blue} fontFamily={DFONT} fontWeight="800">H</text>
+
+          {/* Required height indicator */}
+          {(() => {
+            const reqPx = requiredH * pxPerM;
+            const reqLineY = bGroundY - reqPx;
+            if (reqLineY > 20 && reqLineY < bH - 20) {
+              return (
+                <g>
+                  <line x1={bW - 55} y1={reqLineY} x2={bW - 35} y2={reqLineY}
+                    stroke={clearanceOk ? DC.teal : DC.coral} strokeWidth={1.5} strokeDasharray="3,2"/>
+                  <text x={bW - 100} y={reqLineY - 4} fontSize={11} fill={clearanceOk ? DC.teal : DC.coral} fontFamily={DFONT} fontWeight="600">Min H</text>
+                </g>
+              );
+            }
+            return null;
+          })()}
+        </svg>
+      </div>
+
+      {/* ── Clearance status + inputs ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
         <div>
           <SliderRow label="Line length" value={uLen} min={uUnit ? 33 : 10} max={uUnit ? 6561 : 2000} step={uUnit ? 10 : 1} unit={uUnit ? "ft" : "m"} onChange={v => setLineLen(uUnit ? ft2m(v) : v)} />
@@ -941,83 +1024,38 @@ function BackupFallCalc({ units }: { units: Units }) {
             textAlign: "center",
           }}>
             <div style={{ fontSize: 36 }}>{clearanceOk ? "✅" : "❌"}</div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 700, color: clearanceOk ? DC.teal : DC.coral, marginTop: 8 }}>
+            <div style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 700, color: clearanceOk ? DC.teal : DC.coral, marginTop: 8 }}>
               {clearanceOk ? "CLEARANCE OK" : "INSUFFICIENT CLEARANCE"}
             </div>
             <div style={{ fontFamily: DFONT, fontSize: 15, color: clearanceOk ? DC.teal : DC.coral, marginTop: 6 }}>
-              Required: {uUnit ? m2ft(requiredH) : round1(requiredH)}{uUnit ? "ft" : "m"} &nbsp;|&nbsp;
-              Yours: {uUnit ? m2ft(height) : round1(height)}{uUnit ? "ft" : "m"} &nbsp;|&nbsp;
-              {clearanceOk ? `+${uUnit ? m2ft(margin) : margin}${uUnit ? "ft" : "m"} margin` : `Need ${uUnit ? m2ft(-margin) : Math.abs(margin)}${uUnit ? "ft" : "m"} more`}
+              Required: {uUnit ? m2ft(requiredH) : round1(requiredH)}{uUnit ? " ft" : " m"} &nbsp;|&nbsp;
+              Yours: {uUnit ? uH : round1(height)}{uUnit ? " ft" : " m"} &nbsp;|&nbsp;
+              {clearanceOk ? `+${uUnit ? m2ft(margin) : margin}${uUnit ? " ft" : " m"} margin` : `Need ${uUnit ? m2ft(Math.abs(margin)) : Math.abs(margin)}${uUnit ? " ft" : " m"} more`}
             </div>
           </div>
 
           {/* Results */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-            <ResultCard label="Est. peak backup force" value={units === "imperial" ? kN2lbf(clampedForce) : clampedForce} unit={units === "imperial" ? "lbf" : "kN"} sub="Simplified model" />
+            <ResultCard label="Est. peak backup force" value={units === "imperial" ? kN2lbf(clampedForce) : clampedForce} unit={units === "imperial" ? "lbf" : "kN"} sub="Simplified energy model" />
             <ResultCard label="Min required height" value={uUnit ? m2ft(requiredH) : round1(requiredH)} unit={uUnit ? "ft" : "m"} sub="H > 2(L+S)" />
-            <ResultCard label="Est. fall distance" value={uUnit ? m2ft(round1(leash + backupSag * 0.3)) : round1(leash + backupSag * 0.3)} unit={uUnit ? "ft" : "m"} />
+            <ResultCard label="Est. fall distance" value={uUnit ? m2ft(estFallDist) : estFallDist} unit={uUnit ? "ft" : "m"} sub="to lowest point" />
           </div>
 
-          {/* Diagram — updated with person, looped backup, proper anchors */}
-          {(() => {
-            const bW = 540, bH = 300;
-            const bGroundY = bH - 32;
-            // lineY: scales with height input — more height = line higher
-            const bLineY = Math.max(44, bGroundY - Math.min(230, height * 4.2));
-            const bAX = 30, bBX = bW - 30;
-            // Backup sag below main line
-            const bBackupSagY = bLineY + 8 + Math.min(70, backupSag * 10);
-            const bPersonX = bW / 2;
-            // Person position: on main line
-            const bPersonLineY = bLineY;
-            // Leash from person feet to backup
-            const bLeashLen = Math.min(48, leash * 10 + 8);
-            const bLeashEndY = bPersonLineY + bLeashLen;
-            return (
-              <svg width="100%" viewBox={`0 0 ${bW} ${bH}`} style={{ borderRadius:12, background:DC.bg, border:`1px solid ${DC.border}`, marginTop:12 }}>
-                <defs>
-                  <marker id="arrH" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={6} markerHeight={6} orient="auto">
-                    <path d="M2 1L8 5L2 9" fill="none" stroke={DC.blue} strokeWidth={1.5}/>
-                  </marker>
-                </defs>
-                {/* Ground */}
-                <line x1={0} y1={bGroundY} x2={bW} y2={bGroundY} stroke={clearanceOk ? DC.teal : DC.coral} strokeWidth={2.5}/>
-                <text x={10} y={bGroundY+16} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Ground</text>
-
-                {/* Main line */}
-                <line x1={bAX} y1={bLineY} x2={bBX} y2={bLineY} stroke={DC.navy} strokeWidth={3}/>
-                <text x={bAX+4} y={bLineY-8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Main line</text>
-
-                {/* Anchor circles (same as line tension calc) */}
-                <circle cx={bAX} cy={bLineY} r={8} fill={DC.navy}/>
-                <circle cx={bAX} cy={bLineY} r={4} fill={DC.blue}/>
-                <circle cx={bBX} cy={bLineY} r={8} fill={DC.navy}/>
-                <circle cx={bBX} cy={bLineY} r={4} fill={DC.blue}/>
-
-                {/* Backup line — looped */}
-                <path d={backupLoopPath(bAX, bLineY+6, bBX, bLineY+6, bBackupSagY)} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3" opacity={0.6}/>
-                <text x={bAX+4} y={bBackupSagY+16} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Backup</text>
-
-                {/* Person ON main line */}
-                {PersonOnLine(bPersonX, bPersonLineY, DC.navy)}
-
-                {/* Red leash from person to backup */}
-                <line x1={bPersonX} y1={bPersonLineY} x2={bPersonX} y2={bLeashEndY} stroke={DC.coral} strokeWidth={2} strokeLinecap="round"/>
-
-                {/* H dimension */}
-                <line x1={bW-22} y1={bLineY} x2={bW-22} y2={bGroundY} stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3"/>
-                <line x1={bW-28} y1={bLineY} x2={bW-16} y2={bLineY} stroke={DC.blue} strokeWidth={1.5}/>
-                <line x1={bW-28} y1={bGroundY} x2={bW-16} y2={bGroundY} stroke={DC.blue} strokeWidth={1.5}/>
-                <text x={bW-16} y={(bLineY+bGroundY)/2+5} fontSize={14} fill={DC.blue} fontFamily={DFONT} fontWeight="800">H</text>
-              </svg>
-            );
-          })()}
+          {/* Formula box */}
+          <div style={{ background: DC.bg, borderRadius: 10, padding: "14px 16px", fontFamily: "'DM Mono', monospace", fontSize: 13, color: DC.muted, lineHeight: 1.7 }}>
+            <strong style={{ color: DC.navy }}>Clearance check:</strong> H {">"} 2 × (L + S)<br/>
+            = {round1(height)} {">"} 2 × ({round1(leash)} + {round1(backupSag)}) = {round1(requiredH)} m ?&nbsp;
+            <span style={{ color: clearanceOk ? DC.teal : DC.coral, fontWeight: 700 }}>{clearanceOk ? "✓ YES" : "✗ NO"}</span><br/>
+            <strong style={{ color: DC.navy }}>Peak force:</strong> F = W·g·(1 + √(1 + 2kd/(W·g)))<br/>
+            k = W·g / (ε·L) = {round1(k_approx)} N/m, d = {round1(fallDist)} m
+          </div>
         </div>
       </div>
 
       <SourceNote>
         CLEARANCE FORMULA: H {">"} 2×(L+S) — Athanasiadis (2013), adopted by ISA Midline Advisory (2015).
-        Peak force is a simplified energy model. For accurate results use the ISA official Backup Fall Simulator.
+        Peak force uses simplified spring energy model: k = W·g/(ε·L) where ε is elongation fraction.
+        For accurate results use the ISA official Backup Fall Simulator.
       </SourceNote>
 
       {/* Education section */}
@@ -1029,14 +1067,14 @@ function BackupFallCalc({ units }: { units: Units }) {
             <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
               When the main line breaks, the slackliner free-falls by the <strong style={{ color: DC.navy }}>leash length</strong> before the backup arrests the fall.
               The backup line then sags further under the dynamic load. The person's lowest point is approximately
-              <strong style={{ color: DC.coral }}> H − L − S</strong> above the ground.
+              <strong style={{ color: DC.coral }}> H − 2(L+S)</strong> above the ground.
               If this is negative, the person hits the ground.
             </p>
           </div>
           <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.teal}` }}>
             <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Webbing Type Matters</h4>
             <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
-              <strong style={{ color: DC.navy }}>Dyneema (~1% stretch)</strong>: Very stiff — high peak force, short fall arrest. Low elongation means high shock load.<br/>
+              <strong style={{ color: DC.navy }}>Dyneema (~1% stretch)</strong>: Very stiff — high peak force, short fall arrest.<br/>
               <strong style={{ color: DC.navy }}>Nylon (~5% stretch)</strong>: More elastic — softer arrest, moderate forces.<br/>
               <strong style={{ color: DC.navy }}>Dynamic rope (~25%)</strong>: Very soft arrest, low forces but longer fall distance.
             </p>
@@ -1046,8 +1084,8 @@ function BackupFallCalc({ units }: { units: Units }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
               {[
                 { label: "Minimum safe height", formula: "H > 2 × (L + S)", note: "Athanasiadis 2013, ISA standard" },
-                { label: "Fall distance", formula: "d_fall ≈ L + S × 0.3", note: "Approx. to backup low point" },
-                { label: "Peak backup force", formula: "F = W·g·(1 + √(1 + 2kd/(Wg)))", note: "Energy method, simplified k" },
+                { label: "Fall distance (approx)", formula: "d_fall ≈ L + 0.3·S", note: "To lowest point of person" },
+                { label: "Peak backup force", formula: "F = W·g·(1 + √(1 + 2kd/(W·g)))", note: "Energy method; k = W·g/(ε·L)" },
               ].map(f => (
                 <div key={f.label}>
                   <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{f.label}</div>
@@ -1081,29 +1119,7 @@ function MidlineSafetyCalc({ units }: { units: Units }) {
   const safe = H > required;
   const pct = Math.min(100, Math.max(0, (H / (required * 1.5)) * 100));
 
-  // ── SVG geometry ─────────────────────────────────────────────────────────────
-  const svgW = 460, svgH = 300;
-
-  // Ground at fixed bottom
-  const groundY = svgH - 30;
-
-  // Main line Y: moves up/down based on H — more height = line higher up
-  // Scale: H range 1–50m maps to Y range 40..220
-  const lineY = Math.max(40, groundY - Math.min(220, H * 4.2));
-
-  // Person hangs BELOW the backup, connected by leash
-  // Backup sags: more S = deeper sag
-  const backupSagPx = Math.min(80, S * 10 + 12);
-  const backupMidY = lineY + 6 + backupSagPx;
-
-  // Person position: hanging from backup by leash
-  const personX = svgW / 2;
-  const leashLenPx = Math.min(50, L * 8 + 8);
-  const personY = backupMidY + leashLenPx;  // person hangs BELOW backup midpoint
-
-  // Person silhouette center
-  const headY = personY;
-  const bodyEndY = headY + 22;
+  // (SVG geometry is computed inline in the diagram block below)
 
   return (
     <div>
@@ -1155,53 +1171,83 @@ function MidlineSafetyCalc({ units }: { units: Units }) {
         {/* Diagram */}
         <div>
           <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>
-            Side view
+            Side view — clearance diagram
           </div>
-          <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}` }}>
-            {/* Ground */}
-            <rect x={0} y={groundY} width={svgW} height={svgH - groundY}
-              fill={safe ? "rgba(0,191,165,0.08)" : "rgba(239,83,80,0.1)"}/>
-            <line x1={0} y1={groundY} x2={svgW} y2={groundY}
-              stroke={safe ? DC.teal : DC.coral} strokeWidth={2.5}/>
-            <text x={14} y={groundY + 18} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Ground</text>
+          {(() => {
+            const mW = 460, mH = 320;
+            const mGroundY = mH - 30;
+            // Scale: H maps to pixel distance
+            const pxPerM = Math.min(6.5, (mH - 80) / Math.max(1, H));
+            const mLineY = Math.max(44, mGroundY - H * pxPerM);
+            const mAX = 30, mBX = mW - 30;
 
-            {/* Main highline — full width, horizontal */}
-            <line x1={20} y1={lineY} x2={svgW - 100} y2={lineY}
-              stroke={DC.navy} strokeWidth={3}/>
-            <text x={24} y={lineY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Highline</text>
+            // Backup sags below main
+            const backupSagPx = Math.max(10, Math.min(70, S * pxPerM * 2));
+            const backupMidY = mLineY + 8 + backupSagPx;
 
-            {/* Backup — looped like a real highline */}
-            <path
-              d={backupLoopPath(20, lineY+5, svgW-100, lineY+5, backupMidY)}
-              fill="none" stroke={DC.muted} strokeWidth={2} strokeDasharray="4,3" opacity={0.7}/>
-            <text x={24} y={backupMidY + 18} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="600">Backup</text>
+            // Person hangs from backup by leash
+            const mPersonX = mW / 2;
+            const leashPx = Math.max(12, Math.min(50, L * pxPerM * 2.5));
+            const leashTopY = backupMidY;
+            const personTopY = leashTopY + leashPx;
 
-            {/* Red solid leash from backup to person */}
-            <line x1={personX} y1={backupMidY} x2={personX} y2={headY - 5}
-              stroke={DC.coral} strokeWidth={2.5} strokeLinecap="round"/>
+            return (
+              <svg width="100%" viewBox={`0 0 ${mW} ${mH}`} style={{ borderRadius: 12, background: DC.white, border: `1px solid ${DC.border}` }}>
+                {/* Ground */}
+                <line x1={0} y1={mGroundY} x2={mW} y2={mGroundY} stroke={safe ? DC.teal : DC.coral} strokeWidth={3}/>
+                {Array.from({length: Math.floor(mW/20)}).map((_,i) => (
+                  <line key={i} x1={i*20+4} y1={mGroundY} x2={i*20} y2={mGroundY+10} stroke={safe ? DC.teal : DC.coral} strokeWidth={1} opacity={0.4}/>
+                ))}
+                <text x={12} y={mGroundY - 6} fontSize={13} fill={safe ? DC.teal : DC.coral} fontFamily={DFONT} fontWeight="700">Ground</text>
 
-            {/* Person silhouette — hanging upside down / suspended below backup */}
-            {/* Head */}
-            <circle cx={personX} cy={headY} r={6} fill={DC.navy}/>
-            {/* Torso */}
-            <line x1={personX} y1={headY + 5} x2={personX} y2={bodyEndY} stroke={DC.navy} strokeWidth={2.5} strokeLinecap="round"/>
-            {/* Arms */}
-            <line x1={personX - 10} y1={headY + 11} x2={personX + 10} y2={headY + 11} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
-            {/* Legs spread */}
-            <line x1={personX} y1={bodyEndY} x2={personX - 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
-            <line x1={personX} y1={bodyEndY} x2={personX + 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+                {/* Main line */}
+                <line x1={mAX} y1={mLineY} x2={mBX} y2={mLineY} stroke={DC.navy} strokeWidth={3}/>
+                <text x={mAX + 6} y={mLineY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Highline</text>
 
-            {/* H dimension arrow */}
-            <line x1={svgW - 60} y1={lineY} x2={svgW - 60} y2={groundY}
-              stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3"/>
-            <line x1={svgW - 67} y1={lineY} x2={svgW - 53} y2={lineY} stroke={DC.blue} strokeWidth={1.5}/>
-            <line x1={svgW - 67} y1={groundY} x2={svgW - 53} y2={groundY} stroke={DC.blue} strokeWidth={1.5}/>
-            <text x={svgW - 55} y={(lineY + groundY) / 2 + 5} fontSize={14} fill={DC.blue} fontFamily={DFONT} fontWeight="800">H</text>
+                {/* Anchor circles */}
+                <circle cx={mAX} cy={mLineY} r={8} fill={DC.navy}/>
+                <circle cx={mAX} cy={mLineY} r={4} fill={DC.blue}/>
+                <circle cx={mBX} cy={mLineY} r={8} fill={DC.navy}/>
+                <circle cx={mBX} cy={mLineY} r={4} fill={DC.blue}/>
 
-            {/* 2(L+S) indicator */}
-            <line x1={svgW - 80} y1={lineY} x2={svgW - 80} y2={Math.min(groundY, lineY + Math.min(100, required * 4))}
-              stroke={safe ? DC.teal : DC.coral} strokeWidth={2} strokeDasharray="3,2" opacity={0.5}/>
-          </svg>
+                {/* Backup line — dashed */}
+                <path
+                  d={`M ${mAX} ${mLineY} Q ${mW/2} ${backupMidY} ${mBX} ${mLineY}`}
+                  fill="none" stroke={DC.muted} strokeWidth={2} strokeDasharray="6,4"/>
+                <text x={mAX + 6} y={backupMidY + 16} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Backup</text>
+
+                {/* Red leash */}
+                <line x1={mPersonX} y1={leashTopY} x2={mPersonX} y2={personTopY}
+                  stroke={DC.coral} strokeWidth={3} strokeLinecap="round"/>
+                <text x={mPersonX + 6} y={(leashTopY + personTopY)/2 + 4} fontSize={12} fill={DC.coral} fontFamily={DFONT} fontWeight="700">L</text>
+
+                {/* Person hanging */}
+                {PersonHanging(mPersonX, personTopY, DC.navy)}
+
+                {/* H dimension */}
+                <line x1={mW - 28} y1={mLineY} x2={mW - 28} y2={mGroundY} stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3"/>
+                <line x1={mW - 34} y1={mLineY} x2={mW - 22} y2={mLineY} stroke={DC.blue} strokeWidth={1.5}/>
+                <line x1={mW - 34} y1={mGroundY} x2={mW - 22} y2={mGroundY} stroke={DC.blue} strokeWidth={1.5}/>
+                <text x={mW - 20} y={(mLineY + mGroundY)/2 + 5} fontSize={14} fill={DC.blue} fontFamily={DFONT} fontWeight="800">H</text>
+
+                {/* Required height indicator */}
+                {(() => {
+                  const reqPx = required * pxPerM;
+                  const reqLineY = mGroundY - reqPx;
+                  if (reqLineY > 20 && reqLineY < mH - 20) {
+                    return (
+                      <g>
+                        <line x1={mW - 55} y1={reqLineY} x2={mW - 35} y2={reqLineY}
+                          stroke={safe ? DC.teal : DC.coral} strokeWidth={1.5} strokeDasharray="3,2"/>
+                        <text x={mW - 105} y={reqLineY - 4} fontSize={11} fill={safe ? DC.teal : DC.coral} fontFamily={DFONT} fontWeight="600">Min H</text>
+                      </g>
+                    );
+                  }
+                  return null;
+                })()}
+              </svg>
+            );
+          })()}
         </div>
       </div>
 
