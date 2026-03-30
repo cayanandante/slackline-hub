@@ -24,19 +24,69 @@ function kN2lbf(kn: number) { return round1(kn * 224.809); }
 
 // ─── Brand tokens ────────────────────────────────────────────────────────────
 const DC = {
-  white: "#ffffff",
-  bg: "#f7f8fc",
-  navy: "#1a237e",
-  blue: "#2979ff",
-  coral: "#ef5350",
-  teal: "#00bfa5",
-  amber: "#ffc107",
-  muted: "#5c6685",
+  white:  "#ffffff",
+  bg:     "#f7f8fc",
+  navy:   "#1a237e",
+  blue:   "#2979ff",
+  coral:  "#ef5350",
+  teal:   "#00bfa5",
+  amber:  "#ffc107",
+  muted:  "#5c6685",
   border: "#dde3f0",
-  text: "#1a237e",
+  text:   "#1a237e",
 };
 const C_white = "#ffffff"; // alias for education section cards
 const DFONT = "'DM Sans', sans-serif";
+
+// ─── Shared SVG helpers ──────────────────────────────────────────────────────
+
+// Person standing ON a line (feet touch lineY)
+function PersonOnLine(px: number, lineY: number, color = "#1a237e"): React.ReactNode {
+  const headR = 5, headCY = lineY - 26;
+  return (
+    <>
+      <circle cx={px} cy={headCY} r={headR} fill={color}/>
+      <line x1={px} y1={headCY+headR} x2={px} y2={headCY+headR+13} stroke={color} strokeWidth={2.5} strokeLinecap="round"/>
+      <line x1={px-9} y1={headCY+headR+5} x2={px+9} y2={headCY+headR+5} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+      <line x1={px} y1={headCY+headR+13} x2={px-5} y2={lineY} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+      <line x1={px} y1={headCY+headR+13} x2={px+5} y2={lineY} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+    </>
+  );
+}
+
+// Person HANGING from a point (head at topY, body downward)
+function PersonHanging(px: number, topY: number, color = "#1a237e"): React.ReactNode {
+  const headR = 5, headCY = topY + headR;
+  return (
+    <>
+      <circle cx={px} cy={headCY} r={headR} fill={color}/>
+      <line x1={px} y1={headCY+headR} x2={px} y2={headCY+headR+13} stroke={color} strokeWidth={2.5} strokeLinecap="round"/>
+      <line x1={px-9} y1={headCY+headR+5} x2={px+9} y2={headCY+headR+5} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+      <line x1={px} y1={headCY+headR+13} x2={px-5} y2={headCY+headR+24} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+      <line x1={px} y1={headCY+headR+13} x2={px+5} y2={headCY+headR+24} stroke={color} strokeWidth={2} strokeLinecap="round"/>
+    </>
+  );
+}
+
+// Looped backup line path (like a real highline with loops every ~40px)
+function backupLoopPath(x1: number, y1: number, x2: number, y2: number, sagY: number, loopH = 10, loopSpacing = 38): string {
+  const totalW = x2 - x1;
+  const nLoops = Math.max(1, Math.round(totalW / loopSpacing));
+  const pts: string[] = [];
+  for (let i = 0; i <= nLoops; i++) {
+    const t = i / nLoops;
+    const baseY = y1 + (y2 - y1) * t + 4 * (sagY - Math.max(y1,y2)) * t * (1-t);
+    const lx = x1 + t * totalW;
+    pts.push(`${lx.toFixed(1)},${(baseY - loopH * (1 - Math.abs(2*t-1))).toFixed(1)}`);
+    if (i < nLoops) {
+      const t2 = (i + 0.5) / nLoops;
+      const midY = y1 + (y2 - y1) * t2 + 4 * (sagY - Math.max(y1,y2)) * t2 * (1-t2);
+      pts.push(`${(x1 + t2 * totalW).toFixed(1)},${(midY + loopH * 0.5).toFixed(1)}`);
+    }
+  }
+  return "M " + pts.join(" L ");
+}
+
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
@@ -53,6 +103,23 @@ const styles = {
     padding: "0 clamp(2rem,6vw,7rem) 5rem",
   } as React.CSSProperties,
 };
+
+function SafetyBadge({ value, thresholds }: { value: number; thresholds: [number, number] }) {
+  const color =
+    value >= thresholds[1] ? "#00bfa5" :
+    value >= thresholds[0] ? "#5c6685" : "#ef5350";
+  const bg =
+    value >= thresholds[1] ? "rgba(0,191,165,0.1)" :
+    value >= thresholds[0] ? "rgba(92,102,133,0.1)" : "rgba(239,83,80,0.1)";
+  const label =
+    value >= thresholds[1] ? "✓ Safe" :
+    value >= thresholds[0] ? "⚠ Caution" : "✕ Danger";
+  return (
+    <span style={{
+      background: bg, color, fontFamily: DFONT, fontSize: 15, fontWeight: 700, padding: "6px 14px", borderRadius: 8,
+    }}>{label}</span>
+  );
+}
 
 function ResultCard({ label, value, unit, sub }: { label: string; value: string | number; unit?: string; sub?: string }) {
   return (
@@ -158,6 +225,7 @@ function LineTensionCalc({ units }: { units: Units }) {
   const FB_total = round2(FB_exact + T0);
 
   // Approx (DAV formula for center, adjusted for position) — kept for reference
+  const Fapprox = round2((W * G * L) / (4 * Math.max(0.01, S) * 1000));
 
   const thetaADeg = round2(deg(thetaA));
   const thetaBDeg = round2(deg(thetaB));
@@ -191,6 +259,7 @@ function LineTensionCalc({ units }: { units: Units }) {
 
   // Parabolic curve through 3 points: A, person, B
   // Control point for quadratic bezier
+  const cpY = AY + visualSagMax * (1 / (4 * p * (1 - p))) * 4 * p * (1 - p) / 1;
   // Simpler: just use visually correct sag
   const midSagY = AY + visualSagMax;
   const lineD = `M ${AX} ${AY} Q ${svgW / 2} ${midSagY} ${BX} ${BY}`;
@@ -251,41 +320,27 @@ function LineTensionCalc({ units }: { units: Units }) {
           <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ marginBottom: 20, borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}` }}>
             <defs>
               <marker id="arrT" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
-                <path d="M2 1L8 5L2 9" fill="none" stroke={DC.coral} strokeWidth={1.5} />
+                <path d="M2 1L8 5L2 9" fill="none" stroke={DC.coral} strokeWidth={1.5}/>
               </marker>
               {/* Person silhouette clip */}
             </defs>
 
-            {/* Sky background hint */}
-            <rect x={0} y={0} width={svgW} height={svgH - 40} fill="none" />
-
-            {/* Ground */}
-            <rect x={0} y={svgH - 40} width={svgW} height={40} fill={`${DC.border}50`} rx={0} />
-            <line x1={0} y1={svgH - 40} x2={svgW} y2={svgH - 40} stroke={DC.border} strokeWidth={1.5} />
-
-            {/* Vertical lines from anchors to ground */}
-            <line x1={AX} y1={AY} x2={AX} y2={svgH - 40} stroke={DC.border} strokeWidth={1} strokeDasharray="3,3" />
-            <line x1={BX} y1={BY} x2={BX} y2={svgH - 40} stroke={DC.border} strokeWidth={1} strokeDasharray="3,3" />
-
-            {/* Height marker */}
-            <line x1={svgW / 2 - 60} y1={personY} x2={svgW / 2 - 60} y2={svgH - 40} stroke={DC.muted} strokeWidth={1} strokeDasharray="2,3" opacity={0.5} />
-
-            {/* Backup line (dashed, slightly below main) */}
-            <path d={`M ${AX} ${AY + 6} Q ${svgW / 2} ${midSagY + 10} ${BX} ${BY + 6}`} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="5,4" opacity={0.4} />
+            {/* Looped backup line — like a real highline */}
+            <path d={backupLoopPath(AX, AY+6, BX, BY+6, midSagY+12)} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3" opacity={0.45}/>
 
             {/* Main line */}
-            <path d={lineD} fill="none" stroke={DC.navy} strokeWidth={3} />
-            <path d={lineD} fill="none" stroke={DC.blue} strokeWidth={1.5} opacity={0.5} />
+            <path d={lineD} fill="none" stroke={DC.navy} strokeWidth={3}/>
+            <path d={lineD} fill="none" stroke={DC.blue} strokeWidth={1.5} opacity={0.5}/>
 
-            {/* Force arrows at anchors */}
+            {/* Force arrows at anchors — always point outward horizontally */}
             <line
               x1={AX} y1={AY}
-              x2={AX + arrowAX} y2={AY + arrowAY}
+              x2={AX - 34} y2={AY}
               stroke={DC.coral} strokeWidth={2.5} markerEnd="url(#arrT)"
             />
             <line
               x1={BX} y1={BY}
-              x2={BX - arrowBX} y2={BY + arrowBY}
+              x2={BX + 34} y2={BY}
               stroke={DC.coral} strokeWidth={2.5} markerEnd="url(#arrT)"
             />
 
@@ -294,27 +349,19 @@ function LineTensionCalc({ units }: { units: Units }) {
             <text x={BX + 8} y={BY - 36} fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="800" textAnchor="middle">{FB_total} kN</text>
 
             {/* Anchor dots */}
-            <circle cx={AX} cy={AY} r={8} fill={DC.navy} />
-            <circle cx={AX} cy={AY} r={4} fill={DC.blue} />
-            <circle cx={BX} cy={BY} r={8} fill={DC.navy} />
-            <circle cx={BX} cy={BY} r={4} fill={DC.blue} />
+            <circle cx={AX} cy={AY} r={8} fill={DC.navy}/>
+            <circle cx={AX} cy={AY} r={4} fill={DC.blue}/>
+            <circle cx={BX} cy={BY} r={8} fill={DC.navy}/>
+            <circle cx={BX} cy={BY} r={4} fill={DC.blue}/>
 
             {/* Anchor labels */}
             <text x={AX} y={AY + 22} fontSize={14} fill={DC.navy} fontFamily={DFONT} fontWeight="700" textAnchor="middle">A</text>
             <text x={BX} y={BY + 22} fontSize={14} fill={DC.navy} fontFamily={DFONT} fontWeight="700" textAnchor="middle">B</text>
 
-            {/* Minimalist person silhouette on line */}
-            {/* Body */}
-            <circle cx={personX} cy={personY - 10} r={5} fill={DC.navy} />
-            {/* Torso */}
-            <line x1={personX} y1={personY - 5} x2={personX} y2={personY + 8} stroke={DC.navy} strokeWidth={2.5} strokeLinecap="round" />
-            {/* Legs (spread slightly) */}
-            <line x1={personX} y1={personY + 8} x2={personX - 5} y2={personY + 18} stroke={DC.navy} strokeWidth={2} strokeLinecap="round" />
-            <line x1={personX} y1={personY + 8} x2={personX + 5} y2={personY + 18} stroke={DC.navy} strokeWidth={2} strokeLinecap="round" />
-            {/* Arms out */}
-            <line x1={personX - 9} y1={personY + 2} x2={personX + 9} y2={personY + 2} stroke={DC.navy} strokeWidth={2} strokeLinecap="round" />
-            {/* Leash to line */}
-            <line x1={personX} y1={personY + 18} x2={personX} y2={personY} stroke={DC.muted} strokeWidth={1} strokeDasharray="2,2" opacity={0.6} />
+            {/* Person standing ON the line */}
+            {PersonOnLine(personX, personY, DC.navy)}
+            {/* Red leash from feet to line point */}
+            <line x1={personX} y1={personY - 1} x2={personX} y2={personY + 1} stroke={DC.coral} strokeWidth={2} strokeLinecap="round"/>
           </svg>
 
           {/* Result cards */}
@@ -438,7 +485,7 @@ function LineTensionCalc({ units }: { units: Units }) {
 
 function AnchorAngleCalc({ units }: { units: Units }) {
   const [F, setF] = useState(10);
-  const [numLegs, setNumLegs] = useState<2 | 3 | 4>(2);
+  const [numLegs, setNumLegs] = useState<2|3|4>(2);
   const [alpha, setAlpha] = useState(60);
   const [beta, setBeta] = useState(30);
   const [showElevated, setShowElevated] = useState(false);
@@ -457,15 +504,15 @@ function AnchorAngleCalc({ units }: { units: Units }) {
     if (numLegs === 2) {
       const c = Math.cos(alphaR / 2);
       Fleg = c < 0.001 ? 999 : round2(F / (2 * c));
-      formula = `F_leg = F / (2 × cos(α/2)) = ${F} / (2 × cos ${alpha / 2}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
+      formula = `F_leg = F / (2 × cos(α/2)) = ${F} / (2 × cos ${alpha/2}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
     } else if (numLegs === 3) {
       const c = Math.cos(alphaR / 3);
       Fleg = c < 0.001 ? 999 : round2(F / (3 * c));
-      formula = `F_leg ≈ F / (3 × cos(α/3)) = ${F} / (3 × cos ${round1(alpha / 3)}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
+      formula = `F_leg ≈ F / (3 × cos(α/3)) = ${F} / (3 × cos ${round1(alpha/3)}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
     } else {
       const c = Math.cos(alphaR / 2);
       Fleg = c < 0.001 ? 999 : round2(F / (4 * c));
-      formula = `F_leg = F / (4 × cos(α/2)) = ${F} / (4 × cos ${alpha / 2}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
+      formula = `F_leg = F / (4 × cos(α/2)) = ${F} / (4 × cos ${alpha/2}°) = ${Fleg < 500 ? Fleg : "∞"} kN`;
     }
   }
 
@@ -481,7 +528,8 @@ function AnchorAngleCalc({ units }: { units: Units }) {
 
   const legPositions: { x: number; y: number; angleDeg: number }[] = [];
   for (let i = 0; i < numLegs; i++) {
-    const angleDeg = -alpha / 2 + (alpha / (numLegs - 1)) * i; const r = rad(angleDeg);
+    const angleDeg = numLegs === 1 ? 0 : -alpha / 2 + (alpha / (numLegs - 1)) * i;
+    const r = rad(angleDeg);
     legPositions.push({
       x: mpX + legLen * Math.sin(r),
       y: mpY + legLen * Math.cos(r),
@@ -493,9 +541,9 @@ function AnchorAngleCalc({ units }: { units: Units }) {
   // i.e. arc curves UPWARD (toward y=0), away from the legs which go downward
   const arcR = 44;
   const arcPath = alpha > 5 && alpha < 175
-    ? `M ${mpX + arcR * Math.sin(rad(-alpha / 2))} ${mpY + arcR * Math.cos(rad(-alpha / 2))}
-       A ${arcR} ${arcR} 0 0 1
-       ${mpX + arcR * Math.sin(rad(alpha / 2))} ${mpY + arcR * Math.cos(rad(alpha / 2))}`
+    ? `M ${mpX + arcR * Math.sin(rad(-alpha/2))} ${mpY + arcR * Math.cos(rad(-alpha/2))}
+       A ${arcR} ${arcR} 0 0 0
+       ${mpX + arcR * Math.sin(rad(alpha/2))} ${mpY + arcR * Math.cos(rad(alpha/2))}`
     : "";
 
   // ── Side-view geometry ───────────────────────────────────────────────────────
@@ -604,127 +652,153 @@ function AnchorAngleCalc({ units }: { units: Units }) {
               <svg width="100%" viewBox={`0 0 ${topW} ${topH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}`, marginBottom: 12 }}>
                 <defs>
                   <marker id="arrowUp2" viewBox="0 0 10 10" refX={5} refY={2} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
-                    <path d="M1 9L5 1L9 9" fill="none" stroke={DC.navy} strokeWidth={1.5} />
+                    <path d="M1 9L5 1L9 9" fill="none" stroke={DC.navy} strokeWidth={1.5}/>
+                  </marker>
+                  <marker id="arrLeg" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={6} markerHeight={6} orient="auto">
+                    <path d="M2 1L8 5L2 9" fill="none" stroke={col} strokeWidth={1.5}/>
                   </marker>
                 </defs>
 
                 {/* Load arrow pointing UP from master point */}
                 <line x1={mpX} y1={mpY - 16} x2={mpX} y2={mpY - 58}
-                  stroke={DC.navy} strokeWidth={2.5} markerEnd="url(#arrowUp2)" />
+                  stroke={DC.navy} strokeWidth={2.5} markerEnd="url(#arrowUp2)"/>
                 <text x={mpX + 8} y={mpY - 42} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">F = {F} kN</text>
 
-                {/* Legs */}
-                {legPositions.map((leg, i) => (
-                  <g key={i}>
-                    <line x1={mpX} y1={mpY} x2={leg.x} y2={leg.y} stroke={col} strokeWidth={3} strokeLinecap="round" />
-                    {/* Bolt — dot only, no cross line */}
-                    <circle cx={leg.x} cy={leg.y} r={8} fill={DC.navy} />
-                    <circle cx={leg.x} cy={leg.y} r={4} fill={DC.blue} />
-                    {/* Force label positioned near bolt */}
-                    <text
-                      x={leg.x + (leg.angleDeg < -15 ? -52 : 12)}
-                      y={leg.y + (Math.abs(leg.angleDeg) < 20 ? 22 : 4)}
-                      fontSize={12} fill={col} fontFamily={DFONT} fontWeight="700"
-                    >{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
-                  </g>
-                ))}
+                {/* Legs with arrow toward MP */}
+                {legPositions.map((leg, i) => {
+                  const dx = mpX - leg.x, dy = mpY - leg.y;
+                  const dist = Math.sqrt(dx*dx + dy*dy);
+                  const ux = dx/dist, uy = dy/dist;
+                  const arrowX = leg.x + ux * 28, arrowY = leg.y + uy * 28;
+                  return (
+                    <g key={i}>
+                      <line x1={mpX} y1={mpY} x2={leg.x} y2={leg.y} stroke={col} strokeWidth={3} strokeLinecap="round"/>
+                      {/* Arrow on leg pointing toward MP */}
+                      <line x1={leg.x} y1={leg.y} x2={arrowX} y2={arrowY} stroke={col} strokeWidth={2.5} markerEnd="url(#arrLeg)"/>
+                      {/* Bolt */}
+                      <circle cx={leg.x} cy={leg.y} r={8} fill={DC.navy}/>
+                      <circle cx={leg.x} cy={leg.y} r={4} fill={DC.blue}/>
+                      {/* Force label near bolt, in right panel area only for outermost */}
+                    </g>
+                  );
+                })}
 
                 {/* Master point */}
-                <circle cx={mpX} cy={mpY} r={11} fill={col} />
-                <circle cx={mpX} cy={mpY} r={5} fill={DC.white} />
-                <text x={mpX - 48} y={mpY + 4} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Master Point</text>
+                <circle cx={mpX} cy={mpY} r={11} fill={col}/>
+                <circle cx={mpX} cy={mpY} r={5} fill={DC.white}/>
+                <text x={mpX + 14} y={mpY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Master Point</text>
 
                 {/* Angle arc — concave toward MP (curves away from legs) */}
                 {arcPath && (
-                  <path d={arcPath} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3" />
+                  <path d={arcPath} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3"/>
                 )}
 
                 {/* Labels on RIGHT side of diagram */}
-                <line x1={360} y1={20} x2={360} y2={topH - 20} stroke={DC.border} strokeWidth={1} />
-                <text x={370} y={50} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">α = {alpha}°</text>
-                <text x={370} y={72} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">angle between legs</text>
+                <line x1={355} y1={20} x2={355} y2={topH - 20} stroke={DC.border} strokeWidth={1}/>
+                <text x={365} y={46} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">α = {alpha}°</text>
+                <text x={365} y={64} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">outer legs angle</text>
                 {numLegs >= 3 && (
                   <>
-                    <text x={370} y={105} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">{round1(alpha / (numLegs - 1))}°</text>
-                    <text x={370} y={127} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">between adjacent</text>
+                    <text x={365} y={92} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">{round1(alpha / (numLegs - 1))}°</text>
+                    <text x={365} y={110} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">per-leg angle</text>
                   </>
                 )}
-                <text x={370} y={160} fontSize={13} fill={col} fontFamily={DFONT} fontWeight="800">{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
-                <text x={370} y={182} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">per leg</text>
-                <text x={370} y={215} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">{K}×</text>
-                <text x={370} y={237} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">load multiplier</text>
+                <text x={365} y={numLegs >= 3 ? 138 : 104} fontSize={13} fill={col} fontFamily={DFONT} fontWeight="800">{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
+                <text x={365} y={numLegs >= 3 ? 156 : 122} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">per leg</text>
+                <text x={365} y={numLegs >= 3 ? 184 : 150} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">{K}×</text>
+                <text x={365} y={numLegs >= 3 ? 202 : 168} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">multiplier</text>
               </svg>
             </>
           ) : (
             <>
               <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DC.muted, marginBottom: 8 }}>
-                Side view — elevated master point
+                3D view — A-frame elevated anchor ({numLegs} legs, β = {beta}°)
               </div>
-              <svg width="100%" viewBox={`0 0 ${sideW} ${sideH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}`, marginBottom: 12 }}>
-                <defs>
-                  <marker id="arrowLeftSide" viewBox="0 0 10 10" refX={2} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
-                    <path d="M9 1L1 5L9 9" fill="none" stroke={DC.navy} strokeWidth={1.5} />
-                  </marker>
-                </defs>
-
-                {/* Ground — flat horizontal surface */}
-                <rect x={0} y={groundY2} width={sideW - 140} height={sideH - groundY2} fill={`${DC.border}60`} />
-                <line x1={0} y1={groundY2} x2={sideW - 140} y2={groundY2} stroke={DC.navy} strokeWidth={2.5} />
-                {/* Ground hatch marks (horizontal surface) */}
-                {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-                  <line key={i} x1={16 + i * 26} y1={groundY2} x2={8 + i * 26} y2={groundY2 + 14} stroke={DC.navy} strokeWidth={1} opacity={0.3} />
-                ))}
-
-                {/* Bolt on flat surface — horizontal bolt */}
-                <circle cx={boltX} cy={boltY} r={8} fill={DC.navy} />
-                <circle cx={boltX} cy={boltY} r={4} fill={DC.blue} />
-                <text x={boltX} y={groundY2 + 16} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="700" textAnchor="middle">Bolt</text>
-
-                {/* Horizontal reference from bolt */}
-                <line x1={boltX} y1={boltY} x2={Math.min(sideW - 150, mpSX + 30)} y2={boltY}
-                  stroke={DC.muted} strokeWidth={1} strokeDasharray="5,4" opacity={0.5} />
-
-                {/* β arc */}
-                {beta > 2 && beta < 88 && (
-                  <>
-                    <path
-                      d={`M ${boltX + 46} ${boltY} A 46 46 0 0 0 ${boltX + 46 * Math.cos(betaR)} ${boltY - 46 * Math.sin(betaR)}`}
-                      fill="none" stroke={DC.coral} strokeWidth={1.5} strokeDasharray="3,2"
-                    />
-                    <text x={boltX + 54 * Math.cos(betaR / 2) + 4} y={boltY - 54 * Math.sin(betaR / 2) + 5}
-                      fontSize={13} fill={DC.coral} fontFamily={DFONT} fontWeight="700">β = {beta}°</text>
-                  </>
-                )}
-
-                {/* Anchor leg */}
-                <line x1={boltX} y1={boltY} x2={mpSX} y2={mpSY}
-                  stroke={col} strokeWidth={4} strokeLinecap="round" />
-
-                {/* Height indicator */}
-                <line x1={mpSX + 16} y1={mpSY} x2={mpSX + 16} y2={boltY}
-                  stroke={DC.muted} strokeWidth={1} strokeDasharray="3,3" opacity={0.6} />
-                <line x1={mpSX + 10} y1={mpSY} x2={mpSX + 22} y2={mpSY} stroke={DC.muted} strokeWidth={1} />
-                <line x1={mpSX + 10} y1={boltY} x2={mpSX + 22} y2={boltY} stroke={DC.muted} strokeWidth={1} />
-
-                {/* Master point */}
-                <circle cx={mpSX} cy={mpSY} r={11} fill={col} />
-                <circle cx={mpSX} cy={mpSY} r={5} fill={DC.white} />
-
-                {/* Force arrow pointing to OPPOSITE direction of bolt (left/away from bolt) */}
-                <line x1={mpSX - 14} y1={mpSY} x2={mpSX - 56} y2={mpSY}
-                  stroke={DC.navy} strokeWidth={2.5} markerEnd="url(#arrowLeftSide)" />
-                <text x={mpSX - 80} y={mpSY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">F = {F} kN</text>
-
-                {/* Right-side label panel */}
-                <line x1={sideW - 138} y1={14} x2={sideW - 138} y2={sideH - 14} stroke={DC.border} strokeWidth={1} />
-                <text x={sideW - 128} y={44} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">β = {beta}°</text>
-                <text x={sideW - 128} y={64} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">elevation angle</text>
-                <text x={sideW - 128} y={100} fontSize={13} fill={col} fontFamily={DFONT} fontWeight="800">{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
-                <text x={sideW - 128} y={120} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">per leg</text>
-                <text x={sideW - 128} y={156} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">Master Point</text>
-                <text x={sideW - 128} y={176} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">height above bolt</text>
-                <text x={sideW - 128} y={196} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">{round1(legLenSide * Math.sin(betaR) / 10)}× leg len</text>
-              </svg>
+              {/* 3D isometric projection of n-leg elevated A-frame */}
+              {(() => {
+                const W3 = 480, H3 = 280;
+                // Isometric helpers: world (x,y,z) → screen
+                const iso = (wx: number, wy: number, wz: number) => ({
+                  sx: W3/2 + (wx - wy) * 0.7 * 38,
+                  sy: H3/2 - wz * 38 + (wx + wy) * 0.4 * 22,
+                });
+                // MP at world (0,0,1.8) — elevated above ground origin
+                const mpH = 1.8 + beta * 0.025; // height scales with beta
+                const MP = iso(0,0,mpH);
+                // Ground plane center
+                const GC = iso(0,0,0);
+                // Bolt positions on ground: n legs at equal angles around MP projection
+                const boltRadius = 1.4;
+                const bolts = Array.from({length:numLegs}, (_,i) => {
+                  const angle = (2 * Math.PI * i / numLegs) - Math.PI/2;
+                  const bx3 = boltRadius * Math.cos(angle);
+                  const by3 = boltRadius * Math.sin(angle);
+                  return { w:{x:bx3,y:by3,z:0}, s:iso(bx3,by3,0), angle };
+                });
+                // Ground grid lines
+                const gridLines: React.ReactNode[] = [];
+                for (let gx=-2; gx<=2; gx++) {
+                  const a = iso(gx,-2,0), b = iso(gx,2,0);
+                  gridLines.push(<line key={"gx"+gx} x1={a.sx} y1={a.sy} x2={b.sx} y2={b.sy} stroke={DC.border} strokeWidth={0.8} opacity={0.5}/>);
+                }
+                for (let gy=-2; gy<=2; gy++) {
+                  const a = iso(-2,gy,0), b = iso(2,gy,0);
+                  gridLines.push(<line key={"gy"+gy} x1={a.sx} y1={a.sy} x2={b.sx} y2={b.sy} stroke={DC.border} strokeWidth={0.8} opacity={0.5}/>);
+                }
+                // Vertical guide from ground to MP
+                const mpGround = iso(0,0,0);
+                // Force downward arrow at MP
+                const mpAbove = iso(0,0,mpH+0.9);
+                return (
+                  <svg width="100%" viewBox={`0 0 ${W3} ${H3}`} style={{ borderRadius:12, background:DC.bg, border:`1px solid ${DC.border}`, marginBottom:12 }}>
+                    <defs>
+                      <marker id="arr3d" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={7} markerHeight={7} orient="auto">
+                        <path d="M2 1L8 5L2 9" fill="none" stroke={DC.coral} strokeWidth={1.5}/>
+                      </marker>
+                      <marker id="arrDown3d" viewBox="0 0 10 10" refX={5} refY={8} markerWidth={7} markerHeight={7} orient="auto">
+                        <path d="M1 1L5 9L9 1" fill="none" stroke={DC.navy} strokeWidth={1.5}/>
+                      </marker>
+                    </defs>
+                    {/* Ground grid */}
+                    {gridLines}
+                    {/* Vertical guide dashed */}
+                    <line x1={mpGround.sx} y1={mpGround.sy} x2={MP.sx} y2={MP.sy} stroke={DC.muted} strokeWidth={1} strokeDasharray="4,3" opacity={0.4}/>
+                    {/* Legs from bolts to MP */}
+                    {bolts.map((b,i) => (
+                      <g key={i}>
+                        <line x1={b.s.sx} y1={b.s.sy} x2={MP.sx} y2={MP.sy} stroke={col} strokeWidth={3} strokeLinecap="round"/>
+                        {/* Arrow on leg toward MP — midpoint arrow */}
+                        {(() => {
+                          const mx = (b.s.sx + MP.sx)/2, my = (b.s.sy + MP.sy)/2;
+                          const dx = MP.sx - b.s.sx, dy = MP.sy - b.s.sy;
+                          const d = Math.sqrt(dx*dx+dy*dy);
+                          const ax = mx + dx/d*10, ay = my + dy/d*10;
+                          return <line x1={mx-dx/d*4} y1={my-dy/d*4} x2={ax} y2={ay} stroke={col} strokeWidth={2} markerEnd="url(#arr3d)"/>;
+                        })()}
+                        {/* Bolt circle */}
+                        <circle cx={b.s.sx} cy={b.s.sy} r={7} fill={DC.navy}/>
+                        <circle cx={b.s.sx} cy={b.s.sy} r={3.5} fill={DC.blue}/>
+                        {/* Bolt label */}
+                        <text x={b.s.sx + 10} y={b.s.sy + 4} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">Bolt {i+1}</text>
+                      </g>
+                    ))}
+                    {/* Force arrow DOWN at MP */}
+                    <line x1={mpAbove.sx} y1={mpAbove.sy} x2={MP.sx+2} y2={MP.sy+2} stroke={DC.navy} strokeWidth={2.5} markerEnd="url(#arrDown3d)"/>
+                    <text x={mpAbove.sx+6} y={mpAbove.sy+4} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">F={F} kN</text>
+                    {/* Master point */}
+                    <circle cx={MP.sx} cy={MP.sy} r={12} fill={col}/>
+                    <circle cx={MP.sx} cy={MP.sy} r={6} fill={DC.white}/>
+                    <text x={MP.sx-50} y={MP.sy-16} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">Master Point</text>
+                    {/* β and force labels */}
+                    <text x={W3-110} y={40} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">β = {beta}°</text>
+                    <text x={W3-110} y={58} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">elevation angle</text>
+                    <text x={W3-110} y={86} fontSize={13} fill={col} fontFamily={DFONT} fontWeight="800">{Fleg < 500 ? round2(Fleg) : "∞"} kN</text>
+                    <text x={W3-110} y={104} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">per leg</text>
+                    <text x={W3-110} y={132} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="800">{numLegs} legs</text>
+                    <text x={W3-110} y={150} fontSize={11} fill={DC.muted} fontFamily={DFONT} fontWeight="600">F_leg = F/(n·sinβ)</text>
+                  </svg>
+                );
+              })()}
             </>
           )}
         </div>
@@ -758,8 +832,8 @@ function AnchorAngleCalc({ units }: { units: Units }) {
           <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.coral}` }}>
             <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Sliding-X vs BFK vs Equalette</h4>
             <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
-              <strong style={{ color: DC.navy }}>Sliding-X / Magic X</strong>: 2-leg system, self-equalizing, no extension on failure. Simple and widely used.<br />
-              <strong style={{ color: DC.navy }}>BFK (Bowline Knot Fixo)</strong>: 2-leg with fixed master point, very strong and common in Brazil.<br />
+              <strong style={{ color: DC.navy }}>Sliding-X / Magic X</strong>: 2-leg system, self-equalizing, no extension on failure. Simple and widely used.<br/>
+              <strong style={{ color: DC.navy }}>BFK (Bowline Knot Fixo)</strong>: 2-leg with fixed master point, very strong and common in Brazil.<br/>
               <strong style={{ color: DC.navy }}>Equalette</strong>: 3-leg, redundant, used for critical highline anchors.
             </p>
           </div>
@@ -827,7 +901,7 @@ function BackupFallCalc({ units }: { units: Units }) {
   return (
     <div>
       <SectionTitle>Backup fall simulator</SectionTitle>
-      <p style={{ fontSize: 14, color: "#7a7268", marginBottom: 24, lineHeight: 1.65 }}>
+      <p style={{ fontFamily: DFONT, fontSize: 17, color: DC.muted, marginBottom: 28, lineHeight: 1.7, maxWidth: 640 }}>
         Simulates forces when the main line fails and the backup is loaded.
         Uses the Athanasiadis (2013) model adopted by ISA for minimum height requirements.
       </p>
@@ -847,9 +921,9 @@ function BackupFallCalc({ units }: { units: Units }) {
                 <button key={w} onClick={() => setWebbing(w)} style={{
                   fontFamily: "'DM Mono', monospace", fontSize: 11, padding: "6px 12px", borderRadius: 4,
                   border: "1px solid", cursor: "pointer",
-                  borderColor: webbing === w ? "#c8531a" : "rgba(13,15,14,0.2)",
-                  background: webbing === w ? "#c8531a" : "transparent",
-                  color: webbing === w ? "#fff" : "#0d0f0e",
+                  borderColor: webbing === w ? DC.blue : DC.border,
+                  background: webbing === w ? DC.blue : "transparent",
+                  color: webbing === w ? DC.white : DC.navy,
                 }}>
                   {w === "dyneema" ? "Dyneema (~1%)" : w === "nylon" ? "Nylon (~5%)" : "Dynamic (~25%)"}
                 </button>
@@ -862,15 +936,15 @@ function BackupFallCalc({ units }: { units: Units }) {
           {/* Clearance status — BIG */}
           <div style={{
             padding: 20, borderRadius: 10, marginBottom: 16,
-            background: clearanceOk ? "#d1fae5" : "#fee2e2",
-            border: `2px solid ${clearanceOk ? "#6ee7b7" : "#fca5a5"}`,
+            background: clearanceOk ? `${DC.teal}18` : `${DC.coral}15`,
+            border: `2px solid ${clearanceOk ? DC.teal : DC.coral}`,
             textAlign: "center",
           }}>
             <div style={{ fontSize: 36 }}>{clearanceOk ? "✅" : "❌"}</div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 700, color: clearanceOk ? "#065f46" : "#991b1b", marginTop: 8 }}>
+            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 700, color: clearanceOk ? DC.teal : DC.coral, marginTop: 8 }}>
               {clearanceOk ? "CLEARANCE OK" : "INSUFFICIENT CLEARANCE"}
             </div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: clearanceOk ? "#065f46" : "#991b1b", marginTop: 6 }}>
+            <div style={{ fontFamily: DFONT, fontSize: 15, color: clearanceOk ? DC.teal : DC.coral, marginTop: 6 }}>
               Required: {uUnit ? m2ft(requiredH) : round1(requiredH)}{uUnit ? "ft" : "m"} &nbsp;|&nbsp;
               Yours: {uUnit ? m2ft(height) : round1(height)}{uUnit ? "ft" : "m"} &nbsp;|&nbsp;
               {clearanceOk ? `+${uUnit ? m2ft(margin) : margin}${uUnit ? "ft" : "m"} margin` : `Need ${uUnit ? m2ft(-margin) : Math.abs(margin)}${uUnit ? "ft" : "m"} more`}
@@ -884,38 +958,111 @@ function BackupFallCalc({ units }: { units: Units }) {
             <ResultCard label="Est. fall distance" value={uUnit ? m2ft(round1(leash + backupSag * 0.3)) : round1(leash + backupSag * 0.3)} unit={uUnit ? "ft" : "m"} />
           </div>
 
-          {/* Cross-section diagram */}
-          <svg width="100%" viewBox={`0 0 ${svgW2} ${svgH2}`} style={{ borderRadius: 8, background: "rgba(13,15,14,0.02)", border: "1px solid rgba(13,15,14,0.08)" }}>
-            {/* Ground */}
-            <rect x={0} y={groundY} width={svgW2} height={svgH2 - groundY} fill={clearanceOk ? "rgba(45,106,79,0.08)" : "rgba(220,38,38,0.12)"} />
-            <line x1={0} y1={groundY} x2={svgW2} y2={groundY} stroke={clearanceOk ? "#2d6a4f" : "#dc2626"} strokeWidth={2} />
-            <text x={10} y={groundY - 4} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">Ground</text>
-            {/* Main line */}
-            <line x1={60} y1={lineY} x2={svgW2 - 60} y2={lineY} stroke="#0d0f0e" strokeWidth={2.5} />
-            <text x={10} y={lineY - 4} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">Main line</text>
-            {/* Backup */}
-            <path d={`M 60 ${lineY + 4} Q ${personX} ${backupY} ${svgW2 - 60} ${lineY + 4}`} fill="none" stroke="#7a7268" strokeWidth={1.5} strokeDasharray="5,3" />
-            <text x={10} y={backupY + 4} fontSize={9} fill="#7a7268" fontFamily="'DM Mono', monospace">Backup</text>
-            {/* Person on main line */}
-            <circle cx={personX} cy={lineY - 8} r={8} fill="#0d0f0e" />
-            <line x1={personX} y1={lineY} x2={personX} y2={lineY + round1(leash) * 12} stroke="#7a7268" strokeWidth={1.5} strokeDasharray="3,2" />
-            {/* H dimension */}
-            <line x1={svgW2 - 20} y1={lineY} x2={svgW2 - 20} y2={groundY} stroke="#c8531a" strokeWidth={1} strokeDasharray="3,2" />
-            <text x={svgW2 - 18} y={(lineY + groundY) / 2} fontSize={9} fill="#c8531a" fontFamily="'DM Mono', monospace">H</text>
-          </svg>
+          {/* Diagram — updated with person, looped backup, proper anchors */}
+          {(() => {
+            const bW = 540, bH = 300;
+            const bGroundY = bH - 32;
+            // lineY: scales with height input — more height = line higher
+            const bLineY = Math.max(44, bGroundY - Math.min(230, height * 4.2));
+            const bAX = 30, bBX = bW - 30;
+            // Backup sag below main line
+            const bBackupSagY = bLineY + 8 + Math.min(70, backupSag * 10);
+            const bPersonX = bW / 2;
+            // Person position: on main line
+            const bPersonLineY = bLineY;
+            // Leash from person feet to backup
+            const bLeashLen = Math.min(48, leash * 10 + 8);
+            const bLeashEndY = bPersonLineY + bLeashLen;
+            return (
+              <svg width="100%" viewBox={`0 0 ${bW} ${bH}`} style={{ borderRadius:12, background:DC.bg, border:`1px solid ${DC.border}`, marginTop:12 }}>
+                <defs>
+                  <marker id="arrH" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={6} markerHeight={6} orient="auto">
+                    <path d="M2 1L8 5L2 9" fill="none" stroke={DC.blue} strokeWidth={1.5}/>
+                  </marker>
+                </defs>
+                {/* Ground */}
+                <line x1={0} y1={bGroundY} x2={bW} y2={bGroundY} stroke={clearanceOk ? DC.teal : DC.coral} strokeWidth={2.5}/>
+                <text x={10} y={bGroundY+16} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Ground</text>
+
+                {/* Main line */}
+                <line x1={bAX} y1={bLineY} x2={bBX} y2={bLineY} stroke={DC.navy} strokeWidth={3}/>
+                <text x={bAX+4} y={bLineY-8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Main line</text>
+
+                {/* Anchor circles (same as line tension calc) */}
+                <circle cx={bAX} cy={bLineY} r={8} fill={DC.navy}/>
+                <circle cx={bAX} cy={bLineY} r={4} fill={DC.blue}/>
+                <circle cx={bBX} cy={bLineY} r={8} fill={DC.navy}/>
+                <circle cx={bBX} cy={bLineY} r={4} fill={DC.blue}/>
+
+                {/* Backup line — looped */}
+                <path d={backupLoopPath(bAX, bLineY+6, bBX, bLineY+6, bBackupSagY)} fill="none" stroke={DC.muted} strokeWidth={1.5} strokeDasharray="4,3" opacity={0.6}/>
+                <text x={bAX+4} y={bBackupSagY+16} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Backup</text>
+
+                {/* Person ON main line */}
+                {PersonOnLine(bPersonX, bPersonLineY, DC.navy)}
+
+                {/* Red leash from person to backup */}
+                <line x1={bPersonX} y1={bPersonLineY} x2={bPersonX} y2={bLeashEndY} stroke={DC.coral} strokeWidth={2} strokeLinecap="round"/>
+
+                {/* H dimension */}
+                <line x1={bW-22} y1={bLineY} x2={bW-22} y2={bGroundY} stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3"/>
+                <line x1={bW-28} y1={bLineY} x2={bW-16} y2={bLineY} stroke={DC.blue} strokeWidth={1.5}/>
+                <line x1={bW-28} y1={bGroundY} x2={bW-16} y2={bGroundY} stroke={DC.blue} strokeWidth={1.5}/>
+                <text x={bW-16} y={(bLineY+bGroundY)/2+5} fontSize={14} fill={DC.blue} fontFamily={DFONT} fontWeight="800">H</text>
+              </svg>
+            );
+          })()}
         </div>
       </div>
 
       <SourceNote>
         CLEARANCE FORMULA: H {">"} 2×(L+S) — Athanasiadis (2013), adopted by ISA Midline Advisory (2015).
-        Peak force is a simplified model. For accurate simulation, use the ISA official Backup Fall Simulator at
-        data.slacklineinternational.org/safety/Highline/backup-fall/
+        Peak force is a simplified energy model. For accurate results use the ISA official Backup Fall Simulator.
       </SourceNote>
+
+      {/* Education section */}
+      <div style={{ marginTop: 60, borderTop: `2px solid ${DC.border}`, paddingTop: 48 }}>
+        <h3 style={{ fontFamily: DFONT, fontSize: 28, fontWeight: 800, color: DC.navy, marginBottom: 36 }}>Understanding Backup Falls</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.blue}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>What Happens When the Main Line Fails?</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              When the main line breaks, the slackliner free-falls by the <strong style={{ color: DC.navy }}>leash length</strong> before the backup arrests the fall.
+              The backup line then sags further under the dynamic load. The person's lowest point is approximately
+              <strong style={{ color: DC.coral }}> H − L − S</strong> above the ground.
+              If this is negative, the person hits the ground.
+            </p>
+          </div>
+          <div style={{ background: DC.bg, borderRadius: 14, padding: "28px", borderLeft: `5px solid ${DC.teal}` }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.navy, marginBottom: 12 }}>Webbing Type Matters</h4>
+            <p style={{ fontFamily: DFONT, fontSize: 16, color: DC.muted, lineHeight: 1.8, margin: 0 }}>
+              <strong style={{ color: DC.navy }}>Dyneema (~1% stretch)</strong>: Very stiff — high peak force, short fall arrest. Low elongation means high shock load.<br/>
+              <strong style={{ color: DC.navy }}>Nylon (~5% stretch)</strong>: More elastic — softer arrest, moderate forces.<br/>
+              <strong style={{ color: DC.navy }}>Dynamic rope (~25%)</strong>: Very soft arrest, low forces but longer fall distance.
+            </p>
+          </div>
+          <div style={{ background: DC.navy, borderRadius: 14, padding: "28px", gridColumn: "1 / -1" }}>
+            <h4 style={{ fontFamily: DFONT, fontSize: 20, fontWeight: 800, color: DC.white, marginBottom: 16 }}>Key Formulas</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
+              {[
+                { label: "Minimum safe height", formula: "H > 2 × (L + S)", note: "Athanasiadis 2013, ISA standard" },
+                { label: "Fall distance", formula: "d_fall ≈ L + S × 0.3", note: "Approx. to backup low point" },
+                { label: "Peak backup force", formula: "F = W·g·(1 + √(1 + 2kd/(Wg)))", note: "Energy method, simplified k" },
+              ].map(f => (
+                <div key={f.label}>
+                  <div style={{ fontFamily: DFONT, fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{f.label}</div>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 600, color: DC.blue, marginBottom: 4 }}>{f.formula}</div>
+                  <div style={{ fontFamily: DFONT, fontSize: 13, color: "rgba(255,255,255,0.4)" }}>{f.note}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Calculator 4: Midline Safety ─────────────────────────────────────────────
 // ─── Calculator 4: Midline Safety ─────────────────────────────────────────────
 
 function MidlineSafetyCalc({ units }: { units: Units }) {
@@ -982,8 +1129,8 @@ function MidlineSafetyCalc({ units }: { units: Units }) {
               {safe ? "SAFE" : "NOT SAFE"}
             </div>
             <div style={{ fontFamily: DFONT, fontSize: 16, marginTop: 8, color: DC.muted, lineHeight: 1.8 }}>
-              Min required: <strong style={{ color: DC.navy }}>{round1(uRequired)}{uUnit ? " ft" : " m"}</strong><br />
-              Your height: <strong style={{ color: DC.navy }}>{uH}{uUnit ? " ft" : " m"}</strong><br />
+              Min required: <strong style={{ color: DC.navy }}>{round1(uRequired)}{uUnit ? " ft" : " m"}</strong><br/>
+              Your height: <strong style={{ color: DC.navy }}>{uH}{uUnit ? " ft" : " m"}</strong><br/>
               {safe
                 ? <span style={{ color: DC.teal }}>Safety margin: +{uUnit ? m2ft(margin) : margin}{uUnit ? " ft" : " m"}</span>
                 : <span style={{ color: DC.coral }}>Need {uUnit ? m2ft(Math.abs(margin)) : Math.abs(margin)}{uUnit ? " ft" : " m"} more height</span>
@@ -999,8 +1146,8 @@ function MidlineSafetyCalc({ units }: { units: Units }) {
               <span>{uUnit ? m2ft(round1(required * 1.5)) : round1(required * 1.5)}{uUnit ? " ft" : " m"}</span>
             </div>
             <div style={{ height: 16, background: DC.bg, borderRadius: 8, overflow: "hidden", position: "relative", border: `1px solid ${DC.border}` }}>
-              <div style={{ position: "absolute", left: "66.7%", top: 0, bottom: 0, width: 2, background: DC.coral, zIndex: 2 }} />
-              <div style={{ height: "100%", borderRadius: 8, transition: "width 0.3s, background 0.3s", width: `${pct}%`, background: safe ? DC.teal : DC.coral }} />
+              <div style={{ position: "absolute", left: "66.7%", top: 0, bottom: 0, width: 2, background: DC.coral, zIndex: 2 }}/>
+              <div style={{ height: "100%", borderRadius: 8, transition: "width 0.3s, background 0.3s", width: `${pct}%`, background: safe ? DC.teal : DC.coral }}/>
             </div>
           </div>
         </div>
@@ -1013,47 +1160,47 @@ function MidlineSafetyCalc({ units }: { units: Units }) {
           <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} style={{ borderRadius: 12, background: DC.bg, border: `1px solid ${DC.border}` }}>
             {/* Ground */}
             <rect x={0} y={groundY} width={svgW} height={svgH - groundY}
-              fill={safe ? "rgba(0,191,165,0.08)" : "rgba(239,83,80,0.1)"} />
+              fill={safe ? "rgba(0,191,165,0.08)" : "rgba(239,83,80,0.1)"}/>
             <line x1={0} y1={groundY} x2={svgW} y2={groundY}
-              stroke={safe ? DC.teal : DC.coral} strokeWidth={2.5} />
+              stroke={safe ? DC.teal : DC.coral} strokeWidth={2.5}/>
             <text x={14} y={groundY + 18} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="700">Ground</text>
 
             {/* Main highline — full width, horizontal */}
             <line x1={20} y1={lineY} x2={svgW - 100} y2={lineY}
-              stroke={DC.navy} strokeWidth={3} />
+              stroke={DC.navy} strokeWidth={3}/>
             <text x={24} y={lineY - 8} fontSize={13} fill={DC.navy} fontFamily={DFONT} fontWeight="700">Highline</text>
 
-            {/* Backup — dashed, sagging below main line */}
+            {/* Backup — looped like a real highline */}
             <path
-              d={`M 20 ${lineY + 5} Q ${personX} ${backupMidY} ${svgW - 100} ${lineY + 5}`}
-              fill="none" stroke={DC.muted} strokeWidth={2} strokeDasharray="6,4" />
-            <text x={24} y={backupMidY + 4} fontSize={12} fill={DC.muted} fontFamily={DFONT} fontWeight="600">Backup</text>
+              d={backupLoopPath(20, lineY+5, svgW-100, lineY+5, backupMidY)}
+              fill="none" stroke={DC.muted} strokeWidth={2} strokeDasharray="4,3" opacity={0.7}/>
+            <text x={24} y={backupMidY + 18} fontSize={13} fill={DC.muted} fontFamily={DFONT} fontWeight="600">Backup</text>
 
-            {/* Leash from backup to person */}
+            {/* Red solid leash from backup to person */}
             <line x1={personX} y1={backupMidY} x2={personX} y2={headY - 5}
-              stroke={DC.muted} strokeWidth={1.5} strokeDasharray="3,2" />
+              stroke={DC.coral} strokeWidth={2.5} strokeLinecap="round"/>
 
             {/* Person silhouette — hanging upside down / suspended below backup */}
             {/* Head */}
-            <circle cx={personX} cy={headY} r={6} fill={DC.navy} />
+            <circle cx={personX} cy={headY} r={6} fill={DC.navy}/>
             {/* Torso */}
-            <line x1={personX} y1={headY + 5} x2={personX} y2={bodyEndY} stroke={DC.navy} strokeWidth={2.5} strokeLinecap="round" />
+            <line x1={personX} y1={headY + 5} x2={personX} y2={bodyEndY} stroke={DC.navy} strokeWidth={2.5} strokeLinecap="round"/>
             {/* Arms */}
-            <line x1={personX - 10} y1={headY + 11} x2={personX + 10} y2={headY + 11} stroke={DC.navy} strokeWidth={2} strokeLinecap="round" />
+            <line x1={personX - 10} y1={headY + 11} x2={personX + 10} y2={headY + 11} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
             {/* Legs spread */}
-            <line x1={personX} y1={bodyEndY} x2={personX - 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round" />
-            <line x1={personX} y1={bodyEndY} x2={personX + 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round" />
+            <line x1={personX} y1={bodyEndY} x2={personX - 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
+            <line x1={personX} y1={bodyEndY} x2={personX + 7} y2={bodyEndY + 12} stroke={DC.navy} strokeWidth={2} strokeLinecap="round"/>
 
             {/* H dimension arrow */}
             <line x1={svgW - 60} y1={lineY} x2={svgW - 60} y2={groundY}
-              stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3" />
-            <line x1={svgW - 67} y1={lineY} x2={svgW - 53} y2={lineY} stroke={DC.blue} strokeWidth={1.5} />
-            <line x1={svgW - 67} y1={groundY} x2={svgW - 53} y2={groundY} stroke={DC.blue} strokeWidth={1.5} />
+              stroke={DC.blue} strokeWidth={1.5} strokeDasharray="4,3"/>
+            <line x1={svgW - 67} y1={lineY} x2={svgW - 53} y2={lineY} stroke={DC.blue} strokeWidth={1.5}/>
+            <line x1={svgW - 67} y1={groundY} x2={svgW - 53} y2={groundY} stroke={DC.blue} strokeWidth={1.5}/>
             <text x={svgW - 55} y={(lineY + groundY) / 2 + 5} fontSize={14} fill={DC.blue} fontFamily={DFONT} fontWeight="800">H</text>
 
             {/* 2(L+S) indicator */}
             <line x1={svgW - 80} y1={lineY} x2={svgW - 80} y2={Math.min(groundY, lineY + Math.min(100, required * 4))}
-              stroke={safe ? DC.teal : DC.coral} strokeWidth={2} strokeDasharray="3,2" opacity={0.5} />
+              stroke={safe ? DC.teal : DC.coral} strokeWidth={2} strokeDasharray="3,2" opacity={0.5}/>
           </svg>
         </div>
       </div>
@@ -1099,10 +1246,10 @@ function MidlineSafetyCalc({ units }: { units: Units }) {
               H {">"} 2 × (L + S)
             </div>
             <div style={{ fontFamily: DFONT, fontSize: 15, color: "rgba(255,255,255,0.6)", lineHeight: 1.8 }}>
-              <strong style={{ color: DC.white }}>H</strong> = height of main line above ground<br />
-              <strong style={{ color: DC.white }}>L</strong> = leash length<br />
-              <strong style={{ color: DC.white }}>S</strong> = backup sag at center<br />
-              <br />
+              <strong style={{ color: DC.white }}>H</strong> = height of main line above ground<br/>
+              <strong style={{ color: DC.white }}>L</strong> = leash length<br/>
+              <strong style={{ color: DC.white }}>S</strong> = backup sag at center<br/>
+              <br/>
               Source: Athanasiadis (2013), adopted by ISA Midline Advisory (2015)
             </div>
           </div>
@@ -1141,7 +1288,7 @@ function MechanicalAdvCalc({ units }: { units: Units }) {
   return (
     <div>
       <SectionTitle>Mechanical advantage calculator</SectionTitle>
-      <p style={{ fontSize: 14, color: "#7a7268", marginBottom: 24, lineHeight: 1.65 }}>
+      <p style={{ fontFamily: DFONT, fontSize: 17, color: DC.muted, marginBottom: 28, lineHeight: 1.7, maxWidth: 640 }}>
         Calculate the mechanical advantage (MA) of pulley systems used to tension a highline.
         Includes realistic friction losses per pulley.
       </p>
@@ -1153,7 +1300,7 @@ function MechanicalAdvCalc({ units }: { units: Units }) {
             <div style={{ fontFamily: DFONT, fontSize: 16, fontWeight: 600, color: DC.muted, marginBottom: 10 }}>Pulley system</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
               {systems.map(s => (
-                <button key={s.ma} onClick={() => setSystem(s.ma as 2 | 3 | 4 | 5 | 6)} style={{
+                <button key={s.ma} onClick={() => setSystem(s.ma as 2|3|4|5|6)} style={{
                   padding: "10px 8px", borderRadius: 6, cursor: "pointer", textAlign: "left",
                   border: "1px solid",
                   borderColor: system === s.ma ? "#c8531a" : "rgba(13,15,14,0.15)",
